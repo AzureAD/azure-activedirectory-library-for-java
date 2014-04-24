@@ -1,11 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.microsoft.aad</groupId>
-	<artifactId>sample-for-adal4j</artifactId>
+	<groupId>com.microsoftopentechnologies</groupId>
+	<artifactId>adal4jsample</artifactId>
 	<packaging>war</packaging>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>sample-for-adal4j</name>
+	<name>adal4jsample</name>
 	<url>http://maven.apache.org</url>
 	<properties>
 		<spring.version>3.0.5.RELEASE</spring.version>
@@ -13,14 +13,19 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.microsoft</groupId>
+			<groupId>com.microsoftopentechnologies</groupId>
 			<artifactId>adal4j</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>com.microsoft.windowsazure.activedirectory.sdk.graph</groupId>
-			<artifactId>WindowsAzure-ActiveDirectory-SDK-Graph</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<groupId>com.nimbusds</groupId>
+			<artifactId>oauth2-oidc-sdk</artifactId>
+			<version>3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20090211</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
