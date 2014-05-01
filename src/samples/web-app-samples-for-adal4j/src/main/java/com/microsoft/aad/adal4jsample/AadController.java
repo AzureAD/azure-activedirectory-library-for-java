@@ -32,7 +32,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.microsoft.aad.adal4j.AuthenticationResult;
+import com.microsoftopentechnologies.adal4j.AuthenticationResult;
 
 @Controller
 @RequestMapping("/secure/aad")

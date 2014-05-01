@@ -4,9 +4,6 @@
         <wb-resource deploy-path="/" source-path="/target/m2e-jee/web-resources"/>
         <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
-        <dependent-module archiveName="adal4j-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/adal4j/adal4j">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
         <property name="context-root" value="sample-for-adal4j"/>
         <property name="java-output-path" value="/sample-for-adal4j/target/classes"/>
     </wb-module>

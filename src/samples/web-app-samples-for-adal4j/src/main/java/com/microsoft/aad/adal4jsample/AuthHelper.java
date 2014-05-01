@@ -21,7 +21,7 @@ package com.microsoft.aad.adal4jsample;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.microsoft.aad.adal4j.AuthenticationResult;
+import com.microsoftopentechnologies.adal4j.AuthenticationResult;
 
 public final class AuthHelper {
 
