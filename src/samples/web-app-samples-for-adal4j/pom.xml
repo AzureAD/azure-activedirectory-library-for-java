@@ -13,7 +13,7 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.microsoftopentechnologies</groupId>
+			<groupId>com.microsoft.aad</groupId>
 			<artifactId>adal4j</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
