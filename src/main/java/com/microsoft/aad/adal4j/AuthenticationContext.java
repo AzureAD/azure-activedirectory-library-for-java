@@ -738,4 +738,10 @@ public class AuthenticationContext {
 
         this.validateInput(resource, credential, false);
     }
+
+    public Future<AuthenticationResult> acquireToken(String aadResourceId,
+            UserCredential create, Object callback) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
