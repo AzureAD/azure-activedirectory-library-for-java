@@ -739,9 +739,24 @@ public class AuthenticationContext {
         this.validateInput(resource, credential, false);
     }
 
-    public Future<AuthenticationResult> acquireToken(String aadResourceId,
-            UserCredential create, Object callback) {
-        // TODO Auto-generated method stub
-        return null;
+    public Future<AuthenticationResult> acquireToken(String resource,
+            UserCredential userCredential, final AuthenticationCallback callback) {
+        final ClientAuthentication clientAuth = createClientAuthFromUserCredential(userCredential);
+        final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
+                new ClientCredentialsGrant(null), resource);
+        return this.acquireToken(authGrant, clientAuth, callback);
+    }
+
+    private ClientAuthentication createClientAuthFromUserCredential(
+            UserCredential userCredential) {
+        try {
+            final Map<String, String> map = new HashMap<String, String>();
+            map.put("username",
+                    userCredential.getUsername());
+            map.put("password", userCredential.getPassword());
+            return PrivateKeyJWT.parse(map);
+        } catch (final ParseException e) {
+            throw new AuthenticationException(e);
+        }
     }
 }
