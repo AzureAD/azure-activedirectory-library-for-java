@@ -42,6 +42,7 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.RefreshTokenGrant;
 import com.nimbusds.oauth2.sdk.ResourceOwnerPasswordCredentialsGrant;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
+import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretPost;
 import com.nimbusds.oauth2.sdk.auth.JWTAuthentication;
 import com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT;
@@ -742,25 +743,65 @@ public class AuthenticationContext {
 
     public Future<AuthenticationResult> acquireToken(String resource,
             UserCredential userCredential, final AuthenticationCallback callback) {
-        final UserAuthentication userAuth = createUserAuthFromUserCredential(userCredential);
+        final ResourceOwnerPasswordAuthentication userAuth = createUserAuthFromUserCredential(userCredential);
         final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
                 new ResourceOwnerPasswordCredentialsGrant(userCredential.getUsername(), new Secret(userCredential.getPassword()), null), resource);
         return this.acquireToken(authGrant, userAuth, callback);
     }
 
     private Future<AuthenticationResult> acquireToken(
-            AdalAuthorizatonGrant authGrant, UserAuthentication userAuth,
-            AuthenticationCallback callback) {
-        // TODO Auto-generated method stub
-        return null;
+            AdalAuthorizatonGrant authGrant, ResourceOwnerPasswordAuthentication userAuth,
+            final AuthenticationCallback callback) {
+
+        return service.submit(new Callable<AuthenticationResult>() {
+
+            private AdalAuthorizatonGrant authGrant;
+            private ClientDataHttpHeaders headers;
+            private ResourceOwnerPasswordAuthentication userAuth;
+
+            @Override
+            public AuthenticationResult call() throws Exception {
+                AuthenticationResult result = null;
+                try {
+                    result = acquireTokenCommon(this.authGrant,
+                            this.userAuth, this.headers);
+                    logResult(result, headers);
+                    if (callback != null) {
+                        callback.onSuccess(result);
+                    }
+                } catch (final Exception ex) {
+                    log.error(LogHelper.createMessage(
+                            "Request to acquire token failed.",
+                            this.headers.getHeaderCorrelationIdValue()), ex);
+                    if (callback != null) {
+                        callback.onFailure(ex);
+                    } else {
+                        throw ex;
+                    }
+                }
+                return result;
+            }
+
+            private Callable<AuthenticationResult> init(
+                    final AdalAuthorizatonGrant authGrant,
+                    final ResourceOwnerPasswordAuthentication userAuth,
+                    final ClientDataHttpHeaders headers) {
+                this.authGrant = authGrant;
+                this.userAuth = userAuth;
+                this.headers = headers;
+                return this;
+            }
+        }.init(authGrant, userAuth,
+                new ClientDataHttpHeaders(this.getCorrelationId())));
     }
 
-    private UserAuthentication createUserAuthFromUserCredential(
+    private ResourceOwnerPasswordAuthentication createUserAuthFromUserCredential(
             UserCredential userCredential) {
         final Map<String, String> map = new HashMap<String, String>();
         map.put("username",
                 userCredential.getUsername());
         map.put("password", userCredential.getPassword());
-        return new UserAuthentication();
+        ClientID  clientId = new ClientID("clientId-12345");
+        return new ResourceOwnerPasswordAuthentication(ClientAuthenticationMethod.CLIENT_SECRET_BASIC, clientId);
     }
 }
