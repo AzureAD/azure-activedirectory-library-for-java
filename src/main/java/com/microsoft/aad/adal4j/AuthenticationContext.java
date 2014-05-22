@@ -40,6 +40,7 @@ import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
 import com.nimbusds.oauth2.sdk.ClientCredentialsGrant;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.RefreshTokenGrant;
+import com.nimbusds.oauth2.sdk.ResourceOwnerPasswordCredentialsGrant;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretPost;
 import com.nimbusds.oauth2.sdk.auth.JWTAuthentication;
@@ -741,22 +742,25 @@ public class AuthenticationContext {
 
     public Future<AuthenticationResult> acquireToken(String resource,
             UserCredential userCredential, final AuthenticationCallback callback) {
-        final ClientAuthentication clientAuth = createClientAuthFromUserCredential(userCredential);
+        final UserAuthentication userAuth = createUserAuthFromUserCredential(userCredential);
         final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
-                new ClientCredentialsGrant(null), resource);
-        return this.acquireToken(authGrant, clientAuth, callback);
+                new ResourceOwnerPasswordCredentialsGrant(userCredential.getUsername(), new Secret(userCredential.getPassword()), null), resource);
+        return this.acquireToken(authGrant, userAuth, callback);
     }
 
-    private ClientAuthentication createClientAuthFromUserCredential(
+    private Future<AuthenticationResult> acquireToken(
+            AdalAuthorizatonGrant authGrant, UserAuthentication userAuth,
+            AuthenticationCallback callback) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    private UserAuthentication createUserAuthFromUserCredential(
             UserCredential userCredential) {
-        try {
-            final Map<String, String> map = new HashMap<String, String>();
-            map.put("username",
-                    userCredential.getUsername());
-            map.put("password", userCredential.getPassword());
-            return PrivateKeyJWT.parse(map);
-        } catch (final ParseException e) {
-            throw new AuthenticationException(e);
-        }
+        final Map<String, String> map = new HashMap<String, String>();
+        map.put("username",
+                userCredential.getUsername());
+        map.put("password", userCredential.getPassword());
+        return new UserAuthentication();
     }
 }
