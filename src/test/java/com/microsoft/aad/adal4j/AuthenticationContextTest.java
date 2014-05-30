@@ -241,18 +241,6 @@ public class AuthenticationContextTest extends AbstractAdalTests {
         assertFalse(StringHelper.isBlank(result.get().getAccessToken()));
         assertTrue(StringHelper.isBlank(result.get().getRefreshToken()));
     }
-    
-    @Test(groups = {"end-to-end"})
-    public void testAcquireToken_UsernamePassword() throws Exception {
-        ctx = new AuthenticationContext(TestConfiguration.AAD_TENANT_ENDPOINT, true, service);
-        String username = "adal@microsoft.com";
-        String password = "mypassword";
-        final Future<AuthenticationResult> result = ctx.acquireToken(TestConfiguration.AAD_RESOURCE_ID, UserCredential.create(username, password), null);
-        final AuthenticationResult ar = result.get();
-        assertNotNull(ar);
-        assertFalse(StringHelper.isBlank(result.get().getAccessToken()));
-        assertTrue(StringHelper.isBlank(result.get().getAccessToken()));
-    }
 
     @Test(expectedExceptions = AuthenticationException.class)
     public void testInvalidClientAssertion() throws MalformedURLException {

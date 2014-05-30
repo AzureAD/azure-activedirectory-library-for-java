@@ -42,24 +42,24 @@ public final class WSTrustRequest {
 	private String appliesTo = "urn:federation:MicrosoftOnline";
 	
 	private String soapMessageCredentialTemplate = "<wsse:UsernameToken wsu:Id=\'ADALUsernameToken\'>"
-        +"<wsse:Username> %s </wsse:Username>"
-        +"<wsse:Password> %s </wsse:Password>"
+        +"<wsse:Username>%s</wsse:Username>"
+        +"<wsse:Password>%s</wsse:Password>"
         +"</wsse:UsernameToken>";
 	
 	private final String RSTTemplate = "<s:Envelope xmlns:s=\'http://www.w3.org/2003/05/soap-envelope\' xmlns:wsa=\'http://www.w3.org/2005/08/addressing\' xmlns:wsu=\'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd\'>"
       +"<s:Header>"
       +"<wsa:Action s:mustUnderstand=\'1\'>http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue</wsa:Action>"
-      +"<wsa:messageID>urn:uuid: %s </wsa:messageID>"
+      +"<wsa:messageID>urn:uuid:%s</wsa:messageID>"
       +"<wsa:ReplyTo>"
           +"<wsa:Address>http://www.w3.org/2005/08/addressing/anonymous</wsa:Address>"
         +"</wsa:ReplyTo>"
-        +"<wsa:To s:mustUnderstand=\'1\'> %s </wsa:To> %s"
+        +"<wsa:To s:mustUnderstand=\'1\'>%s</wsa:To>%s"
         + "</s:Header>"
       +"<s:Body>"
         +"<wst:RequestSecurityToken xmlns:wst=\'http://docs.oasis-open.org/ws-sx/ws-trust/200512\'>"
         +"<wsp:AppliesTo xmlns:wsp=\'http://schemas.xmlsoap.org/ws/2004/09/policy\'>"
            +"<wsa:EndpointReference>"
-             +"<wsa:Address> %s </wsa:Address>"
+             +"<wsa:Address>%s</wsa:Address>"
            +"</wsa:EndpointReference>"
           +"</wsp:AppliesTo>"
           +"<wst:KeyType>http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer</wst:KeyType>"
@@ -70,8 +70,8 @@ public final class WSTrustRequest {
 	
 	private final String securityHeaderXmlTemplate = "<wsse:Security s:mustUnderstand=\'1\' xmlns:wsse=\'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd\'>"
         +"<wsu:Timestamp wsu:Id=\'_0\'>"
-        +"<wsu:Created> %s </wsu:Created>"
-        +"<wsu:Expires> %s </wsu:Expires>"
+        +"<wsu:Created>%s</wsu:Created>"
+        +"<wsu:Expires>%s</wsu:Expires>"
     +"</wsu:Timestamp>%s</wsse:Security>";
 	private Map<String,String> headers = new HashMap<String,String>();
 
@@ -151,7 +151,7 @@ public final class WSTrustRequest {
 
 	private String buildSecurityHeader(String username, String password) {
 		Calendar now = Calendar.getInstance();
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm.SSS");
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 		TimeZone timeZone = TimeZone.getTimeZone("UTC");
 		dateFormat.setTimeZone(timeZone);
 		String timeNowString = dateFormat.format(now.getTime())+"Z";

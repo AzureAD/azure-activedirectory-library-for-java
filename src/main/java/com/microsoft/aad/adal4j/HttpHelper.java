@@ -86,6 +86,7 @@ class HttpHelper {
                 conn.setRequestProperty(key, headers.get(key));
             }
         }
+        conn.setRequestProperty("Accept", "application/soap+xml; charset=utf-8");
         return conn;
     }
 
