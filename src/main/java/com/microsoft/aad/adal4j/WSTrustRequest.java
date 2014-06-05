@@ -83,7 +83,7 @@ public final class WSTrustRequest {
         this.headers.put("return-client-request-id", "true");
     }
 
-    public String acquireToken(String username, String password, AuthenticationCallback authenticationCallback) {
+    public WSTrustResponse acquireToken(String username, String password, AuthenticationCallback authenticationCallback) {
     	String accessToken = "accessToken";
     	HttpURLConnection httpUrlConnection = null;
         try {
@@ -95,7 +95,7 @@ public final class WSTrustRequest {
         
         sendRequest(httpUrlConnection, username, password);
         WSTrustResponse wsTrustResponse = WSTrustResponse.processResponse(httpUrlConnection);
-		return accessToken;
+		return wsTrustResponse;
     	
     }
     private void sendRequest(HttpURLConnection httpUrlConnection, String username, String password) {

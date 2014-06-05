@@ -38,8 +38,8 @@ public class WSTrustRequestTest extends AbstractAdalTests {
     		
     	}
     	WSTrustRequest wsTrustRequest = new WSTrustRequest(wsTrustUrl);
-    	String accessToken = wsTrustRequest.acquireToken("myemail", "mypassword", null);
-    	System.out.println(accessToken);
+    	WSTrustResponse wsTrustResponse = wsTrustRequest.acquireToken("gongchen@microsoft.com", "mypassword", null);
+    	System.out.println(wsTrustResponse.getToken());
     }
 
 }

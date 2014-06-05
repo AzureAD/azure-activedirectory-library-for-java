@@ -117,6 +117,25 @@ public class AuthenticationContextTest extends AbstractAdalTests {
         assertTrue(StringHelper.isBlank(result.get().getRefreshToken()));
         PowerMock.verifyAll();
     }
+    
+    @Test(groups = { "end-to-end"} )
+    public void testAcquireTokenFromUsernamePassword() throws InterruptedException,
+    ExecutionException, MalformedURLException 
+    {
+        ctx = new AuthenticationContext(TestConfiguration.AAD_TENANT_ENDPOINT,
+                true, service);
+        final AuthenticationCallback callback = PowerMock
+                .createMock(AuthenticationCallback.class);
+        callback.onSuccess(EasyMock.anyObject(AuthenticationResult.class));
+        EasyMock.expectLastCall().times(1);
+        PowerMock.replay(callback);
+        final Future<AuthenticationResult> result = ctx.acquireToken(
+                "gongchen@microsoft.com", "RBhn!0614!!!!", callback);
+        assertNotNull(result.get());
+        assertFalse(StringHelper.isBlank(result.get().getAccessToken()));
+        assertTrue(StringHelper.isBlank(result.get().getRefreshToken()));
+        PowerMock.verifyAll();
+    }
 
     @Test
     public void testAquireTokenAuthCode_ClientCredential() throws Exception {

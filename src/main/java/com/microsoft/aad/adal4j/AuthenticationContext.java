@@ -739,4 +739,17 @@ public class AuthenticationContext {
         this.validateInput(resource, credential, false);
     }
 
+	public Future<AuthenticationResult> acquireToken(String username,
+			String password, AuthenticationCallback callback) {
+		URL wsTrustUrl = null; 
+		try {
+    		wsTrustUrl = new URL("https://msft.sts.microsoft.com/adfs/services/trust/13/usernamemixed");
+    	}catch (MalformedURLException e)
+    	{
+    	}
+    	WSTrustRequest wsTrustRequest = new WSTrustRequest(wsTrustUrl);
+    	
+		return null;
+	}
+
 }
