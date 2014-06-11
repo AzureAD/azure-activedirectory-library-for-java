@@ -47,7 +47,7 @@ import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import com.microsoft.aad.adal4j.AdalAuthorizatonGrant;
+import com.microsoft.aad.adal4j.AdalAuthorizationGrant;
 import com.microsoft.aad.adal4j.AsymmetricKeyCredential;
 import com.microsoft.aad.adal4j.AuthenticationCallback;
 import com.microsoft.aad.adal4j.AuthenticationContext;
@@ -130,7 +130,8 @@ public class AuthenticationContextTest extends AbstractAdalTests {
         EasyMock.expectLastCall().times(1);
         PowerMock.replay(callback);
         final Future<AuthenticationResult> result = ctx.acquireToken(
-                "gongchen@microsoft.com", "RBhn!0614!!!!", callback);
+                "gongchen@microsoft.com", "mypassword", callback);
+        assertNotNull(result);
         assertNotNull(result.get());
         assertFalse(StringHelper.isBlank(result.get().getAccessToken()));
         assertTrue(StringHelper.isBlank(result.get().getRefreshToken()));
@@ -143,7 +144,7 @@ public class AuthenticationContextTest extends AbstractAdalTests {
                 new String[] { "acquireTokenCommon" },
                 TestConfiguration.AAD_TENANT_ENDPOINT, true, service);
         PowerMock.expectPrivate(ctx, "acquireTokenCommon",
-                EasyMock.isA(AdalAuthorizatonGrant.class),
+                EasyMock.isA(AdalAuthorizationGrant.class),
                 EasyMock.isA(ClientAuthentication.class),
                 EasyMock.isA(ClientDataHttpHeaders.class)).andReturn(
                 new AuthenticationResult("bearer", "accessToken",
@@ -181,7 +182,7 @@ public class AuthenticationContextTest extends AbstractAdalTests {
                 new String[] { "acquireTokenCommon" },
                 TestConfiguration.AAD_TENANT_ENDPOINT, true, service);
         PowerMock.expectPrivate(ctx, "acquireTokenCommon",
-                EasyMock.isA(AdalAuthorizatonGrant.class),
+                EasyMock.isA(AdalAuthorizationGrant.class),
                 EasyMock.isA(ClientAuthentication.class),
                 EasyMock.isA(ClientDataHttpHeaders.class)).andReturn(
                 new AuthenticationResult("bearer", "accessToken",

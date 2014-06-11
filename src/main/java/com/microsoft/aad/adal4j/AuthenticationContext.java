@@ -37,9 +37,12 @@ import org.slf4j.LoggerFactory;
 
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
+import com.nimbusds.oauth2.sdk.AuthorizationGrant;
 import com.nimbusds.oauth2.sdk.ClientCredentialsGrant;
+import com.nimbusds.oauth2.sdk.GrantType;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.RefreshTokenGrant;
+import com.nimbusds.oauth2.sdk.ResourceOwnerPasswordCredentialsGrant;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretPost;
 import com.nimbusds.oauth2.sdk.auth.JWTAuthentication;
@@ -105,13 +108,13 @@ public class AuthenticationContext {
     }
 
     private Future<AuthenticationResult> acquireToken(
-            final AdalAuthorizatonGrant authGrant,
+            final AdalAuthorizationGrant authGrant,
             final ClientAuthentication clientAuth,
             final AuthenticationCallback callback) {
 
         return service.submit(new Callable<AuthenticationResult>() {
 
-            private AdalAuthorizatonGrant authGrant;
+            private AdalAuthorizationGrant authGrant;
             private ClientAuthentication clientAuth;
             private ClientDataHttpHeaders headers;
 
@@ -139,7 +142,7 @@ public class AuthenticationContext {
             }
 
             private Callable<AuthenticationResult> init(
-                    final AdalAuthorizatonGrant authGrant,
+                    final AdalAuthorizationGrant authGrant,
                     final ClientAuthentication clientAuth,
                     final ClientDataHttpHeaders headers) {
                 this.authGrant = authGrant;
@@ -172,7 +175,7 @@ public class AuthenticationContext {
 
         this.validateInput(resource, credential, true);
         final ClientAuthentication clientAuth = createClientAuthFromClientAssertion(credential);
-        final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
+        final AdalAuthorizationGrant authGrant = new AdalAuthorizationGrant(
                 new ClientCredentialsGrant(null), resource);
         return this.acquireToken(authGrant, clientAuth, callback);
     }
@@ -209,7 +212,7 @@ public class AuthenticationContext {
         final ClientAuthentication clientAuth = new ClientSecretPost(
                 new ClientID(credential.getClientId()), new Secret(
                         credential.getClientSecret()));
-        final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
+        final AdalAuthorizationGrant authGrant = new AdalAuthorizationGrant(
                 new ClientCredentialsGrant(null), resource);
         return this.acquireToken(authGrant, clientAuth, callback);
     }
@@ -293,7 +296,7 @@ public class AuthenticationContext {
         this.validateAuthCodeRequestInput(authorizationCode, redirectUri,
                 credential, resource);
         final ClientAuthentication clientAuth = createClientAuthFromClientAssertion(credential);
-        final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
+        final AdalAuthorizationGrant authGrant = new AdalAuthorizationGrant(
                 new AuthorizationCodeGrant(new AuthorizationCode(
                         authorizationCode), redirectUri), resource);
         return this.acquireToken(authGrant, clientAuth, callback);
@@ -357,7 +360,7 @@ public class AuthenticationContext {
         final ClientAuthentication clientAuth = new ClientSecretPost(
                 new ClientID(credential.getClientId()), new Secret(
                         credential.getClientSecret()));
-        final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
+        final AdalAuthorizationGrant authGrant = new AdalAuthorizationGrant(
                 new AuthorizationCodeGrant(new AuthorizationCode(
                         authorizationCode), redirectUri), resource);
         return this.acquireToken(authGrant, clientAuth, callback);
@@ -485,7 +488,7 @@ public class AuthenticationContext {
         this.validateRefreshTokenRequestInput(refreshToken, clientId,
                 credential);
         final ClientAuthentication clientAuth = createClientAuthFromClientAssertion(credential);
-        final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
+        final AdalAuthorizationGrant authGrant = new AdalAuthorizationGrant(
                 new RefreshTokenGrant(new RefreshToken(refreshToken)), resource);
         return this.acquireToken(authGrant, clientAuth, callback);
     }
@@ -539,7 +542,7 @@ public class AuthenticationContext {
         final ClientAuthentication clientAuth = new ClientSecretPost(
                 new ClientID(credential.getClientId()), new Secret(
                         credential.getClientSecret()));
-        final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
+        final AdalAuthorizationGrant authGrant = new AdalAuthorizationGrant(
                 new RefreshTokenGrant(new RefreshToken(refreshToken)), resource);
         return this.acquireToken(authGrant, clientAuth, callback);
     }
@@ -622,7 +625,7 @@ public class AuthenticationContext {
     }
 
     private AuthenticationResult acquireTokenCommon(
-            final AdalAuthorizatonGrant authGrant,
+            final AdalAuthorizationGrant authGrant,
             final ClientAuthentication clientAuth,
             final ClientDataHttpHeaders headers) throws Exception {
         log.debug(LogHelper.createMessage(
@@ -740,7 +743,7 @@ public class AuthenticationContext {
     }
 
 	public Future<AuthenticationResult> acquireToken(String username,
-			String password, AuthenticationCallback callback) {
+			String password, AuthenticationCallback authenticationCallback) {
 		URL wsTrustUrl = null; 
 		try {
     		wsTrustUrl = new URL("https://msft.sts.microsoft.com/adfs/services/trust/13/usernamemixed");
@@ -748,8 +751,50 @@ public class AuthenticationContext {
     	{
     	}
     	WSTrustRequest wsTrustRequest = new WSTrustRequest(wsTrustUrl);
-    	
-		return null;
+    	WSTrustResponse wsTrustResponse = wsTrustRequest.acquireToken(username, password, null);
+    	return performWSTrustAssertionOAuthExchange(wsTrustResponse, authenticationCallback);
+	}
+
+	private Future<AuthenticationResult> performWSTrustAssertionOAuthExchange(
+			WSTrustResponse wsTrustResponse,
+			AuthenticationCallback authenticationCallback) {
+		GrantType grantType = getSamlGrantType(wsTrustResponse);
+		
+		String assertion = Base64.encodeBase64String(wsTrustResponse.getToken().getBytes());
+		// ClientAssertion clientAssertion = new ClientAssertion(assertion);
+		String clientId="04b07795-8ddb-461a-bbee-02f9e1bf7b46";
+		// ClientAuthentication clientAuth = createClientAuthInstanceFromClientAssertion(clientAssertion);
+		Map<String,String> authParameters = new HashMap<String,String>();
+		authParameters.put("resource", "https://management.core.windows.net");
+		authParameters.put("grant_type", grantType.getValue());
+		authParameters.put("scope", "openid");
+		authParameters.put("client_id", clientId);
+		authParameters.put("assertion", assertion);
+		SamlCredentialGrant samlCredentialGrant = new SamlCredentialGrant(grantType, authParameters);
+		AdalAuthorizationGrant authGrant= new AdalAuthorizationGrant(samlCredentialGrant, authParameters);
+		return this.acquireToken(authGrant, null , authenticationCallback);
+	}
+
+	private ClientAuthentication createClientAuthInstanceFromClientAssertion(
+			ClientAssertion clientAssertion) {
+		// TODO Auto-generated method stub
+		return new PublicClientAuthentication(null, authority);
+	}
+
+	private GrantType getSamlGrantType(WSTrustResponse wsTrustResponse) {
+		// GrantType grantType = GrantType.AUTHORIZATION_CODE;
+		// AuthorizationGrant authorizationGrant = new AuthorizationGrant(grantType);
+		String tokenType = wsTrustResponse.getTokenType();
+		if (tokenType.equals(SamlTokenType.V1.toString()))
+		{
+			return new GrantType("urn:ietf:params:oauth:grant-type:saml1_1-bearer");
+		} else if (tokenType.equals(SamlTokenType.V2.toString()))
+		{
+			return new GrantType("urn:ietf:params:oauth:grant-type:saml2-bearer");
+		}else
+		{
+			throw new IllegalArgumentException(String.format("The token type in the response is not recognized %s", tokenType));
+		}
 	}
 
 }

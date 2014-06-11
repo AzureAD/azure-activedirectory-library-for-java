@@ -28,7 +28,7 @@ import java.util.Map;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.microsoft.aad.adal4j.AdalAuthorizatonGrant;
+import com.microsoft.aad.adal4j.AdalAuthorizationGrant;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
 
@@ -39,14 +39,14 @@ public class AdalAuthorizatonGrantTest {
 
     @Test
     public void testConstructor() {
-        final AdalAuthorizatonGrant grant = new AdalAuthorizatonGrant(null,
+        final AdalAuthorizationGrant grant = new AdalAuthorizationGrant(null,
                 new HashMap<String, String>());
         Assert.assertNotNull(grant);
     }
 
     @Test
     public void testToParameters() throws URISyntaxException {
-        final AdalAuthorizatonGrant grant = new AdalAuthorizatonGrant(
+        final AdalAuthorizationGrant grant = new AdalAuthorizationGrant(
                 new AuthorizationCodeGrant(new AuthorizationCode("grant"),
                         new URI("http://microsoft.com")),
                 (Map<String, String>) null);

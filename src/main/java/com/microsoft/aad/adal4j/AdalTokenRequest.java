@@ -40,11 +40,11 @@ class AdalTokenRequest {
 
     private final URL uri;
     private final ClientAuthentication clientAuth;
-    private final AdalAuthorizatonGrant authzGrant;
+    private final AdalAuthorizationGrant authzGrant;
     private final Map<String, String> headerMap;
 
     AdalTokenRequest(final URL uri, final ClientAuthentication clientAuth,
-            final AdalAuthorizatonGrant authzGrant,
+            final AdalAuthorizationGrant authzGrant,
             final Map<String, String> headerMap) {
         this.clientAuth = clientAuth;
         this.authzGrant = authzGrant;
