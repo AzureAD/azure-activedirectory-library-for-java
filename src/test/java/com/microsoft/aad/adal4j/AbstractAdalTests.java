@@ -24,8 +24,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import org.powermock.modules.testng.PowerMockTestCase;
-
 public class AbstractAdalTests extends PowerMockTestCase {
 
     public void beforeClass() throws IOException {

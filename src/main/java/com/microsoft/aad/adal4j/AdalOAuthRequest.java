@@ -80,6 +80,7 @@ class AdalOAuthRequest extends HTTPRequest {
     HTTPResponse createResponse(final HttpURLConnection conn, final String out)
             throws IOException {
         final HTTPResponse response = new HTTPResponse(conn.getResponseCode());
+        
         final String location = conn.getHeaderField("Location");
         if (!StringHelper.isBlank(location)) {
             response.setLocation(new URL(location));
