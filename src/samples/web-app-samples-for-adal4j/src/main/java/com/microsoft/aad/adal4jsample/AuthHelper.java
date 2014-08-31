@@ -19,9 +19,14 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4jsample;
 
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import com.microsoft.aad.adal4j.AuthenticationResult;
+import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
+import com.nimbusds.openid.connect.sdk.AuthenticationResponseParser;
+import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
 
 public final class AuthHelper {
 
@@ -42,8 +47,8 @@ public final class AuthHelper {
 
     public static boolean containsAuthenticationData(
             HttpServletRequest httpRequest) {
-        return httpRequest.getMethod().equals("GET")
-                && (httpRequest.getParameterMap().containsKey(
+        Map<String, String[]> map = httpRequest.getParameterMap();
+        return httpRequest.getMethod().equalsIgnoreCase("POST") && (httpRequest.getParameterMap().containsKey(
                         AuthParameterNames.ERROR)
                         || httpRequest.getParameterMap().containsKey(
                                 AuthParameterNames.ID_TOKEN) || httpRequest
@@ -51,12 +56,7 @@ public final class AuthHelper {
     }
 
     public static boolean isAuthenticationSuccessful(
-            HttpServletRequest httpRequest) {
-        return httpRequest.getMethod().equals("GET")
-                && !httpRequest.getParameterMap().containsKey(
-                        AuthParameterNames.ERROR)
-                && (httpRequest.getParameterMap().containsKey(
-                        AuthParameterNames.ID_TOKEN) || httpRequest
-                        .getParameterMap().containsKey(AuthParameterNames.CODE));
+            AuthenticationResponse authResponse) {
+        return authResponse instanceof AuthenticationSuccessResponse;
     }
 }

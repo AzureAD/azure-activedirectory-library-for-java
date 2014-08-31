@@ -38,7 +38,7 @@ import com.microsoft.aad.adal4j.AuthenticationResult;
 @RequestMapping("/secure/aad")
 public class AadController {
 
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(method = { RequestMethod.GET, RequestMethod.POST })
     public String getDirectoryObjects(ModelMap model, HttpServletRequest httpRequest) {
         HttpSession session = httpRequest.getSession();
         AuthenticationResult result = (AuthenticationResult) session.getAttribute(AuthHelper.PRINCIPAL_SESSION_NAME);

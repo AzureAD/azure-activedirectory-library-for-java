@@ -24,6 +24,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -45,6 +47,7 @@ import com.microsoft.aad.adal4j.AuthenticationResult;
 import com.microsoft.aad.adal4j.ClientCredential;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.openid.connect.sdk.AuthenticationErrorResponse;
+import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponseParser;
 import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
 
@@ -82,17 +85,21 @@ public class BasicFilter implements Filter {
                 // check if user has a session
                 if (!AuthHelper.isAuthenticated(httpRequest)) {
                     if (AuthHelper.containsAuthenticationData(httpRequest)) {
-                        if (AuthHelper.isAuthenticationSuccessful(httpRequest)) {
-
-                            AuthenticationSuccessResponse oidcResponse = (AuthenticationSuccessResponse) AuthenticationResponseParser
-                                    .parse(new URI(fullUrl));
+                        Map<String, String> params = new HashMap<String, String>();
+                        for(String key: request.getParameterMap().keySet()){
+                            params.put(key, request.getParameterMap().get(key)[0]);
+                        }
+                        AuthenticationResponse authResponse =  AuthenticationResponseParser
+                                .parse(new URI(fullUrl), params);
+                        if (AuthHelper.isAuthenticationSuccessful(authResponse)) {
+                            
+                            AuthenticationSuccessResponse oidcResponse = (AuthenticationSuccessResponse)authResponse;
                             AuthenticationResult result = getAccessToken(
                                     oidcResponse.getAuthorizationCode(),
                                     currentUri);
                             createSessionPrincipal(httpRequest, result);
                         } else {
-                            AuthenticationErrorResponse oidcResponse = (AuthenticationErrorResponse) AuthenticationResponseParser
-                                    .parse(new URI(fullUrl));
+                            AuthenticationErrorResponse oidcResponse = (AuthenticationErrorResponse)authResponse;
                             throw new Exception(String.format(
                                     "Request for auth code failed: %s - %s",
                                     oidcResponse.getErrorObject().getCode(),
@@ -229,7 +236,7 @@ public class BasicFilter implements Filter {
     private String getRedirectUrl(String currentUri)
             throws UnsupportedEncodingException {
         String redirectUrl = authority + this.tenant
-                + "/oauth2/authorize?response_type=code&redirect_uri="
+                + "/oauth2/authorize?response_type=code%20id_token&scope=openid&response_mode=form_post&redirect_uri="
                 + URLEncoder.encode(currentUri, "UTF-8") + "&client_id="
                 + clientId + "&resource=https%3a%2f%2fgraph.windows.net"
                 + "&nonce=" + UUID.randomUUID() + "&site_id=500879";
