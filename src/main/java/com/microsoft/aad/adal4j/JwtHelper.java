@@ -26,6 +26,7 @@ import java.util.List;
 
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSHeader.Builder;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -63,10 +64,10 @@ final class JwtHelper {
         claimsSet.setSubject(credential.getClientId());
         SignedJWT jwt = null;
         try {
-            final JWSHeader header = new JWSHeader(JWSAlgorithm.RS256);
-            header.setX509CertThumbprint(new Base64URL(credential
-                    .getPublicCertificateHash()));
-            jwt = new SignedJWT(header, claimsSet);
+            JWSHeader.Builder builder = new Builder(JWSAlgorithm.RS256);
+            builder.x509CertSHA256Thumbprint(new Base64URL(credential
+                  .getPublicCertificateHash()));
+            jwt = new SignedJWT(builder.build(), claimsSet);
             final RSASSASigner signer = new RSASSASigner(
                     (RSAPrivateKey) credential.getKey());
 

@@ -101,7 +101,6 @@ public class UserInfo implements Serializable {
         String userId = null;
         if (!StringHelper.isBlank(claims
                 .getStringClaim(AuthenticationConstants.ID_TOKEN_UPN))) {
-
             userId = claims
                     .getStringClaim(AuthenticationConstants.ID_TOKEN_UPN);
             isDisplayable = true;
@@ -110,6 +109,8 @@ public class UserInfo implements Serializable {
             userId = claims
                     .getStringClaim(AuthenticationConstants.ID_TOKEN_EMAIL);
             isDisplayable = true;
+        } else if (!StringHelper.isBlank(claims.getStringClaim(AuthenticationConstants.ID_TOKEN_OBJECT_ID))) {
+            userId = claims.getSubject();
         } else if (!StringHelper.isBlank(claims.getSubject())) {
             userId = claims.getSubject();
         }

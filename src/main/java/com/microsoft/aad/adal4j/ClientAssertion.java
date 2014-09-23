@@ -25,8 +25,15 @@ package com.microsoft.aad.adal4j;
  */
 public final class ClientAssertion {
 
+    public enum AssertionType {
+        JWT,
+        SAML1_1,
+        SAML2
+    }
+    
     private final String assertion;
-
+    private final AssertionType type;
+    
     /**
      * Constructor to create credential with a jwt token encoded as a base64 url
      * encoded string.
@@ -35,14 +42,20 @@ public final class ClientAssertion {
      *            The jwt used as credential.
      */
     public ClientAssertion(final String assertion) {
+        this(assertion, AssertionType.JWT);
+    }
+
+
+    public ClientAssertion(final String assertion, final AssertionType type) {
 
         if (StringHelper.isBlank(assertion)) {
             throw new NullPointerException("assertion");
         }
 
         this.assertion = assertion;
+        this.type = type;
     }
-
+    
     /**
      * Gets the assertion.
      * 
@@ -52,4 +65,13 @@ public final class ClientAssertion {
         return assertion;
     }
 
+
+    /**
+     * Gets the assertion type.
+     * 
+     * @return assertion value
+     */
+    public AssertionType getAssertionType() {
+        return type;
+    }
 }

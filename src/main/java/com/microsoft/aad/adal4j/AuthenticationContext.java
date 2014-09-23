@@ -35,11 +35,14 @@ import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.microsoft.aad.adal4j.ClientAssertion.AssertionType;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
 import com.nimbusds.oauth2.sdk.ClientCredentialsGrant;
+import com.nimbusds.oauth2.sdk.JWTBearerGrant;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.RefreshTokenGrant;
+import com.nimbusds.oauth2.sdk.ResourceOwnerPasswordCredentialsGrant;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretPost;
 import com.nimbusds.oauth2.sdk.auth.JWTAuthentication;
@@ -119,6 +122,7 @@ public class AuthenticationContext {
             public AuthenticationResult call() throws Exception {
                 AuthenticationResult result = null;
                 try {
+                    processPasswordGrant(this.authGrant);
                     result = acquireTokenCommon(this.authGrant,
                             this.clientAuth, this.headers);
                     logResult(result, headers);
@@ -173,7 +177,7 @@ public class AuthenticationContext {
         this.validateInput(resource, credential, true);
         final ClientAuthentication clientAuth = createClientAuthFromClientAssertion(credential);
         final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
-                new ClientCredentialsGrant(null), resource);
+                new ClientCredentialsGrant(), resource);
         return this.acquireToken(authGrant, clientAuth, callback);
     }
 
@@ -210,7 +214,7 @@ public class AuthenticationContext {
                 new ClientID(credential.getClientId()), new Secret(
                         credential.getClientSecret()));
         final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
-                new ClientCredentialsGrant(null), resource);
+                new ClientCredentialsGrant(), resource);
         return this.acquireToken(authGrant, clientAuth, callback);
     }
 
@@ -638,6 +642,17 @@ public class AuthenticationContext {
         return result;
     }
 
+    /**
+     * 
+     * @param authGrant
+     */
+    private AdalAuthorizatonGrant processPasswordGrant(AdalAuthorizatonGrant authGrant){
+        if(authGrant.getAuthorizationGrant() instanceof ResourceOwnerPasswordCredentialsGrant){
+            return authGrant;
+        }
+        return null;
+    }
+    
     private void logResult(AuthenticationResult result,
             ClientDataHttpHeaders headers) throws NoSuchAlgorithmException,
             UnsupportedEncodingException {
@@ -672,6 +687,10 @@ public class AuthenticationContext {
     private ClientAuthentication createClientAuthFromClientAssertion(
             final ClientAssertion credential) {
 
+        if(credential.getAssertionType() == AssertionType.JWT){
+            return new JWTBearerGrant(credential.getAssertion());
+        }
+        
         try {
             final Map<String, String> map = new HashMap<String, String>();
             map.put("client_assertion_type",

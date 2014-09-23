@@ -65,5 +65,8 @@ class AdalAuthorizatonGrant {
         outParams.putAll(grant.toParameters());
         return outParams;
     }
-
+    
+    AuthorizationGrant getAuthorizationGrant(){
+        return this.grant;
+    }
 }
