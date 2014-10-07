@@ -33,4 +33,6 @@ class AuthenticationConstants {
     static final String ID_TOKEN_EMAIL = "email";
     static final String ID_TOKEN_IDENTITY_PROVIDER = "idp";
     static final String ID_TOKEN_OBJECT_ID = "object_id";
+    static final String ID_TOKEN_PASSWORD_CHANGE_URL = "pwd_url";
+    static final String ID_TOKEN_PASSWORD_EXPIRES_ON = "pwd_exp";
 }

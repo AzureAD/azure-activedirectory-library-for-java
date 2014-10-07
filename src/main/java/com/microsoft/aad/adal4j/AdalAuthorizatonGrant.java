@@ -31,7 +31,7 @@ class AdalAuthorizatonGrant {
 
     private final AuthorizationGrant grant;
     private final Map<String, String> params;
-
+    
     /**
      * 
      * @param grant
@@ -68,5 +68,10 @@ class AdalAuthorizatonGrant {
     
     AuthorizationGrant getAuthorizationGrant(){
         return this.grant;
+    }
+    
+
+    Map<String, String> getCustomParameters() {
+        return params;
     }
 }

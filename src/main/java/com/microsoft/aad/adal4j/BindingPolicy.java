@@ -19,43 +19,31 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
-import com.google.gson.annotations.SerializedName;
+class BindingPolicy {
 
-class UserDiscoveryResponse {
-    
-    @SerializedName("ver")
-    private float version;
+    private String value;
+    private String url;
 
-    @SerializedName("account_type")
-    private String accountType;
-
-    @SerializedName("federation_metadata_url")
-    private String federationMetadataUrl;
-
-    @SerializedName("federation_protocol")
-    private String federationProtocol;
-    
-    @SerializedName("federation_active_auth_url")
-    private String federationActiveAuthUrl;
-    
-    
-    float getVersion() {
-        return version;
-    }
-    
-    boolean isAccountFederated(){
-        return !StringHelper.isBlank(this.accountType) && this.accountType.equalsIgnoreCase("Federated");
-    }
-    
-    String getFederationProtocol(){
-        return federationProtocol;
+    public BindingPolicy(String value) {
+        this.value = value;
     }
 
-    String getFederationMetadataUrl(){
-        return federationMetadataUrl;
+    public String getValue() {
+        return value;
     }
 
-    String getFederationActiveAuthUrl(){
-        return federationActiveAuthUrl;
+    public void setValue(String value) {
+        this.value = value;
     }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+    
+    
+    
 }

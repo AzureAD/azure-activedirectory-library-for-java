@@ -1,7 +1,8 @@
-.classpath
-.project
-.settings/*
-bin/*
-target/*
-test-output/*
+**/.classpath
+**/.project
+**/.settings/**
+**/bin/*
+**/target/*
+**/test-output/*
+
 /target

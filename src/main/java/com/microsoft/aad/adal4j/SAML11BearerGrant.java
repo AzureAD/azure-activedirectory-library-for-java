@@ -19,43 +19,28 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
-import com.google.gson.annotations.SerializedName;
+import java.util.Map;
 
-class UserDiscoveryResponse {
-    
-    @SerializedName("ver")
-    private float version;
+import com.nimbusds.jose.util.Base64URL;
+import com.nimbusds.oauth2.sdk.GrantType;
+import com.nimbusds.oauth2.sdk.SAML2BearerGrant;
 
-    @SerializedName("account_type")
-    private String accountType;
+class SAML11BearerGrant extends SAML2BearerGrant {
 
-    @SerializedName("federation_metadata_url")
-    private String federationMetadataUrl;
-
-    @SerializedName("federation_protocol")
-    private String federationProtocol;
+    /**
+     * The grant type.
+     */
+    public static GrantType grantType = new GrantType("urn:ietf:params:oauth:grant-type:saml1_1-bearer");
     
-    @SerializedName("federation_active_auth_url")
-    private String federationActiveAuthUrl;
-    
-    
-    float getVersion() {
-        return version;
-    }
-    
-    boolean isAccountFederated(){
-        return !StringHelper.isBlank(this.accountType) && this.accountType.equalsIgnoreCase("Federated");
-    }
-    
-    String getFederationProtocol(){
-        return federationProtocol;
+    public SAML11BearerGrant(Base64URL assertion) {
+        super(assertion);
     }
 
-    String getFederationMetadataUrl(){
-        return federationMetadataUrl;
-    }
+    @Override
+    public Map<String,String> toParameters() {
 
-    String getFederationActiveAuthUrl(){
-        return federationActiveAuthUrl;
+            Map<String,String> params = super.toParameters();
+            params.put("grant_type", grantType.getValue());
+            return params;
     }
 }
