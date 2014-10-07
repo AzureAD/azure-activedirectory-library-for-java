@@ -5,7 +5,7 @@
 		Exception -
 		<%=request.getAttribute("error")%></p>
 	<ul>
-		<li><a href="index.jsp">Go Home</a></li>
+		<li><a href="<%=request.getContextPath()%>/index.jsp">Go Home</a></li>
 	</ul>
 </body>
 </html>
