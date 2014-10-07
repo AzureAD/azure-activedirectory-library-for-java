@@ -30,8 +30,6 @@ import org.easymock.EasyMock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.testng.annotations.Test;
 
-import com.microsoft.aad.adal4j.AsymmetricKeyCredential;
-
 @Test(groups = { "checkin" })
 @PrepareForTest({ RSAPrivateKey.class })
 public class AsymmetricKeyCredentialTest extends AbstractAdalTests {

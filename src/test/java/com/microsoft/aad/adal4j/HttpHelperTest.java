@@ -25,10 +25,7 @@ import java.net.HttpURLConnection;
 
 import org.easymock.EasyMock;
 import org.powermock.api.easymock.PowerMock;
-import org.powermock.modules.testng.PowerMockTestCase;
 import org.testng.annotations.Test;
-
-import com.microsoft.aad.adal4j.HttpHelper;
 
 /**
  *

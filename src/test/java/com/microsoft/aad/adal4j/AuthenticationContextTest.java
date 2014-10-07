@@ -47,16 +47,6 @@ import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import com.microsoft.aad.adal4j.AdalAuthorizatonGrant;
-import com.microsoft.aad.adal4j.AsymmetricKeyCredential;
-import com.microsoft.aad.adal4j.AuthenticationCallback;
-import com.microsoft.aad.adal4j.AuthenticationContext;
-import com.microsoft.aad.adal4j.AuthenticationException;
-import com.microsoft.aad.adal4j.AuthenticationResult;
-import com.microsoft.aad.adal4j.ClientAssertion;
-import com.microsoft.aad.adal4j.ClientCredential;
-import com.microsoft.aad.adal4j.ClientDataHttpHeaders;
-import com.microsoft.aad.adal4j.StringHelper;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 
 @Test(groups = { "checkin" })
@@ -96,26 +86,6 @@ public class AuthenticationContextTest extends AbstractAdalTests {
                 true, service);
         ctx.setCorrelationId("correlationId");
         Assert.assertEquals(ctx.getCorrelationId(), "correlationId");
-    }
-
-    @Test(groups = { "end-to-end" })
-    public void testAcquireToken() throws InterruptedException,
-            ExecutionException, MalformedURLException {
-        ctx = new AuthenticationContext(TestConfiguration.AAD_TENANT_ENDPOINT,
-                true, service);
-        final AuthenticationCallback callback = PowerMock
-                .createMock(AuthenticationCallback.class);
-        callback.onSuccess(EasyMock.anyObject(AuthenticationResult.class));
-        EasyMock.expectLastCall().times(1);
-        PowerMock.replay(callback);
-        final Future<AuthenticationResult> result = ctx.acquireToken(
-                "https://graph.windows.net", new ClientCredential(
-                        TestConfiguration.AAD_CLIENT_ID,
-                        TestConfiguration.AAD_CLIENT_SECRET), callback);
-        assertNotNull(result.get());
-        assertFalse(StringHelper.isBlank(result.get().getAccessToken()));
-        assertTrue(StringHelper.isBlank(result.get().getRefreshToken()));
-        PowerMock.verifyAll();
     }
 
     @Test
