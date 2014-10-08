@@ -23,6 +23,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -35,12 +36,17 @@ import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
+import com.nimbusds.oauth2.sdk.AuthorizationGrant;
 import com.nimbusds.oauth2.sdk.ClientCredentialsGrant;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.RefreshTokenGrant;
+import com.nimbusds.oauth2.sdk.ResourceOwnerPasswordCredentialsGrant;
+import com.nimbusds.oauth2.sdk.SAML2BearerGrant;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
+import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretPost;
 import com.nimbusds.oauth2.sdk.auth.JWTAuthentication;
 import com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT;
@@ -119,6 +125,7 @@ public class AuthenticationContext {
             public AuthenticationResult call() throws Exception {
                 AuthenticationResult result = null;
                 try {
+                    this.authGrant = processPasswordGrant(this.authGrant);
                     result = acquireTokenCommon(this.authGrant,
                             this.clientAuth, this.headers);
                     logResult(result, headers);
@@ -152,6 +159,55 @@ public class AuthenticationContext {
     }
 
     /**
+     * Acquires a security token from the authority using a Refresh Token
+     * previously received.
+     * 
+     * @param clientId
+     *            Name or ID of the client requesting the token.
+     * @param resource
+     *            Identifier of the target resource that is the recipient of the
+     *            requested token. If null, token is requested for the same
+     *            resource refresh token was originally issued for. If passed,
+     *            resource should match the original resource used to acquire
+     *            refresh token unless token service supports refresh token for
+     *            multiple resources.
+     * @param username
+     *            Username of the managed or federated user.
+     * @param password
+     *            Password of the managed or federated user.
+     * @param callback
+     *            optional callback object for non-blocking execution.
+     * @return A {@link Future} object representing the
+     *         {@link AuthenticationResult} of the call. It contains Access
+     *         Token, Refresh Token and the Access Token's expiration time.
+     */
+    public Future<AuthenticationResult> acquireToken(final String resource,
+            final String clientId, final String username,
+            final String password, final AuthenticationCallback callback) {
+        if (StringHelper.isBlank(resource)) {
+            throw new IllegalArgumentException("resource is null or empty");
+        }
+
+        if (StringHelper.isBlank(clientId)) {
+            throw new IllegalArgumentException("clientId is null or empty");
+        }
+
+        if (StringHelper.isBlank(username)) {
+            throw new IllegalArgumentException("username is null or empty");
+        }
+
+        if (StringHelper.isBlank(password)) {
+            throw new IllegalArgumentException("password is null or empty");
+        }
+
+        return this.acquireToken(new AdalAuthorizatonGrant(
+                new ResourceOwnerPasswordCredentialsGrant(username, new Secret(
+                        password)), resource), new ClientAuthenticationPost(
+                ClientAuthenticationMethod.NONE, new ClientID(clientId)),
+                callback);
+    }
+
+    /**
      * Acquires security token from the authority.
      * 
      * @param resource
@@ -173,7 +229,7 @@ public class AuthenticationContext {
         this.validateInput(resource, credential, true);
         final ClientAuthentication clientAuth = createClientAuthFromClientAssertion(credential);
         final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
-                new ClientCredentialsGrant(null), resource);
+                new ClientCredentialsGrant(), resource);
         return this.acquireToken(authGrant, clientAuth, callback);
     }
 
@@ -210,7 +266,7 @@ public class AuthenticationContext {
                 new ClientID(credential.getClientId()), new Secret(
                         credential.getClientSecret()));
         final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
-                new ClientCredentialsGrant(null), resource);
+                new ClientCredentialsGrant(), resource);
         return this.acquireToken(authGrant, clientAuth, callback);
     }
 
@@ -636,6 +692,45 @@ public class AuthenticationContext {
         AuthenticationResult result = request
                 .executeOAuthRequestAndProcessResponse();
         return result;
+    }
+
+    /**
+     * 
+     * @param authGrant
+     */
+    private AdalAuthorizatonGrant processPasswordGrant(
+            AdalAuthorizatonGrant authGrant) throws Exception {
+        if (!(authGrant.getAuthorizationGrant() instanceof ResourceOwnerPasswordCredentialsGrant)) {
+            return authGrant;
+        }
+        ResourceOwnerPasswordCredentialsGrant grant = (ResourceOwnerPasswordCredentialsGrant) authGrant
+                .getAuthorizationGrant();
+
+        UserDiscoveryResponse discoveryResponse = UserDiscoveryRequest
+                .execute(this.authenticationAuthority
+                        .getUserRealmEndpoint(grant.getUsername()));
+        if (discoveryResponse.isAccountFederated()) {
+            WSTrustResponse response = WSTrustRequest.execute(MexParser
+                    .getWsTrustEndpointFromMexEndpoint(discoveryResponse
+                            .getFederationMetadataUrl()), grant.getUsername(),
+                    grant.getPassword().getValue());
+
+            AuthorizationGrant updatedGrant = null;
+            if (response.isTokenSaml2()) {
+                updatedGrant = new SAML2BearerGrant(new Base64URL(
+                        Base64.encodeBase64String(response.getToken().getBytes(
+                                "UTF-8"))));
+            } else {
+                updatedGrant = new SAML11BearerGrant(new Base64URL(
+                        Base64.encodeBase64String(response.getToken()
+                                .getBytes())));
+            }
+
+            authGrant = new AdalAuthorizatonGrant(updatedGrant,
+                    authGrant.getCustomParameters());
+        }
+
+        return authGrant;
     }
 
     private void logResult(AuthenticationResult result,

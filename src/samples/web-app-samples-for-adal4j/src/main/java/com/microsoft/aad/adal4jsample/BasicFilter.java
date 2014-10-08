@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright � Microsoft Open Technologies, Inc.
+ * Copyright © Microsoft Open Technologies, Inc.
  * 
  * All Rights Reserved
  * 
@@ -86,20 +86,21 @@ public class BasicFilter implements Filter {
                 if (!AuthHelper.isAuthenticated(httpRequest)) {
                     if (AuthHelper.containsAuthenticationData(httpRequest)) {
                         Map<String, String> params = new HashMap<String, String>();
-                        for(String key: request.getParameterMap().keySet()){
-                            params.put(key, request.getParameterMap().get(key)[0]);
+                        for (String key : request.getParameterMap().keySet()) {
+                            params.put(key,
+                                    request.getParameterMap().get(key)[0]);
                         }
-                        AuthenticationResponse authResponse =  AuthenticationResponseParser
+                        AuthenticationResponse authResponse = AuthenticationResponseParser
                                 .parse(new URI(fullUrl), params);
                         if (AuthHelper.isAuthenticationSuccessful(authResponse)) {
-                            
-                            AuthenticationSuccessResponse oidcResponse = (AuthenticationSuccessResponse)authResponse;
+
+                            AuthenticationSuccessResponse oidcResponse = (AuthenticationSuccessResponse) authResponse;
                             AuthenticationResult result = getAccessToken(
                                     oidcResponse.getAuthorizationCode(),
                                     currentUri);
                             createSessionPrincipal(httpRequest, result);
                         } else {
-                            AuthenticationErrorResponse oidcResponse = (AuthenticationErrorResponse)authResponse;
+                            AuthenticationErrorResponse oidcResponse = (AuthenticationErrorResponse) authResponse;
                             throw new Exception(String.format(
                                     "Request for auth code failed: %s - %s",
                                     oidcResponse.getErrorObject().getCode(),
@@ -107,10 +108,11 @@ public class BasicFilter implements Filter {
                                             .getDescription()));
                         }
                     } else {
-                        // not authenticated
-                        httpResponse.setStatus(302);
-                        httpResponse.sendRedirect(getRedirectUrl(currentUri));
-                        return;
+                            // not authenticated
+                            httpResponse.setStatus(302);
+                            httpResponse
+                                    .sendRedirect(getRedirectUrl(currentUri));
+                            return;
                     }
 
                 } else {
@@ -235,7 +237,8 @@ public class BasicFilter implements Filter {
 
     private String getRedirectUrl(String currentUri)
             throws UnsupportedEncodingException {
-        String redirectUrl = authority + this.tenant
+        String redirectUrl = authority
+                + this.tenant
                 + "/oauth2/authorize?response_type=code%20id_token&scope=openid&response_mode=form_post&redirect_uri="
                 + URLEncoder.encode(currentUri, "UTF-8") + "&client_id="
                 + clientId + "&resource=https%3a%2f%2fgraph.windows.net"

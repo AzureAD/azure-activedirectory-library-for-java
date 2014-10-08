@@ -21,12 +21,9 @@ package com.microsoft.aad.adal4j;
 
 import java.text.ParseException;
 
-import org.powermock.modules.testng.PowerMockTestCase;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.microsoft.aad.adal4j.AdalAccessTokenResponse;
-import com.microsoft.aad.adal4j.StringHelper;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
