@@ -169,7 +169,7 @@ class WSTrustResponse {
 
         if (faultNodes.getLength() > 0) {
             responseValue.faultMessage = faultNodes.item(0).getTextContent();
-            if (StringHelper.isBlank(responseValue.faultMessage)) {
+            if (!StringHelper.isBlank(responseValue.faultMessage)) {
                 responseValue.errorFound = true;
             }
         }

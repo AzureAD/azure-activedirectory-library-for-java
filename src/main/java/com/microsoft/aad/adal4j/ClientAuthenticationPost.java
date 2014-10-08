@@ -32,9 +32,9 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 
-class AdalClientAuthenticationPost extends ClientAuthentication {
+class ClientAuthenticationPost extends ClientAuthentication {
 
-    protected AdalClientAuthenticationPost(ClientAuthenticationMethod method,
+    protected ClientAuthenticationPost(ClientAuthenticationMethod method,
             ClientID clientID) {
         super(method, clientID);
     }

@@ -23,6 +23,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -199,13 +200,11 @@ public class AuthenticationContext {
             throw new IllegalArgumentException("password is null or empty");
         }
 
-        return this
-                .acquireToken(new AdalAuthorizatonGrant(
-                        new ResourceOwnerPasswordCredentialsGrant(username,
-                                new Secret(password)), resource),
-                        new AdalClientAuthenticationPost(
-                                ClientAuthenticationMethod.NONE, new ClientID(
-                                        clientId)), callback);
+        return this.acquireToken(new AdalAuthorizatonGrant(
+                new ResourceOwnerPasswordCredentialsGrant(username, new Secret(
+                        password)), resource), new ClientAuthenticationPost(
+                ClientAuthenticationMethod.NONE, new ClientID(clientId)),
+                callback);
     }
 
     /**
@@ -719,8 +718,8 @@ public class AuthenticationContext {
             AuthorizationGrant updatedGrant = null;
             if (response.isTokenSaml2()) {
                 updatedGrant = new SAML2BearerGrant(new Base64URL(
-                        Base64.encodeBase64String(response.getToken()
-                                .getBytes())));
+                        Base64.encodeBase64String(response.getToken().getBytes(
+                                "UTF-8"))));
             } else {
                 updatedGrant = new SAML11BearerGrant(new Base64URL(
                         Base64.encodeBase64String(response.getToken()
