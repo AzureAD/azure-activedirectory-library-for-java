@@ -24,11 +24,8 @@ import java.util.List;
 
 import net.minidev.json.JSONObject;
 
-import org.powermock.modules.testng.PowerMockTestCase;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import com.microsoft.aad.adal4j.AdalJWTClaimsSet;
 
 /**
  *
@@ -39,7 +36,7 @@ public class AdalJWTClaimsSetTest extends AbstractAdalTests {
     public void testNullAudience() {
 
         final AdalJWTClaimsSet obj = new AdalJWTClaimsSet();
-        obj.setAudience(null);
+        obj.setAudience((String)null);
         final JSONObject jo = obj.toJSONObject();
         Assert.assertFalse(jo.containsKey(AdalJWTClaimsSet.AUDIENCE_CLAIM));
     }

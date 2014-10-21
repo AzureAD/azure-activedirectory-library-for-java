@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright � Microsoft Open Technologies, Inc.
+ * Copyright © Microsoft Open Technologies, Inc.
  * 
  * All Rights Reserved
  * 

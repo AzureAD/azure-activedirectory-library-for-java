@@ -39,11 +39,14 @@ class AuthenticationAuthority {
     private final static String AUTHORIZE_ENDPOINT_TEMPLATE = "https://{host}/{tenant}/oauth2/authorize";
     private final static String DISCOVERY_ENDPOINT = "common/discovery/instance";
     private final static String TOKEN_ENDPOINT = "/oauth2/token";
+    private final static String USER_REALM_ENDPOINT = "common/userrealm";
 
     private String host;
     private String issuer;
     private final String instanceDiscoveryEndpointFormat = "https://%s/"
             + DISCOVERY_ENDPOINT;
+    private final String userRealmEndpointFormat = "https://%s/"
+            + USER_REALM_ENDPOINT + "/%s?api-version=1.0";
     private final String tokenEndpointFormat = "https://%s/{tenant}"
             + TOKEN_ENDPOINT;
     private String authority = "https://%s/%s/";
@@ -84,7 +87,11 @@ class AuthenticationAuthority {
     String getTokenEndpoint() {
         return tokenEndpoint;
     }
-
+    
+    String getUserRealmEndpoint(String username) {
+        return String.format(userRealmEndpointFormat, host, username);
+    }
+    
     AuthorityType getAuthorityType() {
         return authorityType;
     }

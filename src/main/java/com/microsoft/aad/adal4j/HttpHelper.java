@@ -20,6 +20,7 @@
 package com.microsoft.aad.adal4j;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -30,19 +31,50 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 
-/**
- * 
- */
 class HttpHelper {
+
+    static String executeHttpGet(final Logger log, final String url)
+            throws Exception {
+        return executeHttpGet(log, url, null);
+    }
 
     static String executeHttpGet(final Logger log, final String url,
             final Map<String, String> headers) throws Exception {
         final HttpURLConnection conn = HttpHelper.openConnection(url);
         configureAdditionalHeaders(conn, headers);
         String response = readResponseFromConnection(conn);
-        HttpHelper.verifyReturnedCorrelationId(log, conn,
-                headers.get(ClientDataHttpHeaders.CORRELATION_ID_HEADER_NAME));
+        if (headers != null) {
+            HttpHelper.verifyReturnedCorrelationId(log, conn, headers
+                    .get(ClientDataHttpHeaders.CORRELATION_ID_HEADER_NAME));
+        }
         return response;
+    }
+
+    static String executeHttpPost(final Logger log, final String url,
+            String postData) throws Exception {
+        return executeHttpPost(log, url, postData, null);
+    }
+
+    static String executeHttpPost(final Logger log, final String url,
+            String postData, final Map<String, String> headers)
+            throws Exception {
+        final HttpURLConnection conn = HttpHelper.openConnection(url);
+        configureAdditionalHeaders(conn, headers);
+        conn.setRequestMethod("POST");
+        conn.setDoOutput(true);
+        DataOutputStream wr = null;
+        try {
+            wr = new DataOutputStream(conn.getOutputStream());
+            wr.writeBytes(postData);
+            wr.flush();
+
+            String response = readResponseFromConnection(conn);
+            HttpHelper.verifyReturnedCorrelationId(log, conn, headers
+                    .get(ClientDataHttpHeaders.CORRELATION_ID_HEADER_NAME));
+            return response;
+        } finally {
+            wr.close();
+        }
     }
 
     static String readResponseFromConnection(final HttpURLConnection conn)

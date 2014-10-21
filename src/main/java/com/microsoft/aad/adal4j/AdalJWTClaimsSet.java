@@ -38,11 +38,13 @@ class AdalJWTClaimsSet extends JWTClaimsSet {
         // Service does not support arrays. If more than 1 value is passed for
         // audience, first one is selected.
         if (jo.get(AUDIENCE_CLAIM) != null) {
-            final JSONArray arr = (JSONArray) jo.get(AUDIENCE_CLAIM);
-            if (!arr.isEmpty()) {
-                jo.put(AUDIENCE_CLAIM, arr.get(0));
-            } else {
-                jo.remove(AUDIENCE_CLAIM);
+            if (!(jo.get(AUDIENCE_CLAIM) instanceof String)) {
+                final JSONArray arr = (JSONArray) jo.get(AUDIENCE_CLAIM);
+                if (!arr.isEmpty()) {
+                    jo.put(AUDIENCE_CLAIM, arr.get(0));
+                } else {
+                    jo.remove(AUDIENCE_CLAIM);
+                }
             }
         }
         return jo;

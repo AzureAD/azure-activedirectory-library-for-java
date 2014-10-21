@@ -26,13 +26,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.microsoft.aad.adal4j.AuthenticationAuthority;
-import com.microsoft.aad.adal4j.AuthenticationErrorMessage;
-import com.microsoft.aad.adal4j.AuthorityType;
-import com.microsoft.aad.adal4j.HttpHelper;
-import com.microsoft.aad.adal4j.InstanceDiscoveryResponse;
-import com.microsoft.aad.adal4j.JsonHelper;
-
 @Test(groups = { "checkin" })
 @PrepareForTest({ AuthenticationAuthority.class, HttpHelper.class,
         JsonHelper.class, InstanceDiscoveryResponse.class })

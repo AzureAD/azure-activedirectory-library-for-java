@@ -28,8 +28,6 @@ import org.powermock.api.easymock.PowerMock;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.microsoft.aad.adal4j.AuthenticationConstants;
-import com.microsoft.aad.adal4j.UserInfo;
 import com.nimbusds.jwt.ReadOnlyJWTClaimsSet;
 
 /**
@@ -57,13 +55,19 @@ public class UserInfoTest extends AbstractAdalTests {
     }
 
     @Test
-    public void testCreateFromIdTokenClaims_HasEmail() throws ParseException {
+    public void testCreateFromIdTokenClaims_HasEmailSubjectPasswordClaims() throws ParseException {
 
         final ReadOnlyJWTClaimsSet claimSet = PowerMock
                 .createMock(ReadOnlyJWTClaimsSet.class);
         final Map<String, Object> map = new HashMap<String, Object>();
         map.put("", "");
         EasyMock.expect(claimSet.getAllClaims()).andReturn(map).times(1);
+        EasyMock.expect(
+                claimSet.getStringClaim(AuthenticationConstants.ID_TOKEN_OBJECT_ID))
+                .andReturn(null).times(1);
+        EasyMock.expect(
+                claimSet.getStringClaim(AuthenticationConstants.ID_TOKEN_SUBJECT))
+                .andReturn("sub").times(2);
         EasyMock.expect(
                 claimSet.getStringClaim(AuthenticationConstants.ID_TOKEN_UPN))
                 .andReturn(null).times(1);
@@ -79,20 +83,27 @@ public class UserInfoTest extends AbstractAdalTests {
         EasyMock.expect(
                 claimSet.getStringClaim(AuthenticationConstants.ID_TOKEN_IDENTITY_PROVIDER))
                 .andReturn("idp").times(1);
+        EasyMock.expect(
+                claimSet.getStringClaim(AuthenticationConstants.ID_TOKEN_PASSWORD_CHANGE_URL))
+                .andReturn("url").times(2);
+        EasyMock.expect(
+                claimSet.getClaim(AuthenticationConstants.ID_TOKEN_PASSWORD_EXPIRES_ON))
+                .andReturn(5000).times(3);
 
         EasyMock.replay(claimSet);
         final UserInfo ui = UserInfo.createFromIdTokenClaims(claimSet);
         Assert.assertNotNull(ui);
-        Assert.assertEquals("test@value.com", ui.getUserId());
-        Assert.assertTrue(ui.isUserIdDisplayable());
+        Assert.assertEquals("test@value.com", ui.getDispayableId());
+        Assert.assertEquals("sub", ui.getUniqueId());
         Assert.assertEquals("test", ui.getGivenName());
         Assert.assertEquals("value", ui.getFamilyName());
         Assert.assertEquals("idp", ui.getIdentityProvider());
+        Assert.assertEquals("url", ui.getPasswordChangeUrl());
+        Assert.assertNotNull(ui.getPasswordExpiresOn());
         PowerMock.verifyAll();
     }
 
-    @Test
-    public void testCreateFromIdTokenClaims_HasSubject() throws ParseException {
+    public void testCreateFromIdTokenClaims_HasUpnObjectIdNoPasswordClaims() throws ParseException {
 
         final ReadOnlyJWTClaimsSet claimSet = PowerMock
                 .createMock(ReadOnlyJWTClaimsSet.class);
@@ -100,13 +111,17 @@ public class UserInfoTest extends AbstractAdalTests {
         map.put("", "");
         EasyMock.expect(claimSet.getAllClaims()).andReturn(map).times(1);
         EasyMock.expect(
+                claimSet.getStringClaim(AuthenticationConstants.ID_TOKEN_OBJECT_ID))
+                .andReturn(null).times(1);
+        EasyMock.expect(
+                claimSet.getStringClaim(AuthenticationConstants.ID_TOKEN_SUBJECT))
+                .andReturn("sub").times(2);
+        EasyMock.expect(
                 claimSet.getStringClaim(AuthenticationConstants.ID_TOKEN_UPN))
                 .andReturn(null).times(1);
         EasyMock.expect(
                 claimSet.getStringClaim(AuthenticationConstants.ID_TOKEN_EMAIL))
-                .andReturn(null).times(1);
-        EasyMock.expect(claimSet.getSubject()).andReturn("test@value.com")
-                .times(2);
+                .andReturn("test@value.com").times(2);
         EasyMock.expect(
                 claimSet.getStringClaim(AuthenticationConstants.ID_TOKEN_GIVEN_NAME))
                 .andReturn("test").times(1);
@@ -116,16 +131,23 @@ public class UserInfoTest extends AbstractAdalTests {
         EasyMock.expect(
                 claimSet.getStringClaim(AuthenticationConstants.ID_TOKEN_IDENTITY_PROVIDER))
                 .andReturn("idp").times(1);
+        EasyMock.expect(
+                claimSet.getStringClaim(AuthenticationConstants.ID_TOKEN_PASSWORD_CHANGE_URL))
+                .andReturn(null).times(1);
+        EasyMock.expect(
+                claimSet.getClaim(AuthenticationConstants.ID_TOKEN_PASSWORD_EXPIRES_ON))
+                .andReturn(null).times(1);
 
         EasyMock.replay(claimSet);
         final UserInfo ui = UserInfo.createFromIdTokenClaims(claimSet);
         Assert.assertNotNull(ui);
-        Assert.assertEquals("test@value.com", ui.getUserId());
-        Assert.assertFalse(ui.isUserIdDisplayable());
+        Assert.assertEquals("test@value.com", ui.getDispayableId());
+        Assert.assertEquals("sub", ui.getUniqueId());
         Assert.assertEquals("test", ui.getGivenName());
         Assert.assertEquals("value", ui.getFamilyName());
         Assert.assertEquals("idp", ui.getIdentityProvider());
+        Assert.assertNull(ui.getPasswordChangeUrl());
+        Assert.assertNull(ui.getPasswordExpiresOn());
         PowerMock.verifyAll();
     }
-
 }

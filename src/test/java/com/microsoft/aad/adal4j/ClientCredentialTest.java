@@ -21,8 +21,6 @@ package com.microsoft.aad.adal4j;
 
 import org.testng.annotations.Test;
 
-import com.microsoft.aad.adal4j.ClientCredential;
-
 /**
  *
  */

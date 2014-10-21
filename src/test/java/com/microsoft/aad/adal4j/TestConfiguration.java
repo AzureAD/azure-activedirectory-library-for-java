@@ -29,6 +29,9 @@ public final class TestConfiguration {
     public final static String AAD_CLIENT_SECRET = "client_secret";
     public final static String AAD_RESOURCE_ID = "b7a671d8-a408-42ff-86e0-aaf447fd17c4";
     public final static String AAD_CERTIFICATE_PATH = "/test-certificate.pfx";
+    public final static String AAD_MEX_RESPONSE_FILE = "/mex-response.xml";
+    public final static String AAD_TOKEN_ERROR_FILE = "/token-error.xml";
+    public final static String AAD_TOKEN_SUCCESS_FILE = "/token.xml";
     public final static String AAD_CERTIFICATE_PASSWORD = "password";
     public final static String AAD_DEFAULT_REDIRECT_URI = "https://non_existing_uri.windows.com/";
     public final static String AAD_REDIRECT_URI_FOR_CONFIDENTIAL_CLIENT = "https://non_existing_uri_for_confidential_client.com/";

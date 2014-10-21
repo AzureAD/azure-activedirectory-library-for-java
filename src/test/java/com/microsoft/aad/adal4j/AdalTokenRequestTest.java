@@ -33,13 +33,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.microsoft.aad.adal4j.AdalAuthorizatonGrant;
-import com.microsoft.aad.adal4j.AdalOAuthRequest;
-import com.microsoft.aad.adal4j.AdalTokenRequest;
-import com.microsoft.aad.adal4j.AuthenticationException;
-import com.microsoft.aad.adal4j.AuthenticationResult;
-import com.microsoft.aad.adal4j.ClientDataHttpHeaders;
-import com.microsoft.aad.adal4j.StringHelper;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
 import com.nimbusds.oauth2.sdk.AuthorizationGrant;
@@ -176,10 +169,9 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
         Assert.assertEquals(result.getAccessTokenType(), "Bearer");
         Assert.assertEquals(result.getUserInfo().getFamilyName(), "Admin");
         Assert.assertEquals(result.getUserInfo().getGivenName(), "ADALTests");
-        Assert.assertEquals(result.getUserInfo().getUserId(),
+        Assert.assertEquals(result.getUserInfo().getDispayableId(),
                 "admin@aaltests.onmicrosoft.com");
         Assert.assertNull(result.getUserInfo().getIdentityProvider());
-        Assert.assertTrue(result.getUserInfo().isUserIdDisplayable());
     }
 
     @Test(expectedExceptions = AuthenticationException.class)
