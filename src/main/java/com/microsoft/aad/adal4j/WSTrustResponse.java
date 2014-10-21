@@ -77,10 +77,11 @@ class WSTrustResponse {
         return tokenType;
     }
 
-    boolean isTokenSaml2(){
-        return tokenType!=null && !SAML1_ASSERTION.equalsIgnoreCase(tokenType);
+    boolean isTokenSaml2() {
+        return tokenType != null
+                && !SAML1_ASSERTION.equalsIgnoreCase(tokenType);
     }
-    
+
     static WSTrustResponse parse(String response) throws Exception {
         WSTrustResponse responseValue = new WSTrustResponse();
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory
@@ -101,7 +102,7 @@ class WSTrustResponse {
             }
             throw new Exception("Server returned error in RSTR - ErrorCode: "
                     + responseValue.errorCode + " : FaultMessage: "
-                    + responseValue.faultMessage);
+                    + responseValue.faultMessage.trim());
         } else {
             parseToken(responseValue, xmlDocument, xPath);
         }
@@ -145,7 +146,8 @@ class WSTrustResponse {
                         + responseValue.tokenType);
                 continue;
             }
-            responseValue.token = innerXml(requestedTokenNodes.item(0).getFirstChild());
+
+            responseValue.token = innerXml(requestedTokenNodes.item(0));
             if (StringHelper.isBlank(responseValue.token)) {
                 log.warn("Unable to find token associated with TokenType element: "
                         + responseValue.tokenType);
@@ -191,13 +193,15 @@ class WSTrustResponse {
 
         return errorFound;
     }
-    
-    public static String innerXml(Node node) {
+
+    static String innerXml(Node node) {
         String xmlString = "";
         try {
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-            //transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            Transformer transformer = TransformerFactory.newInstance()
+                    .newTransformer();
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION,
+                    "yes");
+            // transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 
             Source source = new DOMSource(node);
 
@@ -205,13 +209,16 @@ class WSTrustResponse {
             StreamResult result = new StreamResult(sw);
 
             transformer.transform(source, result);
-            xmlString = sw.toString ();
+            xmlString = sw.toString();
 
         } catch (Exception ex) {
-            ex.printStackTrace ();
+            ex.printStackTrace();
         }
 
-        return xmlString;
+        xmlString = xmlString.replaceAll("<trust:RequestedSecurityToken \\S*>",
+                "");
+        xmlString = xmlString.replaceAll("</trust:RequestedSecurityToken>", "");
+        return xmlString.trim();
     }
-    
+
 }

@@ -23,7 +23,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -293,6 +292,41 @@ public class AuthenticationContext {
         return this.acquireToken(resource, JwtHelper.buildJwt(credential,
                 this.authenticationAuthority.getSelfSignedJwtAudience()),
                 callback);
+    }
+
+    /**
+     * Acquires security token from the authority using an authorization code
+     * previously received.
+     * 
+     * @param authorizationCode
+     *            The authorization code received from service authorization
+     * @param resource
+     *            Identifier of the target resource that is the recipient of the
+     *            requested token.
+     * @param clientId
+     *            The client assertion to use for token acquisition endpoint.
+     * @param redirectUri
+     *            The redirect address used for obtaining authorization code.
+     * @param callback
+     *            optional callback object for non-blocking execution.
+     * @return A {@link Future} object representing the
+     *         {@link AuthenticationResult} of the call. It contains Access
+     *         Token, Refresh Token and the Access Token's expiration time.
+     */
+    public Future<AuthenticationResult> acquireTokenByAuthorizationCode(
+            final String authorizationCode, final String resource,
+            final String clientId, final URI redirectUri,
+            final AuthenticationCallback callback) {
+
+        final ClientAuthentication clientAuth = new ClientAuthenticationPost(
+                ClientAuthenticationMethod.NONE, new ClientID(clientId));
+
+        this.validateAuthCodeRequestInput(authorizationCode, redirectUri,
+                clientAuth, resource);
+        final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
+                new AuthorizationCodeGrant(new AuthorizationCode(
+                        authorizationCode), redirectUri), resource);
+        return this.acquireToken(authGrant, clientAuth, callback);
     }
 
     /**

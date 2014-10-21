@@ -11,8 +11,8 @@ import com.microsoft.aad.adal4j.AuthenticationResult;
 
 public class PublicClient {
 
-    private final static String AUTHORITY = "YOUR_AUTHORITY";
-    private final static String CLIENT_ID = "YOUR_PUBLIC_CLIENT_ID";
+    private final static String AUTHORITY = "https://login.windows.net/common";
+    private final static String CLIENT_ID = "9ba1a5c7-f17a-4de9-a1f1-6178c8d51223";
 
     public static void main(String args[]) throws Exception {
 
@@ -36,7 +36,7 @@ public class PublicClient {
         ExecutorService service = null;
         try {
             service = Executors.newFixedThreadPool(1);
-            context = new AuthenticationContext(AUTHORITY, true, service);
+            context = new AuthenticationContext(AUTHORITY, false, service);
             Future<AuthenticationResult> future = context.acquireToken(
                     "https://graph.windows.net", CLIENT_ID, username, password,
                     null);

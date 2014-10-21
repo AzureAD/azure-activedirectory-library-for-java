@@ -39,7 +39,7 @@ class AuthenticationAuthority {
     private final static String AUTHORIZE_ENDPOINT_TEMPLATE = "https://{host}/{tenant}/oauth2/authorize";
     private final static String DISCOVERY_ENDPOINT = "common/discovery/instance";
     private final static String TOKEN_ENDPOINT = "/oauth2/token";
-    private final static String USER_REALM_ENDPOINT = "common/UserRealm";
+    private final static String USER_REALM_ENDPOINT = "common/userrealm";
 
     private String host;
     private String issuer;

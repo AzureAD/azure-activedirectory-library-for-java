@@ -19,6 +19,9 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,9 +29,14 @@ class UserDiscoveryRequest {
 
     private final static Logger log = LoggerFactory
             .getLogger(UserDiscoveryRequest.class);
-    
+    private final static Map<String, String> HEADERS;
+    static{
+        HEADERS = new HashMap<String, String>();
+        HEADERS.put("Accept", "application/json, text/javascript, */*");
+        
+    }
     static UserDiscoveryResponse execute(String uri) throws Exception {
-       String response = HttpHelper.executeHttpGet(log, uri);
+       String response = HttpHelper.executeHttpGet(log, uri, HEADERS);
        return JsonHelper.convertJsonToObject(response, UserDiscoveryResponse.class);
     }
 }
