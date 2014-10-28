@@ -139,17 +139,17 @@ public class UserInfo implements Serializable {
         }
 
         if (claims
-                .getClaim(AuthenticationConstants.ID_TOKEN_PASSWORD_EXPIRES_ON) != null
-                && (int) claims
-                        .getClaim(AuthenticationConstants.ID_TOKEN_PASSWORD_EXPIRES_ON) > 0) {
+                .getClaim(AuthenticationConstants.ID_TOKEN_PASSWORD_EXPIRES_ON) != null) {
+            int claimExpiry = Integer
+                    .valueOf((String) claims
+                            .getClaim(AuthenticationConstants.ID_TOKEN_PASSWORD_EXPIRES_ON));
             // pwd_exp returns seconds to expiration time
             // it returns in seconds. Date accepts milliseconds.
-            Calendar expires = new GregorianCalendar();
-            expires.add(
-                    Calendar.SECOND,
-                    (int) claims
-                            .getClaim(AuthenticationConstants.ID_TOKEN_PASSWORD_EXPIRES_ON));
-            userInfo.passwordExpiresOn = expires.getTime();
+            if (claimExpiry > 0) {
+                Calendar expires = new GregorianCalendar();
+                expires.add(Calendar.SECOND, claimExpiry);
+                userInfo.passwordExpiresOn = expires.getTime();
+            }
         }
 
         return userInfo;
