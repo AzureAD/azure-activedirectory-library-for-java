@@ -55,7 +55,8 @@ public class UserInfoTest extends AbstractAdalTests {
     }
 
     @Test
-    public void testCreateFromIdTokenClaims_HasEmailSubjectPasswordClaims() throws ParseException {
+    public void testCreateFromIdTokenClaims_HasEmailSubjectPasswordClaims()
+            throws ParseException {
 
         final ReadOnlyJWTClaimsSet claimSet = PowerMock
                 .createMock(ReadOnlyJWTClaimsSet.class);
@@ -88,7 +89,7 @@ public class UserInfoTest extends AbstractAdalTests {
                 .andReturn("url").times(2);
         EasyMock.expect(
                 claimSet.getClaim(AuthenticationConstants.ID_TOKEN_PASSWORD_EXPIRES_ON))
-                .andReturn(5000).times(3);
+                .andReturn("5000").times(2);
 
         EasyMock.replay(claimSet);
         final UserInfo ui = UserInfo.createFromIdTokenClaims(claimSet);
@@ -103,7 +104,8 @@ public class UserInfoTest extends AbstractAdalTests {
         PowerMock.verifyAll();
     }
 
-    public void testCreateFromIdTokenClaims_HasUpnObjectIdNoPasswordClaims() throws ParseException {
+    public void testCreateFromIdTokenClaims_HasUpnObjectIdNoPasswordClaims()
+            throws ParseException {
 
         final ReadOnlyJWTClaimsSet claimSet = PowerMock
                 .createMock(ReadOnlyJWTClaimsSet.class);
