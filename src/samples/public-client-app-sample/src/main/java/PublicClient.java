@@ -26,6 +26,7 @@ public class PublicClient {
             AuthenticationResult result = getAccessTokenFromUserCredentials(
                     username, password);
             System.out.println("Access Token - " + result.getAccessToken());
+            System.out.println("Refresh Token - " + result.getRefreshToken());
         }
     }
 
