@@ -13,9 +13,9 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.microsoft.aad</groupId>
+			<groupId>com.microsoft.azure</groupId>
 			<artifactId>adal4j</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
+			<version>0.0.4</version>
 		</dependency>
 		<dependency>
 			<groupId>com.nimbusds</groupId>
