@@ -1,21 +1,34 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.microsoft.aad</groupId>
+	<groupId>com.microsoft.azure</groupId>
 	<artifactId>adal4j</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.4</version>
 	<packaging>jar</packaging>
 	<name>adal4j</name>
-	<url>http://maven.apache.org</url>
-	<scm>
-		<url>https://github.com/MSOpenTech/azure-activedirectory-library-for-java.git</url>
-	</scm>
-
+	<description>
+    Azure active directory library for Java gives you the ability to add Windows Azure Active Directory 
+    authentication to your web application with just a few lines of additional code. Using our ADAL SDKs you 
+    can quickly and easily extend your existing application to all the employees that use Windows Azure 
+    AD and Active Directory on-premises using Active Directory Federation Services, including Office365 
+    customers.
+  </description>
+	<url>https://github.com/AzureAD/azure-activedirectory-library-for-java</url>
+	<developers>
+		<developer>
+			<id>msopentech</id>
+			<name>Microsoft Open Technologies, Inc.</name>
+		</developer>
+	</developers>
 	<licenses>
 		<license>
 			<name>Apache License, Version 2.0</name>
 		</license>
 	</licenses>
+	<inceptionYear>2013</inceptionYear>
+	<scm>
+		<url>https://github.com/AzureAD/azure-activedirectory-library-for-java.git</url>
+	</scm>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -34,7 +34,7 @@ class AuthenticationAuthority {
             .getLogger(AuthenticationAuthority.class);
 
     private final static String[] TRUSTED_HOST_LIST = { "login.windows.net",
-            "login.chinacloudapi.cn", "login.cloudgovapi.us" };
+            "login.chinacloudapi.cn", "login.cloudgovapi.us", "login.microsoftonline.com" };
     private final static String TENANTLESS_TENANT_NAME = "common";
     private final static String AUTHORIZE_ENDPOINT_TEMPLATE = "https://{host}/{tenant}/oauth2/authorize";
     private final static String DISCOVERY_ENDPOINT = "common/discovery/instance";
