@@ -266,6 +266,8 @@ public class AuthenticationContext {
 	public Future<AuthenticationResult> acquireToken(final String resource,
 			final ClientAssertion assertion, final ClientCredential credential,
 			final AuthenticationCallback callback) {
+
+		this.validateInput(resource, credential, true);
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("resource", resource);
 		params.put("requested_token_use", "on_behalf_of");
