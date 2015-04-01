@@ -15,7 +15,7 @@
 		<dependency>
 			<groupId>com.microsoft.azure</groupId>
 			<artifactId>adal4j</artifactId>
-			<version>0.0.4</version>
+			<version>0.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.nimbusds</groupId>
@@ -42,6 +42,14 @@
 	<build>
 		<finalName>public-client-adal4j-sample</finalName>
 		<plugins>
+		        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>1.2.1</version>
+            <configuration>
+                <mainClass>PublicClient</mainClass>
+            </configuration>
+        </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
