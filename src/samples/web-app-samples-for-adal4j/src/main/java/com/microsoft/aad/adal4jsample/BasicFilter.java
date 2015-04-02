@@ -127,7 +127,7 @@ public class BasicFilter implements Filter {
                         if (httpRequest.getParameter("cc") != null) {
                             result = getAccessTokenFromClientCredentials();
                         } else {
-                            if (result.getExpiresOn() <= new Date().getTime()) {
+                            if (result.getExpiresOnDate().before(new Date()) {
                                 result = getAccessTokenFromRefreshToken(
                                         result.getRefreshToken(), currentUri);
                             }
