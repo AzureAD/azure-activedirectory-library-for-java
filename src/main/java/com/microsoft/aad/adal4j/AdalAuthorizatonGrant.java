@@ -62,6 +62,8 @@ class AdalAuthorizatonGrant {
         if (this.params != null) {
             outParams.putAll(this.params);
         }
+        
+        outParams.put("scope", "openid");
         outParams.putAll(grant.toParameters());
         return outParams;
     }
