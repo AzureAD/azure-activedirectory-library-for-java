@@ -114,7 +114,6 @@ public class BasicFilter implements Filter {
                                     .sendRedirect(getRedirectUrl(currentUri));
                             return;
                     }
-
                 } else {
                     // if authenticated, how to check for valid session?
                     AuthenticationResult result = AuthHelper
@@ -127,7 +126,7 @@ public class BasicFilter implements Filter {
                         if (httpRequest.getParameter("cc") != null) {
                             result = getAccessTokenFromClientCredentials();
                         } else {
-                            if (result.getExpiresOnDate().before(new Date()) {
+                            if (result.getExpiresOnDate().before(new Date())) {
                                 result = getAccessTokenFromRefreshToken(
                                         result.getRefreshToken(), currentUri);
                             }
