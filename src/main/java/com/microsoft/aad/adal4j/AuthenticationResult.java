@@ -20,6 +20,7 @@
 package com.microsoft.aad.adal4j;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Contains the results of one token acquisition operation.
@@ -29,7 +30,8 @@ public final class AuthenticationResult implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final String accessTokenType;
-    private final long expiresOn;
+    private final long expiresIn;
+    private final Date expiresOn;
     private final UserInfo userInfo;
     private final String accessToken;
     private final String refreshToken;
@@ -37,12 +39,17 @@ public final class AuthenticationResult implements Serializable {
 
     public AuthenticationResult(final String accessTokenType,
             final String accessToken, final String refreshToken,
-            final long expiresOn, final UserInfo userInfo,
+            final long expiresIn, final UserInfo userInfo,
             final boolean isMultipleResourceRefreshToken) {
         this.accessTokenType = accessTokenType;
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
-        this.expiresOn = expiresOn;
+        this.expiresIn = expiresIn;
+
+        Date now = new Date();
+        now.setTime(now.getTime() + (expiresIn * 1000));
+        this.expiresOn = now;
+
         this.userInfo = userInfo;
         this.isMultipleResourceRefreshToken = isMultipleResourceRefreshToken;
     }
@@ -59,7 +66,16 @@ public final class AuthenticationResult implements Serializable {
         return refreshToken;
     }
 
+    @Deprecated
     public long getExpiresOn() {
+        return expiresIn;
+    }
+
+    public long getExpiresAfter() {
+        return expiresIn;
+    }
+
+    public Date getExpiresOnDate() {
         return expiresOn;
     }
 

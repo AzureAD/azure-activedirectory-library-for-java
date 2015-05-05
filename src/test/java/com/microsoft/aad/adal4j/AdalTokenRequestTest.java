@@ -165,7 +165,7 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
         Assert.assertFalse(StringHelper.isBlank(result.getAccessToken()));
         Assert.assertFalse(StringHelper.isBlank(result.getRefreshToken()));
         Assert.assertTrue(result.isMultipleResourceRefreshToken());
-        Assert.assertEquals(result.getExpiresOn(), 3600);
+        Assert.assertEquals(result.getExpiresAfter(), 3600);
         Assert.assertEquals(result.getAccessTokenType(), "Bearer");
         Assert.assertEquals(result.getUserInfo().getFamilyName(), "Admin");
         Assert.assertEquals(result.getUserInfo().getGivenName(), "ADALTests");
