@@ -33,7 +33,7 @@ public class UserInfo implements Serializable {
 
     private static final long serialVersionUID = 1L;
     String uniqueId;
-    String dispayableId;
+    String displayableId;
     String givenName;
     String familyName;
     String identityProvider;
@@ -43,8 +43,8 @@ public class UserInfo implements Serializable {
     private UserInfo() {
     }
 
-    public String getDispayableId() {
-        return dispayableId;
+    public String getDisplayableId() {
+        return displayableId;
     }
 
     /**
@@ -123,7 +123,7 @@ public class UserInfo implements Serializable {
 
         final UserInfo userInfo = new UserInfo();
         userInfo.uniqueId = uniqueId;
-        userInfo.dispayableId = displayableId;
+        userInfo.displayableId = displayableId;
         userInfo.familyName = claims
                 .getStringClaim(AuthenticationConstants.ID_TOKEN_FAMILY_NAME);
         userInfo.givenName = claims
