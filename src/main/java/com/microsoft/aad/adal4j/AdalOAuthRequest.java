@@ -108,7 +108,17 @@ class AdalOAuthRequest extends HTTPRequest {
             conn.setRequestProperty("Authorization", this.getAuthorization());
         }
 
-        HttpHelper.configureAdditionalHeaders(conn, this.extraHeaderParams);
+        Map<String, String> params = new java.util.HashMap<>();
+        if (this.extraHeaderParams != null && !this.extraHeaderParams.isEmpty()) {
+            for (java.util.Map.Entry<String, String> entry : this.extraHeaderParams.entrySet()) {
+                if (entry.getValue() == null || entry.getValue().isEmpty()) {
+                    continue;
+                }
+                params.put(entry.getKey(), entry.getValue());
+            }
+        }
+        //HttpHelper.configureAdditionalHeaders(conn, this.extraHeaderParams);	// Fixed Google Appengine URLFetch Exception
+        HttpHelper.configureAdditionalHeaders(conn, params);
         conn.setDoOutput(true);
         conn.setRequestProperty("Content-Type",
                 CommonContentTypes.APPLICATION_URLENCODED.toString());
