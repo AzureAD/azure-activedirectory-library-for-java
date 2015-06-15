@@ -100,9 +100,33 @@ class HttpHelper {
         return out.toString();
     }
 
+    public static final String SYSTEM_PROPERTY_CONNECTION_TIMEOUT = "ADAL4J_CONNECTION_TIMEOUT";
+    public static final String SYSTEM_PROPERTY_READ_TIMEOUT = "ADAL4J_READ_TIMEOUT";
+
+    private static Integer getSystemPropertyInt(String propertyName) {
+        String value = System.getProperty(SYSTEM_PROPERTY_CONNECTION_TIMEOUT);
+        if (StringUtils.isNoneBlank(value)) {
+            try {
+                return Integer.parseInt(value);
+            } catch (NumberFormatException e) {
+                // no-op
+            }
+        }
+        return null;
+    }
+    
     static HttpURLConnection openConnection(final URL finalURL)
             throws IOException {
-        return (HttpURLConnection) finalURL.openConnection();
+        HttpURLConnection conn = (HttpURLConnection) finalURL.openConnection();
+
+        if (getSystemPropertyInt(SYSTEM_PROPERTY_CONNECTION_TIMEOUT) != null) {
+            conn.setConnectTimeout(getSystemPropertyInt(SYSTEM_PROPERTY_CONNECTION_TIMEOUT));
+        }
+        if (getSystemPropertyInt(SYSTEM_PROPERTY_READ_TIMEOUT) != null) {
+            conn.setConnectTimeout(getSystemPropertyInt(SYSTEM_PROPERTY_READ_TIMEOUT));
+        }
+
+        return conn;
     }
 
     static HttpURLConnection openConnection(final String url)
