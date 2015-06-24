@@ -101,7 +101,11 @@ public class UserInfo implements Serializable {
         String uniqueId = null;
         String displayableId = null;
 
-        if (!StringHelper.isBlank(claims
+        if (!StringHelper.isBlank((String) claims
+                .getCustomClaim(AuthenticationConstants.ID_TOKEN_OID))) {
+            uniqueId = claims
+                    .getStringClaim(AuthenticationConstants.ID_TOKEN_OID);
+        }else if (!StringHelper.isBlank(claims
                 .getStringClaim(AuthenticationConstants.ID_TOKEN_OBJECT_ID))) {
             uniqueId = claims
                     .getStringClaim(AuthenticationConstants.ID_TOKEN_OBJECT_ID);

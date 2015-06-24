@@ -19,16 +19,15 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
-import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.nimbusds.jwt.ReadOnlyJWTClaimsSet;
 import org.easymock.EasyMock;
 import org.powermock.api.easymock.PowerMock;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.nimbusds.jwt.ReadOnlyJWTClaimsSet;
+import java.text.ParseException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -90,11 +89,14 @@ public class UserInfoTest extends AbstractAdalTests {
         EasyMock.expect(
                 claimSet.getClaim(AuthenticationConstants.ID_TOKEN_PASSWORD_EXPIRES_ON))
                 .andReturn("5000").times(2);
+        EasyMock.expect(
+                claimSet.getCustomClaim("oid"))
+                .andReturn(null).times(1);
 
         EasyMock.replay(claimSet);
         final UserInfo ui = UserInfo.createFromIdTokenClaims(claimSet);
         Assert.assertNotNull(ui);
-        Assert.assertEquals("test@value.com", ui.getDispayableId());
+        Assert.assertEquals("test@value.com", ui.getDisplayableId());
         Assert.assertEquals("sub", ui.getUniqueId());
         Assert.assertEquals("test", ui.getGivenName());
         Assert.assertEquals("value", ui.getFamilyName());
@@ -112,6 +114,10 @@ public class UserInfoTest extends AbstractAdalTests {
         final Map<String, Object> map = new HashMap<String, Object>();
         map.put("", "");
         EasyMock.expect(claimSet.getAllClaims()).andReturn(map).times(1);
+
+        EasyMock.expect(
+                claimSet.getCustomClaim("oid"))
+                .andReturn(null).times(1);
         EasyMock.expect(
                 claimSet.getStringClaim(AuthenticationConstants.ID_TOKEN_OBJECT_ID))
                 .andReturn(null).times(1);
@@ -143,7 +149,7 @@ public class UserInfoTest extends AbstractAdalTests {
         EasyMock.replay(claimSet);
         final UserInfo ui = UserInfo.createFromIdTokenClaims(claimSet);
         Assert.assertNotNull(ui);
-        Assert.assertEquals("test@value.com", ui.getDispayableId());
+        Assert.assertEquals("test@value.com", ui.getDisplayableId());
         Assert.assertEquals("sub", ui.getUniqueId());
         Assert.assertEquals("test", ui.getGivenName());
         Assert.assertEquals("value", ui.getFamilyName());
