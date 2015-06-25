@@ -19,32 +19,25 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-
-import net.minidev.json.JSONObject;
-
-import org.easymock.EasyMock;
-import org.powermock.api.easymock.PowerMock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
-import com.nimbusds.oauth2.sdk.AuthorizationCode;
-import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
-import com.nimbusds.oauth2.sdk.AuthorizationGrant;
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.SerializeException;
-import com.nimbusds.oauth2.sdk.TokenErrorResponse;
+import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretPost;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import net.minidev.json.JSONObject;
+import org.easymock.EasyMock;
+import org.powermock.api.easymock.PowerMock;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 @Test(groups = { "checkin" })
 @PrepareForTest(TokenErrorResponse.class)
@@ -169,7 +162,7 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
         Assert.assertEquals(result.getAccessTokenType(), "Bearer");
         Assert.assertEquals(result.getUserInfo().getFamilyName(), "Admin");
         Assert.assertEquals(result.getUserInfo().getGivenName(), "ADALTests");
-        Assert.assertEquals(result.getUserInfo().getDispayableId(),
+        Assert.assertEquals(result.getUserInfo().getDisplayableId(),
                 "admin@aaltests.onmicrosoft.com");
         Assert.assertNull(result.getUserInfo().getIdentityProvider());
     }

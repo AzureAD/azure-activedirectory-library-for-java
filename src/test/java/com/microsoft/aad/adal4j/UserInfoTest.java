@@ -1,34 +1,33 @@
 /*******************************************************************************
  * Copyright © Microsoft Open Technologies, Inc.
- * 
+ *
  * All Rights Reserved
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS
  * OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  * ANY IMPLIED WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A
  * PARTICULAR PURPOSE, MERCHANTABILITY OR NON-INFRINGEMENT.
- * 
+ *
  * See the Apache License, Version 2.0 for the specific language
  * governing permissions and limitations under the License.
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
-import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.nimbusds.jwt.ReadOnlyJWTClaimsSet;
 import org.easymock.EasyMock;
 import org.powermock.api.easymock.PowerMock;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.nimbusds.jwt.ReadOnlyJWTClaimsSet;
+import java.text.ParseException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -64,7 +63,7 @@ public class UserInfoTest extends AbstractAdalTests {
         map.put("", "");
         EasyMock.expect(claimSet.getAllClaims()).andReturn(map).times(1);
         EasyMock.expect(
-                claimSet.getStringClaim(AuthenticationConstants.ID_TOKEN_OBJECT_ID))
+                claimSet.getCustomClaim(AuthenticationConstants.ID_TOKEN_OBJECT_ID))
                 .andReturn(null).times(1);
         EasyMock.expect(
                 claimSet.getStringClaim(AuthenticationConstants.ID_TOKEN_SUBJECT))
@@ -94,7 +93,7 @@ public class UserInfoTest extends AbstractAdalTests {
         EasyMock.replay(claimSet);
         final UserInfo ui = UserInfo.createFromIdTokenClaims(claimSet);
         Assert.assertNotNull(ui);
-        Assert.assertEquals("test@value.com", ui.getDispayableId());
+        Assert.assertEquals("test@value.com", ui.getDisplayableId());
         Assert.assertEquals("sub", ui.getUniqueId());
         Assert.assertEquals("test", ui.getGivenName());
         Assert.assertEquals("value", ui.getFamilyName());
@@ -113,7 +112,7 @@ public class UserInfoTest extends AbstractAdalTests {
         map.put("", "");
         EasyMock.expect(claimSet.getAllClaims()).andReturn(map).times(1);
         EasyMock.expect(
-                claimSet.getStringClaim(AuthenticationConstants.ID_TOKEN_OBJECT_ID))
+                claimSet.getCustomClaim(AuthenticationConstants.ID_TOKEN_OBJECT_ID))
                 .andReturn(null).times(1);
         EasyMock.expect(
                 claimSet.getStringClaim(AuthenticationConstants.ID_TOKEN_SUBJECT))
@@ -143,7 +142,7 @@ public class UserInfoTest extends AbstractAdalTests {
         EasyMock.replay(claimSet);
         final UserInfo ui = UserInfo.createFromIdTokenClaims(claimSet);
         Assert.assertNotNull(ui);
-        Assert.assertEquals("test@value.com", ui.getDispayableId());
+        Assert.assertEquals("test@value.com", ui.getDisplayableId());
         Assert.assertEquals("sub", ui.getUniqueId());
         Assert.assertEquals("test", ui.getGivenName());
         Assert.assertEquals("value", ui.getFamilyName());
