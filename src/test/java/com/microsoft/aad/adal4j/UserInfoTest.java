@@ -1,19 +1,19 @@
 /*******************************************************************************
  * Copyright © Microsoft Open Technologies, Inc.
- * 
+ *
  * All Rights Reserved
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS
  * OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  * ANY IMPLIED WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A
  * PARTICULAR PURPOSE, MERCHANTABILITY OR NON-INFRINGEMENT.
- * 
+ *
  * See the Apache License, Version 2.0 for the specific language
  * governing permissions and limitations under the License.
  ******************************************************************************/
@@ -63,7 +63,7 @@ public class UserInfoTest extends AbstractAdalTests {
         map.put("", "");
         EasyMock.expect(claimSet.getAllClaims()).andReturn(map).times(1);
         EasyMock.expect(
-                claimSet.getStringClaim(AuthenticationConstants.ID_TOKEN_OBJECT_ID))
+                claimSet.getCustomClaim(AuthenticationConstants.ID_TOKEN_OBJECT_ID))
                 .andReturn(null).times(1);
         EasyMock.expect(
                 claimSet.getStringClaim(AuthenticationConstants.ID_TOKEN_SUBJECT))
@@ -89,9 +89,6 @@ public class UserInfoTest extends AbstractAdalTests {
         EasyMock.expect(
                 claimSet.getClaim(AuthenticationConstants.ID_TOKEN_PASSWORD_EXPIRES_ON))
                 .andReturn("5000").times(2);
-        EasyMock.expect(
-                claimSet.getCustomClaim("oid"))
-                .andReturn(null).times(1);
 
         EasyMock.replay(claimSet);
         final UserInfo ui = UserInfo.createFromIdTokenClaims(claimSet);
@@ -114,12 +111,8 @@ public class UserInfoTest extends AbstractAdalTests {
         final Map<String, Object> map = new HashMap<String, Object>();
         map.put("", "");
         EasyMock.expect(claimSet.getAllClaims()).andReturn(map).times(1);
-
         EasyMock.expect(
-                claimSet.getCustomClaim("oid"))
-                .andReturn(null).times(1);
-        EasyMock.expect(
-                claimSet.getStringClaim(AuthenticationConstants.ID_TOKEN_OBJECT_ID))
+                claimSet.getCustomClaim(AuthenticationConstants.ID_TOKEN_OBJECT_ID))
                 .andReturn(null).times(1);
         EasyMock.expect(
                 claimSet.getStringClaim(AuthenticationConstants.ID_TOKEN_SUBJECT))
