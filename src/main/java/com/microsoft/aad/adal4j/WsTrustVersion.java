@@ -17,35 +17,9 @@
  * See the Apache License, Version 2.0 for the specific language
  * governing permissions and limitations under the License.
  ******************************************************************************/
+
 package com.microsoft.aad.adal4j;
 
-class BindingPolicy {
-
-    private String value;
-    private String url;
-    private WsTrustVersion version;
-    
-    public BindingPolicy(String value) {
-        this.value = value;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }    
-    
-    public void setVersion(WsTrustVersion version){
-	this.version = version;
-    }
+enum WsTrustVersion {
+    WSTRUST13, WSTRUST2005, UNDEFINED
 }
