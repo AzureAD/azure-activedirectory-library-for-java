@@ -94,7 +94,7 @@ public class UserInfoTest extends AbstractAdalTests {
         EasyMock.replay(claimSet);
         final UserInfo ui = UserInfo.createFromIdTokenClaims(claimSet);
         Assert.assertNotNull(ui);
-        Assert.assertEquals("test@value.com", ui.getDispayableId());
+        Assert.assertEquals("test@value.com", ui.getDisplayableId());
         Assert.assertEquals("sub", ui.getUniqueId());
         Assert.assertEquals("test", ui.getGivenName());
         Assert.assertEquals("value", ui.getFamilyName());
@@ -143,7 +143,7 @@ public class UserInfoTest extends AbstractAdalTests {
         EasyMock.replay(claimSet);
         final UserInfo ui = UserInfo.createFromIdTokenClaims(claimSet);
         Assert.assertNotNull(ui);
-        Assert.assertEquals("test@value.com", ui.getDispayableId());
+        Assert.assertEquals("test@value.com", ui.getDisplayableId());
         Assert.assertEquals("sub", ui.getUniqueId());
         Assert.assertEquals("test", ui.getGivenName());
         Assert.assertEquals("value", ui.getFamilyName());
