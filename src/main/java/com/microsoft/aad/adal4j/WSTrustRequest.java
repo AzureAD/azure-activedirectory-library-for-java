@@ -64,17 +64,28 @@ class WSTrustRequest {
             throws Exception {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Content-Type", "application/soap+xml; charset=utf-8");
-        headers.put("SOAPAction",
-                "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue");
-        String body = buildMessage(url, username, password).toString();
+
+
+        BindingPolicy policy = MexParser.getWsTrustEndpointFromMexEndpoint(url);
+        String soapAction = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue"; // default value (WSTrust 1.3)
+
+        // only change it if version is wsTrust2005, otherwise default to wsTrust13
+        if (policy.getVersion() == WsTrustVersion.WSTRUST2005)
+        {
+            soapAction = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue"; // wsTrust2005 soap value
+        }
+
+        headers.put("SOAPAction", soapAction);
+        String body = buildMessage(policy.getUrl(), username, password, policy.getVersion()).toString();
         String response = HttpHelper.executeHttpPost(log, url, body, headers);
         return WSTrustResponse.parse(response);
     }
 
-    private static StringBuilder buildMessage(String resource, String username,
+    private static StringBuilder buildMessage(String address, String username,
             String password, WsTrustVersion addressVersion) {
-        StringBuilder securityHeaderBuilder = buildSecurityHeader(username,
-                password, addressVersion);
+	StringBuilder securityHeaderBuilder = new StringBuilder(
+                MAX_EXPECTED_MESSAGE_SIZE);
+        buildSecurityHeader(securityHeaderBuilder, username, password, addressVersion);
         String guid = UUID.randomUUID().toString();
         StringBuilder messageBuilder = new StringBuilder(
                 MAX_EXPECTED_MESSAGE_SIZE);

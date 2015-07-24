@@ -43,9 +43,9 @@ public class MexParserTest {
                 line = br.readLine();
             }
         }
-        String endpoint = MexParser.getWsTrustEndpointFromMexResponse(sb
+        BindingPolicy endpoint = MexParser.getWsTrustEndpointFromMexResponse(sb
                 .toString());
-        Assert.assertEquals(endpoint,
+        Assert.assertEquals(endpoint.getUrl(),
                 "https://msft.sts.microsoft.com/adfs/services/trust/13/usernamemixed");
     }
 

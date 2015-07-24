@@ -28,6 +28,11 @@ class BindingPolicy {
     public BindingPolicy(String value) {
         this.value = value;
     }
+    
+    public BindingPolicy(String url, WsTrustVersion version) {
+        this.url = url;
+        this.version = version;
+    }
 
     public String getValue() {
         return value;
@@ -47,5 +52,9 @@ class BindingPolicy {
     
     public void setVersion(WsTrustVersion version){
 	this.version = version;
+    }
+
+    public WsTrustVersion getVersion(){
+        return this.version;
     }
 }

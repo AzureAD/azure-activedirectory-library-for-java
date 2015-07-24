@@ -744,9 +744,8 @@ public class AuthenticationContext {
                 .execute(this.authenticationAuthority
                         .getUserRealmEndpoint(grant.getUsername()));
         if (discoveryResponse.isAccountFederated()) {
-            WSTrustResponse response = WSTrustRequest.execute(MexParser
-                    .getWsTrustEndpointFromMexEndpoint(discoveryResponse
-                            .getFederationMetadataUrl()), grant.getUsername(),
+            WSTrustResponse response = WSTrustRequest.execute(discoveryResponse
+                    .getFederationMetadataUrl(), grant.getUsername(),
                     grant.getPassword().getValue());
 
             AuthorizationGrant updatedGrant = null;
