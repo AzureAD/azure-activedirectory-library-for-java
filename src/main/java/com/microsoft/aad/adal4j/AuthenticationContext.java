@@ -1,19 +1,19 @@
 /*******************************************************************************
  * Copyright © Microsoft Open Technologies, Inc.
- * 
+ *
  * All Rights Reserved
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS
  * OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  * ANY IMPLIED WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A
  * PARTICULAR PURPOSE, MERCHANTABILITY OR NON-INFRINGEMENT.
- * 
+ *
  * See the Apache License, Version 2.0 for the specific language
  * governing permissions and limitations under the License.
  ******************************************************************************/
@@ -36,10 +36,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.nimbusds.jose.util.Base64URL;
+import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
 import com.nimbusds.oauth2.sdk.AuthorizationGrant;
 import com.nimbusds.oauth2.sdk.ClientCredentialsGrant;
+import com.nimbusds.oauth2.sdk.JWTBearerGrant;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.RefreshTokenGrant;
 import com.nimbusds.oauth2.sdk.ResourceOwnerPasswordCredentialsGrant;
@@ -71,7 +73,7 @@ public class AuthenticationContext {
 
     /**
      * Constructor to create the context with the address of the authority.
-     * 
+     *
      * @param authority
      *            URL of the authenticating authority
      * @param validateAuthority
@@ -84,7 +86,7 @@ public class AuthenticationContext {
      *             thrown if URL is invalid
      */
     public AuthenticationContext(final String authority,
-            final boolean validateAuthority, final ExecutorService service)
+                                 final boolean validateAuthority, final ExecutorService service)
             throws MalformedURLException {
 
         if (StringHelper.isBlank(authority)) {
@@ -160,7 +162,7 @@ public class AuthenticationContext {
     /**
      * Acquires a security token from the authority using a Refresh Token
      * previously received.
-     * 
+     *
      * @param clientId
      *            Name or ID of the client requesting the token.
      * @param resource
@@ -181,8 +183,8 @@ public class AuthenticationContext {
      *         Token, Refresh Token and the Access Token's expiration time.
      */
     public Future<AuthenticationResult> acquireToken(final String resource,
-            final String clientId, final String username,
-            final String password, final AuthenticationCallback callback) {
+                                                     final String clientId, final String username,
+                                                     final String password, final AuthenticationCallback callback) {
         if (StringHelper.isBlank(resource)) {
             throw new IllegalArgumentException("resource is null or empty");
         }
@@ -200,15 +202,15 @@ public class AuthenticationContext {
         }
 
         return this.acquireToken(new AdalAuthorizatonGrant(
-                new ResourceOwnerPasswordCredentialsGrant(username, new Secret(
-                        password)), resource), new ClientAuthenticationPost(
-                ClientAuthenticationMethod.NONE, new ClientID(clientId)),
+                        new ResourceOwnerPasswordCredentialsGrant(username, new Secret(
+                                password)), resource), new ClientAuthenticationPost(
+                        ClientAuthenticationMethod.NONE, new ClientID(clientId)),
                 callback);
     }
 
     /**
      * Acquires security token from the authority.
-     * 
+     *
      * @param resource
      *            Identifier of the target resource that is the recipient of the
      *            requested token.
@@ -222,8 +224,8 @@ public class AuthenticationContext {
      *         property will be null for this overload.
      */
     public Future<AuthenticationResult> acquireToken(final String resource,
-            final ClientAssertion credential,
-            final AuthenticationCallback callback) {
+                                                     final ClientAssertion credential,
+                                                     final AuthenticationCallback callback) {
 
         this.validateInput(resource, credential, true);
         final ClientAuthentication clientAuth = createClientAuthFromClientAssertion(credential);
@@ -233,7 +235,7 @@ public class AuthenticationContext {
     }
 
     private void validateInput(final String resource, final Object credential,
-            final boolean validateResource) {
+                               final boolean validateResource) {
         if (validateResource && StringHelper.isBlank(resource)) {
             throw new IllegalArgumentException("resource is null or empty");
         }
@@ -243,8 +245,49 @@ public class AuthenticationContext {
     }
 
     /**
+     * Acquires an access token from the authority on behalf of a user. It
+     * requires using a user token previously received.
+     *
+     * @param resource
+     *            Identifier of the target resource that is the recipient of the
+     *            requested token.
+     * @param assertion
+     *            The access token to use for token acquisition.
+     * @param credential
+     *            The client credential to use for token acquisition.
+     * @param callback
+     *            optional callback object for non-blocking execution.
+     * @return A {@link Future} object representing the
+     *         {@link AuthenticationResult} of the call. It contains Access
+     *         Token and the Access Token's expiration time. Refresh Token
+     *         property will be null for this overload.
+     * @throws AuthenticationException
+     */
+    public Future<AuthenticationResult> acquireToken(final String resource,
+                                                     final ClientAssertion assertion, final ClientCredential credential,
+                                                     final AuthenticationCallback callback) {
+
+        this.validateInput(resource, credential, true);
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("resource", resource);
+        params.put("requested_token_use", "on_behalf_of");
+        try {
+            AdalAuthorizatonGrant grant = new AdalAuthorizatonGrant(
+                    new JWTBearerGrant(
+                            SignedJWT.parse(assertion.getAssertion())), params);
+
+            final ClientAuthentication clientAuth = new ClientSecretPost(
+                    new ClientID(credential.getClientId()), new Secret(
+                    credential.getClientSecret()));
+            return this.acquireToken(grant, clientAuth, callback);
+        } catch (final Exception e) {
+            throw new AuthenticationException(e);
+        }
+    }
+
+    /**
      * Acquires security token from the authority.
-     * 
+     *
      * @param resource
      *            Identifier of the target resource that is the recipient of the
      *            requested token.
@@ -258,12 +301,12 @@ public class AuthenticationContext {
      *         property will be null for this overload.
      */
     public Future<AuthenticationResult> acquireToken(final String resource,
-            final ClientCredential credential,
-            final AuthenticationCallback callback) {
+                                                     final ClientCredential credential,
+                                                     final AuthenticationCallback callback) {
         this.validateInput(resource, credential, true);
         final ClientAuthentication clientAuth = new ClientSecretPost(
                 new ClientID(credential.getClientId()), new Secret(
-                        credential.getClientSecret()));
+                credential.getClientSecret()));
         final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
                 new ClientCredentialsGrant(), resource);
         return this.acquireToken(authGrant, clientAuth, callback);
@@ -271,7 +314,7 @@ public class AuthenticationContext {
 
     /**
      * Acquires security token from the authority.
-     * 
+     *
      * @param resource
      *            Identifier of the target resource that is the recipient of the
      *            requested token.
@@ -286,18 +329,18 @@ public class AuthenticationContext {
      * @throws AuthenticationException
      */
     public Future<AuthenticationResult> acquireToken(final String resource,
-            final AsymmetricKeyCredential credential,
-            final AuthenticationCallback callback)
+                                                     final AsymmetricKeyCredential credential,
+                                                     final AuthenticationCallback callback)
             throws AuthenticationException {
         return this.acquireToken(resource, JwtHelper.buildJwt(credential,
-                this.authenticationAuthority.getSelfSignedJwtAudience()),
+                        this.authenticationAuthority.getSelfSignedJwtAudience()),
                 callback);
     }
 
     /**
      * Acquires security token from the authority using an authorization code
      * previously received.
-     * 
+     *
      * @param authorizationCode
      *            The authorization code received from service authorization
      * @param resource
@@ -332,7 +375,7 @@ public class AuthenticationContext {
     /**
      * Acquires security token from the authority using an authorization code
      * previously received.
-     * 
+     *
      * @param authorizationCode
      *            The authorization code received from service authorization
      *            endpoint.
@@ -357,7 +400,7 @@ public class AuthenticationContext {
     /**
      * Acquires security token from the authority using an authorization code
      * previously received.
-     * 
+     *
      * @param authorizationCode
      *            The authorization code received from service authorization
      *            endpoint.
@@ -392,7 +435,7 @@ public class AuthenticationContext {
     /**
      * Acquires security token from the authority using an authorization code
      * previously received.
-     * 
+     *
      * @param authorizationCode
      *            The authorization code received from service authorization
      *            endpoint.
@@ -419,7 +462,7 @@ public class AuthenticationContext {
     /**
      * Acquires security token from the authority using an authorization code
      * previously received.
-     * 
+     *
      * @param authorizationCode
      *            The authorization code received from service authorization
      *            endpoint.
@@ -446,7 +489,7 @@ public class AuthenticationContext {
                 credential, resource);
         final ClientAuthentication clientAuth = new ClientSecretPost(
                 new ClientID(credential.getClientId()), new Secret(
-                        credential.getClientSecret()));
+                credential.getClientSecret()));
         final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
                 new AuthorizationCodeGrant(new AuthorizationCode(
                         authorizationCode), redirectUri), resource);
@@ -457,7 +500,7 @@ public class AuthenticationContext {
     /**
      * Acquires security token from the authority using an authorization code
      * previously received.
-     * 
+     *
      * @param authorizationCode
      *            The authorization code received from service authorization
      *            endpoint.
@@ -486,7 +529,7 @@ public class AuthenticationContext {
     /**
      * Acquires security token from the authority using an authorization code
      * previously received.
-     * 
+     *
      * @param authorizationCode
      *            The authorization code received from service authorization
      *            endpoint.
@@ -524,7 +567,7 @@ public class AuthenticationContext {
     /**
      * Acquires a security token from the authority using a Refresh Token
      * previously received.
-     * 
+     *
      * @param refreshToken
      *            Refresh Token to use in the refresh flow.
      * @param clientId
@@ -548,7 +591,7 @@ public class AuthenticationContext {
     /**
      * Acquires a security token from the authority using a Refresh Token
      * previously received.
-     * 
+     *
      * @param refreshToken
      *            Refresh Token to use in the refresh flow.
      * @param clientId
@@ -583,7 +626,7 @@ public class AuthenticationContext {
     /**
      * Acquires a security token from the authority using a Refresh Token
      * previously received.
-     * 
+     *
      * @param refreshToken
      *            Refresh Token to use in the refresh flow.
      * @param credential
@@ -604,7 +647,7 @@ public class AuthenticationContext {
     /**
      * Acquires a security token from the authority using a Refresh Token
      * previously received.
-     * 
+     *
      * @param refreshToken
      *            Refresh Token to use in the refresh flow.
      * @param credential
@@ -628,7 +671,7 @@ public class AuthenticationContext {
 
         final ClientAuthentication clientAuth = new ClientSecretPost(
                 new ClientID(credential.getClientId()), new Secret(
-                        credential.getClientSecret()));
+                credential.getClientSecret()));
         final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
                 new RefreshTokenGrant(new RefreshToken(refreshToken)), resource);
         return this.acquireToken(authGrant, clientAuth, callback);
@@ -637,7 +680,7 @@ public class AuthenticationContext {
     /**
      * Acquires a security token from the authority using a Refresh Token
      * previously received.
-     * 
+     *
      * @param refreshToken
      *            Refresh Token to use in the refresh flow.
      * @param credential
@@ -663,7 +706,7 @@ public class AuthenticationContext {
     /**
      * Acquires a security token from the authority using a Refresh Token
      * previously received.
-     * 
+     *
      * @param refreshToken
      *            Refresh Token to use in the refresh flow.
      * @param credential
@@ -699,7 +742,7 @@ public class AuthenticationContext {
     }
 
     private void validateRefreshTokenRequestInput(final String refreshToken,
-            final String clientId, final Object credential) {
+                                                  final String clientId, final Object credential) {
 
         if (StringHelper.isBlank(refreshToken)) {
             throw new IllegalArgumentException("refreshToken is null or empty");
@@ -729,7 +772,7 @@ public class AuthenticationContext {
     }
 
     /**
-     * 
+     *
      * @param authGrant
      */
     private AdalAuthorizatonGrant processPasswordGrant(
@@ -745,7 +788,7 @@ public class AuthenticationContext {
                         .getUserRealmEndpoint(grant.getUsername()));
         if (discoveryResponse.isAccountFederated()) {
             WSTrustResponse response = WSTrustRequest.execute(discoveryResponse
-                    .getFederationMetadataUrl(), grant.getUsername(),
+                            .getFederationMetadataUrl(), grant.getUsername(),
                     grant.getPassword().getValue());
 
             AuthorizationGrant updatedGrant = null;
@@ -767,7 +810,7 @@ public class AuthenticationContext {
     }
 
     private void logResult(AuthenticationResult result,
-            ClientDataHttpHeaders headers) throws NoSuchAlgorithmException,
+                           ClientDataHttpHeaders headers) throws NoSuchAlgorithmException,
             UnsupportedEncodingException {
         if (!StringHelper.isBlank(result.getAccessToken())) {
             String logMessage = "";
@@ -815,7 +858,7 @@ public class AuthenticationContext {
      * Returns the correlation id configured by the user. It does not return the
      * id automatically generated by the API in case the user does not provide
      * one.
-     * 
+     *
      * @return String value of the correlation id
      */
     public String getCorrelationId() {
@@ -825,7 +868,7 @@ public class AuthenticationContext {
     /**
      * Set optional correlation id to be used by the API. If not provided, the
      * API generates a random id.
-     * 
+     *
      * @param correlationId
      *            String value
      */
@@ -836,7 +879,7 @@ public class AuthenticationContext {
     /**
      * Returns validateAuthority boolean value passed as a constructor
      * parameter.
-     * 
+     *
      * @return boolean value
      */
     public boolean shouldValidateAuthority() {
@@ -845,7 +888,7 @@ public class AuthenticationContext {
 
     /**
      * Authority associated with the context instance
-     * 
+     *
      * @return String value
      */
     public String getAuthority() {
@@ -853,8 +896,8 @@ public class AuthenticationContext {
     }
 
     private void validateAuthCodeRequestInput(final String authorizationCode,
-            final URI redirectUri, final Object credential,
-            final String resource) {
+                                              final URI redirectUri, final Object credential,
+                                              final String resource) {
         if (StringHelper.isBlank(authorizationCode)) {
             throw new IllegalArgumentException(
                     "authorization code is null or empty");
