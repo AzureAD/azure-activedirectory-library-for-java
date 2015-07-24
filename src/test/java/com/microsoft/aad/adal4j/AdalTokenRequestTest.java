@@ -169,7 +169,7 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
         Assert.assertEquals(result.getAccessTokenType(), "Bearer");
         Assert.assertEquals(result.getUserInfo().getFamilyName(), "Admin");
         Assert.assertEquals(result.getUserInfo().getGivenName(), "ADALTests");
-        Assert.assertEquals(result.getUserInfo().getDispayableId(),
+        Assert.assertEquals(result.getUserInfo().getDisplayableId(),
                 "admin@aaltests.onmicrosoft.com");
         Assert.assertNull(result.getUserInfo().getIdentityProvider());
     }
