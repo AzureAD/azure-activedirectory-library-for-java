@@ -89,7 +89,7 @@ public class AuthenticationContextTest extends AbstractAdalTests {
     }
 
     @Test
-    public void testAquireTokenAuthCode_ClientCredential() throws Exception {
+    public void testAcquireTokenAuthCode_ClientCredential() throws Exception {
         ctx = PowerMock.createPartialMock(AuthenticationContext.class,
                 new String[] { "acquireTokenCommon" },
                 TestConfiguration.AAD_TENANT_ENDPOINT, true, service);
@@ -110,16 +110,16 @@ public class AuthenticationContextTest extends AbstractAdalTests {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "authorization code is null or empty")
-    public void testAquireTokenAuthCode_AuthCodeNull() throws Exception {
+    public void testcAquireTokenAuthCode_AuthCodeNull() throws Exception {
         ctx = new AuthenticationContext(TestConfiguration.AAD_TENANT_ENDPOINT,
                 true, service);
         ctx.acquireTokenByAuthorizationCode(null, new URI(
-                TestConfiguration.AAD_DEFAULT_REDIRECT_URI),
+                        TestConfiguration.AAD_DEFAULT_REDIRECT_URI),
                 new ClientCredential("clientId", "clientSecret"), null);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "redirect uri is null")
-    public void testAquireTokenAuthCode_RedirectUriNull() throws Exception {
+    public void testAcquireTokenAuthCode_RedirectUriNull() throws Exception {
         ctx = new AuthenticationContext(TestConfiguration.AAD_TENANT_ENDPOINT,
                 true, service);
         ctx.acquireTokenByAuthorizationCode("auth_code", null,
@@ -127,7 +127,7 @@ public class AuthenticationContextTest extends AbstractAdalTests {
     }
 
     @Test
-    public void testAquireTokenAuthCode_KeyCredential() throws Exception {
+    public void testAcquireTokenAuthCode_KeyCredential() throws Exception {
         ctx = PowerMock.createPartialMock(AuthenticationContext.class,
                 new String[] { "acquireTokenCommon" },
                 TestConfiguration.AAD_TENANT_ENDPOINT, true, service);
@@ -156,6 +156,29 @@ public class AuthenticationContextTest extends AbstractAdalTests {
                         AsymmetricKeyCredential.create(
                                 TestConfiguration.AAD_CLIENT_ID, key, cert),
                         null);
+        AuthenticationResult ar = result.get();
+        Assert.assertNotNull(ar);
+        PowerMock.verifyAll();
+        PowerMock.resetAll(ctx);
+    }
+
+    @Test
+    public void testAcquireToken_Username_Password() throws Exception {
+        ctx = PowerMock.createPartialMock(AuthenticationContext.class,
+                new String[] { "acquireTokenCommon" },
+                TestConfiguration.AAD_TENANT_ENDPOINT, true, service);
+        PowerMock.expectPrivate(ctx, "acquireTokenCommon",
+                EasyMock.isA(AdalAuthorizatonGrant.class),
+                EasyMock.isA(ClientAuthentication.class),
+                EasyMock.isA(ClientDataHttpHeaders.class)).andReturn(
+                new AuthenticationResult("bearer", "accessToken",
+                        "refreshToken", new Date().getTime(), null, false));
+
+        PowerMock.replay(ctx);
+        Future<AuthenticationResult> result = ctx.acquireToken("resource",
+        "clientId", "username",
+        "password", null);
+
         AuthenticationResult ar = result.get();
         Assert.assertNotNull(ar);
         PowerMock.verifyAll();
