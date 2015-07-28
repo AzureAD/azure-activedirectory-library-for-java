@@ -24,6 +24,7 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -96,9 +97,9 @@ class MexParser {
         BindingPolicy wstrust13 = null, wstrust2005 = null;
 
         // Select wstrust13 first if wstrust13 available
-        Iterator it = policies.entrySet().iterator();
+        Iterator<Entry<String, BindingPolicy>> it = policies.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<String, BindingPolicy> pair = (Map.Entry<String, BindingPolicy>)it.next();
+            Map.Entry<String, BindingPolicy> pair = it.next();
             if (pair.getValue().getUrl() != null) {
                 if(pair.getValue().getVersion() == WsTrustVersion.WSTRUST13){
                     wstrust13 = pair.getValue();

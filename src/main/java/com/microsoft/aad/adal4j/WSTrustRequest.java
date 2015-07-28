@@ -38,28 +38,7 @@ class WSTrustRequest {
             .getLogger(WSTrustRequest.class);
 
     private final static int MAX_EXPECTED_MESSAGE_SIZE = 1024;
-    private final static String WSTRUST_ENVELOPE_TEMPLATE = "<s:Envelope xmlns:s='http://www.w3.org/2003/05/soap-envelope' xmlns:a='http://www.w3.org/2005/08/addressing' xmlns:u='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd'>"
-            + "<s:Header>"
-            + "<a:Action s:mustUnderstand='1'>http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue</a:Action>"
-            + "<a:messageID>urn:uuid:%s</a:messageID>"
-            + "<a:ReplyTo><a:Address>http://www.w3.org/2005/08/addressing/anonymous</a:Address></a:ReplyTo>"
-            + "<a:To s:mustUnderstand='1'>%s</a:To>"
-            + "%s"
-            + "</s:Header>"
-            + "<s:Body>"
-            + "<trust:RequestSecurityToken xmlns:trust='http://docs.oasis-open.org/ws-sx/ws-trust/200512'>"
-            + "<wsp:AppliesTo xmlns:wsp='http://schemas.xmlsoap.org/ws/2004/09/policy'>"
-            + "<a:EndpointReference>"
-            + "<a:Address>%s</a:Address>"
-            + "</a:EndpointReference>"
-            + "</wsp:AppliesTo>"
-            + "<trust:KeyType>http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer</trust:KeyType>"
-            + "<trust:RequestType>http://docs.oasis-open.org/ws-sx/ws-trust/200512/Issue</trust:RequestType>"
-            + "</trust:RequestSecurityToken>" + "</s:Body>" + "</s:Envelope>";
-
-    private final static String DEFAULT_APPLIES_TO = "urn:federation:MicrosoftOnline";
-
-    
+    private final static String DEFAULT_APPLIES_TO = "urn:federation:MicrosoftOnline";    
     
     static WSTrustResponse execute(String url, String username, String password)
             throws Exception {
