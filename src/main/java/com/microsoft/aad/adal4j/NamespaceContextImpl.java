@@ -49,6 +49,10 @@ public class NamespaceContextImpl implements NamespaceContext {
         PREF_MAP.put("q", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
     }
 
+    public void modifyNameSpace(String key, String value){
+        PREF_MAP.put(key, value);
+    }
+    
     public String getNamespaceURI(String prefix) {
         return PREF_MAP.get(prefix);
     }

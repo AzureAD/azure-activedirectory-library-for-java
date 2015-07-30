@@ -48,5 +48,25 @@ public class MexParserTest {
         Assert.assertEquals(endpoint.getUrl(),
                 "https://msft.sts.microsoft.com/adfs/services/trust/13/usernamemixed");
     }
+    
+    @Test
+    public void testMexParsingWs2005() throws Exception {
+
+        StringBuilder sb = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(new FileReader(
+                (this.getClass().getResource(
+                        TestConfiguration.AAD_MEX_2005_RESPONSE_FILE).getFile())))) {
+            String line = br.readLine();
+
+            while (line != null) {
+                sb.append(line);
+                sb.append(System.lineSeparator());
+                line = br.readLine();
+            }
+        }
+        BindingPolicy endpoint = MexParser.getWsTrustEndpointFromMexResponse(sb
+                .toString());
+        Assert.assertEquals(endpoint.getUrl(),"https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed");
+    }
 
 }
