@@ -57,8 +57,8 @@ class WSTrustRequest {
 
         headers.put("SOAPAction", soapAction);
         String body = buildMessage(policy.getUrl(), username, password, policy.getVersion()).toString();
-        String response = HttpHelper.executeHttpPost(log, url, body, headers);
-        return WSTrustResponse.parse(response);
+        String response = HttpHelper.executeHttpPost(log, policy.getUrl(), body, headers);
+        return WSTrustResponse.parse(response, policy.getVersion());
     }
 
     private static StringBuilder buildMessage(String address, String username,
@@ -79,7 +79,6 @@ class WSTrustRequest {
         
         if (addressVersion == WsTrustVersion.WSTRUST2005)
         {
-            schemaLocation = "http://schemas.xmlsoap.org/ws/2005/02/trust/ws-trust.xsd";
             soapAction = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue";
             rstTrustNamespace = "http://schemas.xmlsoap.org/ws/2005/02/trust";
             keyType = "http://schemas.xmlsoap.org/ws/2005/05/identity/NoProofKey";
@@ -151,11 +150,6 @@ class WSTrustRequest {
         username = StringEscapeUtils.escapeXml10(username);
         password = StringEscapeUtils.escapeXml10(password);
 
-        messageCredentialsBuilder
-                .append(String
-                        .format("<o:UsernameToken u:Id='uuid-%s'><o:Username>%s</o:Username><o:Password>%s</o:Password></o:UsernameToken>",
-                                guid, username, password));
-
         DateFormat dateFormat = new SimpleDateFormat(
                 "yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -165,57 +159,27 @@ class WSTrustRequest {
         // Expiry is 10 minutes after creation
         int toAdd = 60 * 1000 * 10;
         date = new Date(date.getTime() + toAdd);
-        String expiryTimString = dateFormat.format(date);
+        String expiryTimeString = dateFormat.format(date);
 
-        if (version == WsTrustVersion.WSTRUST2005) {
-            //<wsse:Security soap:mustUnderstand="1" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
-            //<wsu:Timestamp wsu:Id="TS-1">
-            //<wsu:Created>2014-02-10T23:36:42Z</wsu:Created>
-            //<wsu:Expires>2014-02-10T24:36:42Z</wsu:Expires>
-            //</wsu:Timestamp>
-            //<wsse:UsernameToken xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" wsu:Id="SecurityToken-6138db82-5a4c-4bf7-915f-af7a10d9ae96">
-            //<wsse:Username>user</wsse:Username>
-            //<wsse:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordDigest">CBb7a2itQDgxVkqYnFtggUxtuqk=</wsse:Password>
-            //</wsse:UsernameToken>
-            //</wsse:Security>
-            messageCredentialsBuilder.append(String.format(
-                    "<wsse:UsernameToken xmlns:wsu='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd' wsu:Id='SecurityToken-%s'>" + // guid
-                            "<wsse:Username>%s</wsse:Username>" + // user
-                            "<wsse:Password Type='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordDigest'>%s</wsse:Password>", // password
-                    guid,
-                    username,
-                    password));
+        messageCredentialsBuilder.append(String.format(
+                "<o:UsernameToken u:Id='uuid-"
+                + "%s'>" + // guid
+                "<o:Username>%s</o:Username>" + //username
+                "<o:Password>%s</o:Password>" + //password
+                "</o:UsernameToken>",
+                guid,
+                username,
+                password));
 
-            securityHeaderBuilder.append("<wsse:Security soap:mustUnderstand='1' xmlns:wsse='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' xmlns:wsu='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd'>");
-            securityHeaderBuilder.append(String.format(
-                    "<wsu:Timestamp wsu:Id='uuid-%s'>" +        // guid
-                            "<wsu:Created>%s</wsu:Created>" +        // created
-                            "<wsu:Expires>%s</wsu:Expires>" +        // Expires
-                            "</wsu:Timestamp>",
-                    guid,
-                    currentTimeString, expiryTimString));
-            securityHeaderBuilder.append(String.format("%s</wsse:Security>", messageCredentialsBuilder.toString()));
-        } else if (version == WsTrustVersion.WSTRUST13) {
-            messageCredentialsBuilder.append(String.format(
-                    "<o:UsernameToken u:Id='uuid-" +
-                            "%s'>" + // guid
-                            "<o:Username>%s</o:Username>" + //username
-                            "<o:Password>%s</o:Password>" + //password
-                            "</o:UsernameToken>",
-                    guid,
-                    username,
-                    password));
-
-            securityHeaderBuilder.append("<o:Security s:mustUnderstand='1' xmlns:o='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd'>");
-            securityHeaderBuilder.append(String.format(
-                    "<u:Timestamp u:Id='_0'>" +
-                            "<u:Created>%s</u:Created>" +        // created
-                            "<u:Expires>%s</u:Expires>" +        // Expires
-                            "</u:Timestamp>",
-                    currentTimeString, expiryTimString));
-            securityHeaderBuilder.append(messageCredentialsBuilder.toString());
-            securityHeaderBuilder.append("</o:Security>");
-        }
+        securityHeaderBuilder.append("<o:Security s:mustUnderstand='1' xmlns:o='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd'>");
+        securityHeaderBuilder.append(String.format(
+                "<u:Timestamp u:Id='_0'>"
+                + "<u:Created>%s</u:Created>" + // created
+                "<u:Expires>%s</u:Expires>" + // Expires
+                "</u:Timestamp>",
+                currentTimeString, expiryTimeString));
+        securityHeaderBuilder.append(messageCredentialsBuilder.toString());
+        securityHeaderBuilder.append("</o:Security>");
 
         return securityHeaderBuilder;
     }

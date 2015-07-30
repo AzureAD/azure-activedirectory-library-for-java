@@ -47,7 +47,6 @@ class WSTrustResponse {
             .getLogger(WSTrustResponse.class);
 
     public final static String SAML1_ASSERTION = "urn:oasis:names:tc:SAML:1.0:assertion";
-
     private String faultMessage;
     private boolean errorFound;
     private String errorCode;
@@ -82,7 +81,7 @@ class WSTrustResponse {
                 && !SAML1_ASSERTION.equalsIgnoreCase(tokenType);
     }
 
-    static WSTrustResponse parse(String response) throws Exception {
+    static WSTrustResponse parse(String response, WsTrustVersion version) throws Exception {
         WSTrustResponse responseValue = new WSTrustResponse();
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory
                 .newInstance();
@@ -91,8 +90,9 @@ class WSTrustResponse {
         Document xmlDocument = builder.parse(new ByteArrayInputStream(response
                 .getBytes(Charset.forName("UTF-8"))));
         XPath xPath = XPathFactory.newInstance().newXPath();
-        xPath.setNamespaceContext(new NamespaceContextImpl());
-
+        NamespaceContextImpl namespace = new NamespaceContextImpl();
+        xPath.setNamespaceContext(namespace);
+        
         if (parseError(responseValue, xmlDocument, xPath)) {
             if (StringHelper.isBlank(responseValue.errorCode)) {
                 responseValue.errorCode = "NONE";
@@ -104,18 +104,17 @@ class WSTrustResponse {
                     + responseValue.errorCode + " : FaultMessage: "
                     + responseValue.faultMessage.trim());
         } else {
-            parseToken(responseValue, xmlDocument, xPath);
+            parseToken(responseValue, xmlDocument, xPath, version);
         }
 
         return responseValue;
     }
 
     private static void parseToken(WSTrustResponse responseValue,
-            Document xmlDocument, XPath xPath) throws Exception {
+            Document xmlDocument, XPath xPath, WsTrustVersion version) throws Exception {
 
         NodeList tokenTypeNodes = (NodeList) xPath
-                .compile(
-                        "//s:Envelope/s:Body/wst:RequestSecurityTokenResponseCollection/wst:RequestSecurityTokenResponse/wst:TokenType")
+                .compile(version.getResponseTokenTypePath())
                 .evaluate(xmlDocument, XPathConstants.NODESET);
         if (tokenTypeNodes.getLength() == 0) {
             log.warn("No TokenType elements found in RSTR");
@@ -134,7 +133,7 @@ class WSTrustResponse {
             }
 
             NodeList requestedTokenNodes = (NodeList) xPath.compile(
-                    "wst:RequestedSecurityToken").evaluate(
+                    version.getResponseSecurityTokenPath()).evaluate(
                     tokenTypeNode.getParentNode(), XPathConstants.NODESET);
             if (requestedTokenNodes.getLength() > 1) {
                 throw new Exception(
@@ -147,6 +146,7 @@ class WSTrustResponse {
                 continue;
             }
 
+            
             responseValue.token = innerXml(requestedTokenNodes.item(0));
             if (StringHelper.isBlank(responseValue.token)) {
                 log.warn("Unable to find token associated with TokenType element: "
@@ -195,7 +195,8 @@ class WSTrustResponse {
     }
 
     static String innerXml(Node node) {
-        String xmlString = "";
+        StringBuilder resultBuilder = new StringBuilder();
+        NodeList children = node.getChildNodes();
         try {
             Transformer transformer = TransformerFactory.newInstance()
                     .newTransformer();
@@ -203,22 +204,24 @@ class WSTrustResponse {
                     "yes");
             // transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 
-            Source source = new DOMSource(node);
-
             StringWriter sw = new StringWriter();
-            StreamResult result = new StreamResult(sw);
+            StreamResult streamResult = new StreamResult(sw);
 
-            transformer.transform(source, result);
-            xmlString = sw.toString();
+            for (int index = 0; index < children.getLength(); index++) {
+                Node child = children.item(index);
+
+                // Print the DOM node
+                DOMSource source = new DOMSource(child);
+                transformer.transform(source, streamResult);
+                // Append child to end result
+                resultBuilder.append(sw.toString());
+            }
 
         } catch (Exception ex) {
             ex.printStackTrace();
         }
 
-        xmlString = xmlString.replaceAll("<trust:RequestedSecurityToken \\S*>",
-                "");
-        xmlString = xmlString.replaceAll("</trust:RequestedSecurityToken>", "");
-        return xmlString.trim();
+        return resultBuilder.toString().trim();
     }
 
 }

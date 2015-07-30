@@ -63,10 +63,18 @@ class MexParser {
                 mexResponse.getBytes(Charset.forName("UTF-8"))));
 
         XPath xPath = XPathFactory.newInstance().newXPath();
-        xPath.setNamespaceContext(new NamespaceContextImpl());
-        Map<String, BindingPolicy> policies = selectUsernamePasswordPolicies(
-                xmlDocument, xPath);
-
+        NamespaceContextImpl nameSpace = new NamespaceContextImpl();
+        xPath.setNamespaceContext(nameSpace);
+        String xpathExpression = "//wsdl:definitions/wsp:Policy/wsp:ExactlyOne/wsp:All/"
+                 + "sp:SignedEncryptedSupportingTokens/wsp:Policy/sp:UsernameToken/"
+                 + "wsp:Policy/sp:WssUsernameToken10";
+    	Map<String, BindingPolicy> policies = selectUsernamePasswordPoliciesWithExpression(xmlDocument, xPath, xpathExpression);
+        nameSpace.modifyNameSpace("sp", "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy");
+        xpathExpression = "//wsdl:definitions/wsp:Policy/wsp:ExactlyOne/wsp:All/"
+                + "sp:SignedSupportingTokens/wsp:Policy/sp:UsernameToken/"
+                + "wsp:Policy/sp:WssUsernameToken10";
+    	policies.putAll(selectUsernamePasswordPoliciesWithExpression(xmlDocument, xPath, xpathExpression));
+        
         if (policies.isEmpty()) {
             log.debug("No matching policies");
             return null;
@@ -223,11 +231,9 @@ class MexParser {
         return WsTrustVersion.UNDEFINED;
     }
 
-    private static Map<String, BindingPolicy> selectUsernamePasswordPolicies(
-            Document xmlDocument, XPath xPath) throws XPathExpressionException {
-        String xpathExpression = "//wsdl:definitions/wsp:Policy/wsp:ExactlyOne/wsp:All/"
-                + "sp:SignedEncryptedSupportingTokens/wsp:Policy/sp:UsernameToken/"
-                + "wsp:Policy/sp:WssUsernameToken10";
+    private static Map<String, BindingPolicy> selectUsernamePasswordPoliciesWithExpression(
+            Document xmlDocument, XPath xPath, String xpathExpression) throws XPathExpressionException {
+        
         Map<String, BindingPolicy> policies = new HashMap<String, BindingPolicy>();
 
         NodeList nodeList = (NodeList) xPath.compile(xpathExpression).evaluate(
