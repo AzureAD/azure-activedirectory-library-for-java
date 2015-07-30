@@ -54,8 +54,8 @@ public class MexParserTest {
 
         StringBuilder sb = new StringBuilder();
         try (BufferedReader br = new BufferedReader(new FileReader(
-                (this.getClass().getResource(
-                        TestConfiguration.AAD_MEX_2005_RESPONSE_FILE).getFile())))) {
+                this.getClass().getResource(
+                TestConfiguration.AAD_MEX_2005_RESPONSE_FILE).getFile()))) {
             String line = br.readLine();
 
             while (line != null) {

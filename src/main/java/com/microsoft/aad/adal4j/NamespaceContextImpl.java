@@ -45,6 +45,7 @@ public class NamespaceContextImpl implements NamespaceContext {
         PREF_MAP.put("s", "http://www.w3.org/2003/05/soap-envelope");
         PREF_MAP.put("wsa", "http://www.w3.org/2005/08/addressing");
         PREF_MAP.put("wst", "http://docs.oasis-open.org/ws-sx/ws-trust/200512");
+        PREF_MAP.put("t", "http://schemas.xmlsoap.org/ws/2005/02/trust");
         PREF_MAP.put("a", "http://www.w3.org/2005/08/addressing");
         PREF_MAP.put("q", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
     }

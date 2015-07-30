@@ -58,7 +58,7 @@ class WSTrustRequest {
         headers.put("SOAPAction", soapAction);
         String body = buildMessage(policy.getUrl(), username, password, policy.getVersion()).toString();
         String response = HttpHelper.executeHttpPost(log, policy.getUrl(), body, headers);
-        return WSTrustResponse.parse(response);
+        return WSTrustResponse.parse(response, policy.getVersion());
     }
 
     private static StringBuilder buildMessage(String address, String username,
@@ -159,7 +159,7 @@ class WSTrustRequest {
         // Expiry is 10 minutes after creation
         int toAdd = 60 * 1000 * 10;
         date = new Date(date.getTime() + toAdd);
-        String expiryTimString = dateFormat.format(date);
+        String expiryTimeString = dateFormat.format(date);
 
         messageCredentialsBuilder.append(String.format(
                 "<o:UsernameToken u:Id='uuid-"
@@ -177,7 +177,7 @@ class WSTrustRequest {
                 + "<u:Created>%s</u:Created>" + // created
                 "<u:Expires>%s</u:Expires>" + // Expires
                 "</u:Timestamp>",
-                currentTimeString, expiryTimString));
+                currentTimeString, expiryTimeString));
         securityHeaderBuilder.append(messageCredentialsBuilder.toString());
         securityHeaderBuilder.append("</o:Security>");
 
