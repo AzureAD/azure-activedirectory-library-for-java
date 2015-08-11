@@ -22,7 +22,9 @@ package com.microsoft.aad.adal4j;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -47,10 +49,11 @@ class MexParser {
     private final static String ADDRESS_XPATH = "wsa10:EndpointReference/wsa10:Address";
     private final static String SOAP_ACTION_XPATH = "wsdl:operation/soap12:operation/@soapAction";
     private final static String RST_SOAP_ACTION = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue";
+    private final static String RST_SOAP_ACTION_2005 = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue";
     private final static String SOAP_TRANSPORT_XPATH = "soap12:binding/@transport";
     private final static String SOAP_HTTP_TRANSPORT_VALUE = "http://schemas.xmlsoap.org/soap/http";
 
-    static String getWsTrustEndpointFromMexResponse(String mexResponse)
+    static BindingPolicy getWsTrustEndpointFromMexResponse(String mexResponse)
             throws Exception {
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory
                 .newInstance();
@@ -60,15 +63,23 @@ class MexParser {
                 mexResponse.getBytes(Charset.forName("UTF-8"))));
 
         XPath xPath = XPathFactory.newInstance().newXPath();
-        xPath.setNamespaceContext(new NamespaceContextImpl());
-        Map<String, BindingPolicy> policies = selectUsernamePasswordPolicies(
-                xmlDocument, xPath);
-
+        NamespaceContextImpl nameSpace = new NamespaceContextImpl();
+        xPath.setNamespaceContext(nameSpace);
+        String xpathExpression = "//wsdl:definitions/wsp:Policy/wsp:ExactlyOne/wsp:All/"
+                 + "sp:SignedEncryptedSupportingTokens/wsp:Policy/sp:UsernameToken/"
+                 + "wsp:Policy/sp:WssUsernameToken10";
+    	Map<String, BindingPolicy> policies = selectUsernamePasswordPoliciesWithExpression(xmlDocument, xPath, xpathExpression);
+        nameSpace.modifyNameSpace("sp", "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy");
+        xpathExpression = "//wsdl:definitions/wsp:Policy/wsp:ExactlyOne/wsp:All/"
+                + "sp:SignedSupportingTokens/wsp:Policy/sp:UsernameToken/"
+                + "wsp:Policy/sp:WssUsernameToken10";
+    	policies.putAll(selectUsernamePasswordPoliciesWithExpression(xmlDocument, xPath, xpathExpression));
+        
         if (policies.isEmpty()) {
             log.debug("No matching policies");
             return null;
         } else {
-            Map<String, String> bindings = getMatchingBindings(xmlDocument,
+            Map<String, BindingPolicy> bindings = getMatchingBindings(xmlDocument,
                     xPath, policies);
 
             if (bindings.isEmpty()) {
@@ -77,34 +88,45 @@ class MexParser {
             } else {
                 getPortsForPolicyBindings(xmlDocument, xPath, bindings,
                         policies);
-                return selectSingleMatchingPolicy(policies).trim();
+                return selectSingleMatchingPolicy(policies);
             }
         }
     }
 
-    static String getWsTrustEndpointFromMexEndpoint(String metadataEndpoint)
+    static BindingPolicy getWsTrustEndpointFromMexEndpoint(String metadataEndpoint)
             throws Exception {
         String mexResponse = HttpHelper.executeHttpGet(log, metadataEndpoint);
         return getWsTrustEndpointFromMexResponse(mexResponse);
     }
 
-    private static String selectSingleMatchingPolicy(
+    private static BindingPolicy selectSingleMatchingPolicy(
             Map<String, BindingPolicy> policies) {
-        for (String key : policies.keySet()) {
-            if (policies.get(key).getUrl() == null) {
-                policies.remove(key);
+
+        BindingPolicy wstrust13 = null, wstrust2005 = null;
+
+        // Select wstrust13 first if wstrust13 available
+        Iterator<Entry<String, BindingPolicy>> it = policies.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, BindingPolicy> pair = it.next();
+            if (pair.getValue().getUrl() != null) {
+                if(pair.getValue().getVersion() == WsTrustVersion.WSTRUST13){
+                    wstrust13 = pair.getValue();
+                } else if(pair.getValue().getVersion() == WsTrustVersion.WSTRUST2005){
+                    wstrust2005 = pair.getValue();
+                }
             }
         }
 
-        if (policies.size() == 0) {
+        if (wstrust13 == null && wstrust2005 == null) {
             log.warn("no policies found with an url");
             return null;
         }
-        return policies.values().iterator().next().getUrl();
+
+        return wstrust13 != null ? wstrust13 : wstrust2005;
     }
 
-    private static Map<String, String> getPortsForPolicyBindings(
-            Document xmlDocument, XPath xPath, Map<String, String> bindings,
+    private static void getPortsForPolicyBindings(
+            Document xmlDocument, XPath xPath, Map<String, BindingPolicy> bindings,
             Map<String, BindingPolicy> policies) throws Exception {
 
         NodeList portNodes = (NodeList) xPath.compile(PORT_XPATH).evaluate(
@@ -119,36 +141,37 @@ class MexParser {
                         .getNamedItem("binding").getNodeValue();
                 String[] bindingIdParts = bindingId.split(":");
                 bindingId = bindingIdParts[bindingIdParts.length - 1];
-                BindingPolicy bindingPolicy = policies.get(bindings
-                        .get(bindingId));
-                if (bindingPolicy != null
-                        && StringHelper.isBlank(bindingPolicy.getUrl())) {
-                    NodeList addressNodes = (NodeList) xPath.compile(
-                            ADDRESS_XPATH).evaluate(portNode,
-                            XPathConstants.NODESET);
-                    if (addressNodes.getLength() > 0) {
-                        String address = addressNodes.item(0).getTextContent();
-                        if (address != null
-                                && address.toLowerCase().startsWith("https://")) {
-                            bindingPolicy.setUrl(address);
+                BindingPolicy trustPolicy = bindings.get(bindingId);
+                if(trustPolicy != null) {
+                    BindingPolicy bindingPolicy = policies.get(trustPolicy.getUrl());
+                    if (bindingPolicy != null
+                            && StringHelper.isBlank(bindingPolicy.getUrl())) {
+                        bindingPolicy.setVersion(trustPolicy.getVersion());
+                        NodeList addressNodes = (NodeList) xPath.compile(
+                                ADDRESS_XPATH).evaluate(portNode,
+                                XPathConstants.NODESET);
+                        if (addressNodes.getLength() > 0) {
+                            String address = addressNodes.item(0).getTextContent();
+                            if (address != null
+                                    && address.toLowerCase().startsWith("https://")) {
+                                bindingPolicy.setUrl(address.trim());
+                            } else {
+                                log.warn("skipping insecure endpoint: " + address);
+                            }
                         } else {
-                            log.warn("skipping insecure endpoint: " + address);
+                            throw new Exception("no address nodes on port");
                         }
-                    } else {
-                        throw new Exception("no address nodes on port");
                     }
                 }
             }
         }
-
-        return null;
     }
 
-    private static Map<String, String> getMatchingBindings(
+    private static Map<String, BindingPolicy> getMatchingBindings(
             Document xmlDocument, XPath xPath,
             Map<String, BindingPolicy> policies)
             throws XPathExpressionException {
-        Map<String, String> bindings = new HashMap<String, String>();
+        Map<String, BindingPolicy> bindings = new HashMap<String, BindingPolicy>();
         NodeList nodeList = (NodeList) xPath.compile(
                 "//wsdl:definitions/wsdl:binding/wsp:PolicyReference")
                 .evaluate(xmlDocument, XPathConstants.NODESET);
@@ -160,16 +183,21 @@ class MexParser {
                 Node bindingNode = node.getParentNode();
                 String bindingName = bindingNode.getAttributes()
                         .getNamedItem("name").getNodeValue();
-                if (checkSoapActionAndTransport(xPath, bindingNode)) {
-                    bindings.put(bindingName, uri);
+
+                WsTrustVersion version = checkSoapActionAndTransport(xPath, bindingNode);
+                if (version != WsTrustVersion.UNDEFINED) {
+                    BindingPolicy policy = new BindingPolicy("");
+                    policy.setUrl(uri);
+                    policy.setVersion(version);
+                    bindings.put(bindingName, policy);
                 }
             }
         }
         return bindings;
     }
 
-    private static boolean checkSoapActionAndTransport(XPath xPath,
-            Node bindingNode) throws XPathExpressionException {
+    private static WsTrustVersion checkSoapActionAndTransport(XPath xPath,
+                                                              Node bindingNode) throws XPathExpressionException {
         NodeList soapTransportAttributes = null;
         String soapAction = null;
         String soapTransport = null;
@@ -183,36 +211,44 @@ class MexParser {
             soapTransportAttributes = (NodeList) xPath.compile(
                     SOAP_TRANSPORT_XPATH).evaluate(bindingNode,
                     XPathConstants.NODESET);
+            if (soapTransportAttributes != null
+                    && soapTransportAttributes.getLength() > 0
+                    && soapTransportAttributes.item(0).getNodeValue()
+                    .equalsIgnoreCase(SOAP_HTTP_TRANSPORT_VALUE)) {
+
+                if (soapAction.equalsIgnoreCase(RST_SOAP_ACTION)) {
+                    log.debug("Found binding matching Action and Transport: "
+                            + bindingName);
+                    return WsTrustVersion.WSTRUST13;
+                } else if (soapAction.equalsIgnoreCase(RST_SOAP_ACTION_2005)) {
+                    log.debug("Binding node did not match soap Action or Transport: "
+                            + bindingName);
+                    return WsTrustVersion.WSTRUST2005;
+                }
+            }
         }
 
-        if (soapTransportAttributes != null
-                && soapTransportAttributes.getLength() > 0) {
-            soapTransport = soapTransportAttributes.item(0).getNodeValue();
-        }
-
-        boolean found = soapAction.equalsIgnoreCase(RST_SOAP_ACTION)
-                && soapTransport.equalsIgnoreCase(SOAP_HTTP_TRANSPORT_VALUE);
-        if (found) {
-            log.debug("Found binding matching Action and Transport: "
-                    + bindingName);
-        } else {
-            log.debug("Binding node did not match soap Action or Transport: "
-                    + bindingName);
-        }
-
-        return found;
+        return WsTrustVersion.UNDEFINED;
     }
 
-    private static Map<String, BindingPolicy> selectUsernamePasswordPolicies(
-            Document xmlDocument, XPath xPath) throws XPathExpressionException {
-        String xpathExpression = "//wsdl:definitions/wsp:Policy/wsp:ExactlyOne/wsp:All/"
-                + "sp:SignedEncryptedSupportingTokens/wsp:Policy/sp:UsernameToken/"
-                + "wsp:Policy/sp:WssUsernameToken10";
+    private static Map<String, BindingPolicy> selectUsernamePasswordPoliciesWithExpression(
+            Document xmlDocument, XPath xPath, String xpathExpression) throws XPathExpressionException {
+        
         Map<String, BindingPolicy> policies = new HashMap<String, BindingPolicy>();
 
         NodeList nodeList = (NodeList) xPath.compile(xpathExpression).evaluate(
                 xmlDocument, XPathConstants.NODESET);
         for (int i = 0; i < nodeList.getLength(); i++) {
+
+            // Nodes
+            // sp:WssUsernameToken10
+            // wsp:Policy
+            // sp:UsernameToken
+            // wsp:Policy
+            // sp:SignedEncryptedSupportingTokens
+            // wsp:All
+            // wsp:ExactlyOne
+            // wsp:Policy
             String policy = checkPolicy(xPath, nodeList.item(i).getParentNode()
                     .getParentNode().getParentNode().getParentNode()
                     .getParentNode().getParentNode().getParentNode());

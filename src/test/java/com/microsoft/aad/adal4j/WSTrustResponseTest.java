@@ -42,7 +42,7 @@ public class WSTrustResponseTest {
                 line = br.readLine();
             }
         }
-        WSTrustResponse response = WSTrustResponse.parse(sb.toString());
+        WSTrustResponse response = WSTrustResponse.parse(sb.toString(), WsTrustVersion.WSTRUST13);
         Assert.assertNotNull(response);
     }
 
@@ -60,7 +60,7 @@ public class WSTrustResponseTest {
                 line = br.readLine();
             }
         }
-        WSTrustResponse response = WSTrustResponse.parse(sb.toString());
+        WSTrustResponse response = WSTrustResponse.parse(sb.toString(), WsTrustVersion.WSTRUST13);
         Assert.assertNotNull(response);
     }
 }

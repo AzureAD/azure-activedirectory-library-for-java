@@ -114,7 +114,6 @@ public class BasicFilter implements Filter {
                                     .sendRedirect(getRedirectUrl(currentUri));
                             return;
                     }
-
                 } else {
                     // if authenticated, how to check for valid session?
                     AuthenticationResult result = AuthHelper
