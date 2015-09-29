@@ -21,6 +21,7 @@ package com.microsoft.aad.adal4j;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.Proxy;
 import java.net.URI;
 import java.net.URL;
 import java.security.MessageDigest;
@@ -70,6 +71,7 @@ public class AuthenticationContext {
     private String authority;
     private final ExecutorService service;
     private final boolean validateAuthority;
+    private final Proxy proxy;
 
     /**
      * Constructor to create the context with the address of the authority.
@@ -99,9 +101,46 @@ public class AuthenticationContext {
         this.service = service;
         this.validateAuthority = validateAuthority;
         this.authority = this.canonicalizeUri(authority);
+        this.proxy = Proxy.NO_PROXY;
 
         authenticationAuthority = new AuthenticationAuthority(new URL(
                 this.getAuthority()), this.shouldValidateAuthority());
+    }
+
+    /**
+     * Constructor to create the context with the address of the authority.
+     *
+     * @param authority
+     *            URL of the authenticating authority
+     * @param validateAuthority
+     *            flag to enable/disable authority validation.
+     * @param service
+     *            ExecutorService to be used to execute the requests. Developer
+     *            is responsible for maintaining the lifetime of the
+     *            ExecutorService.
+     * @param proxy
+     *            which will be used for http requests
+     * @throws MalformedURLException
+     *             thrown if URL is invalid
+     */
+    public AuthenticationContext(final String authority,
+                                 final boolean validateAuthority, final ExecutorService service, final Proxy proxy)
+            throws MalformedURLException {
+
+        if (StringHelper.isBlank(authority)) {
+            throw new IllegalArgumentException("authority is null or empty");
+        }
+
+        if (service == null) {
+            throw new IllegalArgumentException("service is null");
+        }
+        this.service = service;
+        this.validateAuthority = validateAuthority;
+        this.authority = this.canonicalizeUri(authority);
+        this.proxy = proxy;
+
+        authenticationAuthority = new AuthenticationAuthority(new URL(
+                this.getAuthority()), this.shouldValidateAuthority(), proxy);;
     }
 
     private String canonicalizeUri(String authority) {
@@ -783,13 +822,12 @@ public class AuthenticationContext {
         ResourceOwnerPasswordCredentialsGrant grant = (ResourceOwnerPasswordCredentialsGrant) authGrant
                 .getAuthorizationGrant();
 
-        UserDiscoveryResponse discoveryResponse = UserDiscoveryRequest
-                .execute(this.authenticationAuthority
-                        .getUserRealmEndpoint(grant.getUsername()));
+        UserDiscoveryResponse discoveryResponse =
+                UserDiscoveryRequest.execute(this.authenticationAuthority.getUserRealmEndpoint(grant.getUsername()), proxy);
         if (discoveryResponse.isAccountFederated()) {
             WSTrustResponse response = WSTrustRequest.execute(discoveryResponse
                             .getFederationMetadataUrl(), grant.getUsername(),
-                    grant.getPassword().getValue());
+                    grant.getPassword().getValue(), proxy);
 
             AuthorizationGrant updatedGrant = null;
             if (response.isTokenSaml2()) {
