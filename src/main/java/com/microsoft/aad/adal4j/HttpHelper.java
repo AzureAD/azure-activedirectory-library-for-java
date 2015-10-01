@@ -36,7 +36,7 @@ class HttpHelper {
 
     static String executeHttpGet(final Logger log, final String url)
             throws Exception {
-        return executeHttpGet(log, url, null, null);
+        return executeHttpGet(log, url, null, Proxy.NO_PROXY);
     }
 
     static String executeHttpGet(final Logger log, final String url, final Proxy proxy)
