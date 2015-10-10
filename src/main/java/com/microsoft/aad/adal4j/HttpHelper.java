@@ -36,7 +36,7 @@ class HttpHelper {
 
     static String executeHttpGet(final Logger log, final String url)
             throws Exception {
-        return executeHttpGet(log, url, null, Proxy.NO_PROXY);
+        return executeHttpGet(log, url, null, null);
     }
 
     static String executeHttpGet(final Logger log, final String url, final Proxy proxy)
@@ -52,7 +52,10 @@ class HttpHelper {
 
     static String executeHttpGet(final Logger log, final String url,
                                  final Map<String, String> headers, final Proxy proxy) throws Exception {
-        final HttpURLConnection conn = HttpHelper.openConnection(url, proxy);
+        final HttpURLConnection conn =
+                    proxy == null ?
+                            HttpHelper.openConnection(url) :
+                            HttpHelper.openConnection(url, proxy);
         return executeGetRequest(log, headers, conn);
     }
 
@@ -71,7 +74,10 @@ class HttpHelper {
     static String executeHttpPost(final Logger log, final String url,
                                   String postData, final Map<String, String> headers, final Proxy proxy)
             throws Exception {
-        final HttpURLConnection conn = HttpHelper.openConnection(url, proxy);
+        final HttpURLConnection conn =
+                    proxy == null ?
+                            HttpHelper.openConnection(url) :
+                            HttpHelper.openConnection(url, proxy);
         return executePostRequest(log, postData, headers, conn);
     }
 

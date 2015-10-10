@@ -63,7 +63,7 @@ class AuthenticationAuthority {
     private final URL authorityUrl;
     private final boolean validateAuthority;
 
-    private final Proxy proxy;
+    private Proxy proxy;
 
     AuthenticationAuthority(final URL authorityUrl,
             final boolean validateAuthority) {
@@ -71,21 +71,16 @@ class AuthenticationAuthority {
         this.authorityUrl = authorityUrl;
         this.authorityType = detectAuthorityType();
         this.validateAuthority = validateAuthority;
-        proxy = Proxy.NO_PROXY;
         validateAuthorityUrl();
         setupAuthorityProperties();
     }
 
-    AuthenticationAuthority(final URL authorityUrl,
-                            final boolean validateAuthority,
-                            final Proxy proxy) {
+    public Proxy getProxy() {
+        return proxy;
+    }
 
-        this.authorityUrl = authorityUrl;
-        this.authorityType = detectAuthorityType();
-        this.validateAuthority = validateAuthority;
+    public void setProxy(Proxy proxy) {
         this.proxy = proxy;
-        validateAuthorityUrl();
-        setupAuthorityProperties();
     }
 
     String getHost() {
