@@ -21,6 +21,7 @@ package com.microsoft.aad.adal4j;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
@@ -117,7 +118,7 @@ class AdalOAuthRequest extends HTTPRequest {
                 params.put(entry.getKey(), entry.getValue());
             }
         }
-        //HttpHelper.configureAdditionalHeaders(conn, this.extraHeaderParams);	// Fixed Google Appengine URLFetch Exception
+        
         HttpHelper.configureAdditionalHeaders(conn, params);
         conn.setDoOutput(true);
         conn.setRequestProperty("Content-Type",
@@ -139,6 +140,12 @@ class AdalOAuthRequest extends HTTPRequest {
         if (responseCode == 200) {
             inReader = new InputStreamReader(conn.getInputStream());
         } else {
+        	InputStream stream = conn.getErrorStream();
+        	if(stream == null && responseCode == 404)
+        	{
+        		stream = conn.getInputStream();
+        	}
+        	
             inReader = new InputStreamReader(conn.getErrorStream());
         }
         final BufferedReader reader = new BufferedReader(inReader);
