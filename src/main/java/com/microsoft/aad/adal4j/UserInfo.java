@@ -19,12 +19,12 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
+import com.nimbusds.jwt.ReadOnlyJWTClaimsSet;
+
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-
-import com.nimbusds.jwt.ReadOnlyJWTClaimsSet;
 
 /**
  * Contains information of a single user.
@@ -101,14 +101,15 @@ public class UserInfo implements Serializable {
         String uniqueId = null;
         String displayableId = null;
 
-        if (!StringHelper.isBlank(claims
-                .getStringClaim(AuthenticationConstants.ID_TOKEN_OBJECT_ID))) {
-            uniqueId = claims
-                    .getStringClaim(AuthenticationConstants.ID_TOKEN_OBJECT_ID);
-        } else if (!StringHelper.isBlank(claims
+        if (!StringHelper.isBlank((String) claims
+                .getCustomClaim(AuthenticationConstants.ID_TOKEN_OBJECT_ID))) {
+            uniqueId = (String) claims
+                    .getCustomClaim(AuthenticationConstants.ID_TOKEN_OBJECT_ID);
+        }else if (!StringHelper.isBlank(claims
                 .getStringClaim(AuthenticationConstants.ID_TOKEN_SUBJECT))) {
-            uniqueId = claims
-                    .getStringClaim(AuthenticationConstants.ID_TOKEN_SUBJECT);
+
+            uniqueId = claims.getStringClaim(AuthenticationConstants.ID_TOKEN_SUBJECT);
+
         }
 
         if (!StringHelper.isBlank(claims
