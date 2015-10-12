@@ -110,9 +110,9 @@ class MexParser {
         while (it.hasNext()) {
             Map.Entry<String, BindingPolicy> pair = it.next();
             if (pair.getValue().getUrl() != null) {
-                if(pair.getValue().getVersion() == WsTrustVersion.WSTRUST13){
+                if(pair.getValue().getVersion() == WSTrustVersion.WSTRUST13){
                     wstrust13 = pair.getValue();
-                } else if(pair.getValue().getVersion() == WsTrustVersion.WSTRUST2005){
+                } else if(pair.getValue().getVersion() == WSTrustVersion.WSTRUST2005){
                     wstrust2005 = pair.getValue();
                 }
             }
@@ -185,8 +185,8 @@ class MexParser {
                 String bindingName = bindingNode.getAttributes()
                         .getNamedItem("name").getNodeValue();
 
-                WsTrustVersion version = checkSoapActionAndTransport(xPath, bindingNode);
-                if (version != WsTrustVersion.UNDEFINED) {
+                WSTrustVersion version = checkSoapActionAndTransport(xPath, bindingNode);
+                if (version != WSTrustVersion.UNDEFINED) {
                     BindingPolicy policy = new BindingPolicy("");
                     policy.setUrl(uri);
                     policy.setVersion(version);
@@ -197,7 +197,7 @@ class MexParser {
         return bindings;
     }
 
-    private static WsTrustVersion checkSoapActionAndTransport(XPath xPath,
+    private static WSTrustVersion checkSoapActionAndTransport(XPath xPath,
                                                               Node bindingNode) throws XPathExpressionException {
         NodeList soapTransportAttributes = null;
         String soapAction = null;
@@ -220,16 +220,16 @@ class MexParser {
                 if (soapAction.equalsIgnoreCase(RST_SOAP_ACTION)) {
                     log.debug("Found binding matching Action and Transport: "
                             + bindingName);
-                    return WsTrustVersion.WSTRUST13;
+                    return WSTrustVersion.WSTRUST13;
                 } else if (soapAction.equalsIgnoreCase(RST_SOAP_ACTION_2005)) {
                     log.debug("Binding node did not match soap Action or Transport: "
                             + bindingName);
-                    return WsTrustVersion.WSTRUST2005;
+                    return WSTrustVersion.WSTRUST2005;
                 }
             }
         }
 
-        return WsTrustVersion.UNDEFINED;
+        return WSTrustVersion.UNDEFINED;
     }
 
     private static Map<String, BindingPolicy> selectUsernamePasswordPoliciesWithExpression(

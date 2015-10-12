@@ -791,6 +791,7 @@ public class AuthenticationContext {
         if (!(authGrant.getAuthorizationGrant() instanceof ResourceOwnerPasswordCredentialsGrant)) {
             return authGrant;
         }
+        
         ResourceOwnerPasswordCredentialsGrant grant = (ResourceOwnerPasswordCredentialsGrant) authGrant
                 .getAuthorizationGrant();
 
