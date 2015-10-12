@@ -20,6 +20,7 @@
 package com.microsoft.aad.adal4j;
 
 import java.io.ByteArrayInputStream;
+import java.net.Proxy;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -93,9 +94,9 @@ class MexParser {
         }
     }
 
-    static BindingPolicy getWsTrustEndpointFromMexEndpoint(String metadataEndpoint)
+    static BindingPolicy getWsTrustEndpointFromMexEndpoint(String metadataEndpoint, Proxy proxy)
             throws Exception {
-        String mexResponse = HttpHelper.executeHttpGet(log, metadataEndpoint);
+        String mexResponse = HttpHelper.executeHttpGet(log, metadataEndpoint, proxy);
         return getWsTrustEndpointFromMexResponse(mexResponse);
     }
 

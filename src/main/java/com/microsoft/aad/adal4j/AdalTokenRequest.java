@@ -86,11 +86,14 @@ class AdalTokenRequest {
                         .getJWTClaimsSet());
             }
 
-            result = new AuthenticationResult(response.getAccessToken()
-                    .getType().getValue(),
-                    response.getAccessToken().getValue(), refreshToken,
-                    response.getAccessToken().getLifetime(), info,
-                    !StringHelper.isBlank(response.getResource()));
+            result = new AuthenticationResult(
+                        response.getAccessToken().getType().getValue(),
+                        response.getAccessToken().getValue(),
+                        refreshToken,
+                        response.getAccessToken().getLifetime(),
+                        response.getIDTokenString(),
+                        info,
+                        !StringHelper.isBlank(response.getResource()));
         } else {
             final TokenErrorResponse errorResponse = TokenErrorResponse
                     .parse(httpResponse);
