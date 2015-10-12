@@ -81,7 +81,7 @@ class WSTrustResponse {
                 && !SAML1_ASSERTION.equalsIgnoreCase(tokenType);
     }
 
-    static WSTrustResponse parse(String response, WsTrustVersion version) throws Exception {
+    static WSTrustResponse parse(String response, WSTrustVersion version) throws Exception {
         WSTrustResponse responseValue = new WSTrustResponse();
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory
                 .newInstance();
@@ -111,7 +111,7 @@ class WSTrustResponse {
     }
 
     private static void parseToken(WSTrustResponse responseValue,
-            Document xmlDocument, XPath xPath, WsTrustVersion version) throws Exception {
+            Document xmlDocument, XPath xPath, WSTrustVersion version) throws Exception {
 
         NodeList tokenTypeNodes = (NodeList) xPath
                 .compile(version.getResponseTokenTypePath())

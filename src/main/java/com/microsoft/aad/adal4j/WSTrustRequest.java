@@ -51,7 +51,7 @@ class WSTrustRequest {
         String soapAction = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue"; // default value (WSTrust 1.3)
 
         // only change it if version is wsTrust2005, otherwise default to wsTrust13
-        if (policy.getVersion() == WsTrustVersion.WSTRUST2005)
+        if (policy.getVersion() == WSTrustVersion.WSTRUST2005)
         {
             soapAction = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue"; // wsTrust2005 soap value
         }
@@ -63,7 +63,7 @@ class WSTrustRequest {
     }
 
     private static StringBuilder buildMessage(String address, String username,
-            String password, WsTrustVersion addressVersion) {
+            String password, WSTrustVersion addressVersion) {
 
         StringBuilder securityHeaderBuilder = new StringBuilder(
                 MAX_EXPECTED_MESSAGE_SIZE);
@@ -78,7 +78,7 @@ class WSTrustRequest {
         String keyType = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer";
         String requestType = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Issue";
         
-        if (addressVersion == WsTrustVersion.WSTRUST2005)
+        if (addressVersion == WSTrustVersion.WSTRUST2005)
         {
             soapAction = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue";
             rstTrustNamespace = "http://schemas.xmlsoap.org/ws/2005/02/trust";
@@ -143,7 +143,7 @@ class WSTrustRequest {
         return messageBuilder;
     }
 
-    private static StringBuilder buildSecurityHeader(StringBuilder securityHeaderBuilder, String username, String password, WsTrustVersion version) {
+    private static StringBuilder buildSecurityHeader(StringBuilder securityHeaderBuilder, String username, String password, WSTrustVersion version) {
 
         StringBuilder messageCredentialsBuilder = new StringBuilder(
                 MAX_EXPECTED_MESSAGE_SIZE);

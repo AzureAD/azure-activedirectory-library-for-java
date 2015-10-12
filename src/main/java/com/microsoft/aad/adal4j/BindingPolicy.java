@@ -23,13 +23,13 @@ class BindingPolicy {
 
     private String value;
     private String url;
-    private WsTrustVersion version;
+    private WSTrustVersion version;
     
     public BindingPolicy(String value) {
         this.value = value;
     }
     
-    public BindingPolicy(String url, WsTrustVersion version) {
+    public BindingPolicy(String url, WSTrustVersion version) {
         this.url = url;
         this.version = version;
     }
@@ -50,11 +50,11 @@ class BindingPolicy {
         this.url = url;
     }    
     
-    public void setVersion(WsTrustVersion version){
+    public void setVersion(WSTrustVersion version){
 	this.version = version;
     }
 
-    public WsTrustVersion getVersion(){
+    public WSTrustVersion getVersion(){
         return this.version;
     }
 }

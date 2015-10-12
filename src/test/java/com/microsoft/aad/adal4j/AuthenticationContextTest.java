@@ -174,7 +174,7 @@ public class AuthenticationContextTest extends AbstractAdalTests {
                 EasyMock.isA(ClientAuthentication.class),
                 EasyMock.isA(ClientDataHttpHeaders.class)).andReturn(
                 new AuthenticationResult("bearer", "accessToken",
-                        "refreshToken", new Date().getTime(), null, false));
+                        "refreshToken", new Date().getTime(), null, null, false));
 
         PowerMock.replay(ctx);
         Future<AuthenticationResult> result = ctx.acquireToken("resource",

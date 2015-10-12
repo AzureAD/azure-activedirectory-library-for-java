@@ -21,7 +21,7 @@
  */
 package com.microsoft.aad.adal4j;
 
-enum WsTrustVersion {
+enum WSTrustVersion {
 
     WSTRUST13("//s:Envelope/s:Body/wst:RequestSecurityTokenResponseCollection/wst:RequestSecurityTokenResponse/wst:TokenType",
     "wst:RequestedSecurityToken"),
@@ -30,7 +30,7 @@ enum WsTrustVersion {
     private String responseTokenTypePath = "";
     private String responseSecurityTokenPath = "";
 
-    private WsTrustVersion(String tokenType, String responseSecurityToken) {
+    private WSTrustVersion(String tokenType, String responseSecurityToken) {
         this.responseTokenTypePath = tokenType;
         this.responseSecurityTokenPath = responseSecurityToken;
     }
