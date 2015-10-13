@@ -22,10 +22,12 @@ package com.microsoft.aad.adal4j;
 import static org.testng.Assert.assertNotNull;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.apache.tools.ant.filters.StringInputStream;
 import org.easymock.EasyMock;
 import org.powermock.api.easymock.PowerMock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -125,5 +127,22 @@ public class AdalOAuthRequestTest extends AbstractAdalTests {
                 "location.pl");
         Assert.assertEquals(response.getLocation().getProtocol(), "https");
         Assert.assertNull(response.getContent());
+    }
+    
+    @Test
+    public void testCreateResponseFor404() throws Exception {
+        final AdalOAuthRequest request = new AdalOAuthRequest(Method.GET,
+                new URL("https://" + TestConfiguration.AAD_HOST_NAME), null);
+        final HttpURLConnection conn = PowerMock
+                .createMock(HttpURLConnection.class);
+        EasyMock.expect(conn.getResponseCode()).andReturn(404);
+        EasyMock.expect(conn.getErrorStream()).andReturn(null);
+        InputStream stream = new StringInputStream("stream");
+        EasyMock.expect(conn.getInputStream()).andReturn(stream);
+        PowerMock.replay(conn);
+        final String response = Whitebox.invokeMethod(request,
+                "processAndReadResponse", conn);
+        Assert.assertEquals(response, "stream");
+        PowerMock.verifyAll();
     }
 }

@@ -146,7 +146,7 @@ class AdalOAuthRequest extends HTTPRequest {
         		stream = conn.getInputStream();
         	}
         	
-            inReader = new InputStreamReader(conn.getErrorStream());
+            inReader = new InputStreamReader(stream);
         }
         final BufferedReader reader = new BufferedReader(inReader);
         final char[] buffer = new char[256];
