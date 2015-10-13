@@ -827,36 +827,35 @@ public class AuthenticationContext {
     private AdalAuthorizatonGrant processPasswordGrant(
             AdalAuthorizatonGrant authGrant) throws Exception {
 
-        if (!(authGrant.getAuthorizationGrant() instanceof ResourceOwnerPasswordCredentialsGrant)) {
-            return authGrant;
-        }
+        if ((authGrant.getAuthorizationGrant() instanceof ResourceOwnerPasswordCredentialsGrant)) {
 
-        ResourceOwnerPasswordCredentialsGrant grant = (ResourceOwnerPasswordCredentialsGrant) authGrant
-                .getAuthorizationGrant();
+            ResourceOwnerPasswordCredentialsGrant grant = (ResourceOwnerPasswordCredentialsGrant) authGrant
+                    .getAuthorizationGrant();
 
-        UserDiscoveryResponse discoveryResponse = UserDiscoveryRequest.execute(
-                this.authenticationAuthority.getUserRealmEndpoint(grant
-                        .getUsername()), this.proxy, this.sslSocketFactory);
-        if (discoveryResponse.isAccountFederated()) {
-            WSTrustResponse response = WSTrustRequest.execute(
-                    discoveryResponse.getFederationMetadataUrl(),
-                    grant.getUsername(), grant.getPassword().getValue(),
-                    this.proxy, this.sslSocketFactory);
+            UserDiscoveryResponse discoveryResponse = UserDiscoveryRequest.execute(
+                    this.authenticationAuthority.getUserRealmEndpoint(grant
+                            .getUsername()), this.proxy, this.sslSocketFactory);
+            if (discoveryResponse.isAccountFederated()) {
+                WSTrustResponse response = WSTrustRequest.execute(
+                        discoveryResponse.getFederationMetadataUrl(),
+                        grant.getUsername(), grant.getPassword().getValue(),
+                        this.proxy, this.sslSocketFactory);
 
-            AuthorizationGrant updatedGrant = null;
-            if (response.isTokenSaml2()) {
-                updatedGrant = new SAML2BearerGrant(new Base64URL(
-                        Base64.encodeBase64String(response.getToken().getBytes(
-                                "UTF-8"))));
+                AuthorizationGrant updatedGrant = null;
+                if (response.isTokenSaml2()) {
+                    updatedGrant = new SAML2BearerGrant(new Base64URL(
+                            Base64.encodeBase64String(response.getToken().getBytes(
+                                    "UTF-8"))));
+                }
+                else {
+                    updatedGrant = new SAML11BearerGrant(new Base64URL(
+                            Base64.encodeBase64String(response.getToken()
+                                    .getBytes())));
+                }
+
+                authGrant = new AdalAuthorizatonGrant(updatedGrant,
+                        authGrant.getCustomParameters());
             }
-            else {
-                updatedGrant = new SAML11BearerGrant(new Base64URL(
-                        Base64.encodeBase64String(response.getToken()
-                                .getBytes())));
-            }
-
-            authGrant = new AdalAuthorizatonGrant(updatedGrant,
-                    authGrant.getCustomParameters());
         }
 
         return authGrant;
