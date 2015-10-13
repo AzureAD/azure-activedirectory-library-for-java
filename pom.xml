@@ -87,6 +87,11 @@
 			<artifactId>commons-codec</artifactId>
 			<version>1.10</version>
 		</dependency>
+		<dependency>
+			<groupId>com.microsoft.alm</groupId>
+			<artifactId>oauth2-useragent</artifactId>
+			<version>0.5.9</version>
+		</dependency>
 
 		<!-- test dependencies -->
 		<dependency>
