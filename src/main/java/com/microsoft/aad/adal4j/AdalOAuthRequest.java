@@ -26,6 +26,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.net.HttpURLConnection;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
@@ -46,6 +47,7 @@ class AdalOAuthRequest extends HTTPRequest {
 
     private final Map<String, String> extraHeaderParams;
     private final Logger log = LoggerFactory.getLogger(AdalOAuthRequest.class);
+    private final Proxy proxy;
 
     /**
      * 
@@ -54,9 +56,10 @@ class AdalOAuthRequest extends HTTPRequest {
      * @param correlationId
      */
     AdalOAuthRequest(final Method method, final URL url,
-            final Map<String, String> extraHeaderParams) {
+            final Map<String, String> extraHeaderParams, final Proxy proxy) {
         super(method, url);
         this.extraHeaderParams = extraHeaderParams;
+        this.proxy = proxy;
     }
 
     Map<String, String> getReadOnlyExtraHeaderParameters() {
@@ -69,7 +72,7 @@ class AdalOAuthRequest extends HTTPRequest {
     @Override
     public HTTPResponse send() throws IOException {
 
-        final HttpURLConnection conn = HttpHelper.openConnection(this.getURL());
+        final HttpURLConnection conn = HttpHelper.openConnection(this.getURL(), this.proxy);
         this.configureHeaderAndExecuteOAuthCall(conn);
         final String out = this.processAndReadResponse(conn);
         HttpHelper.verifyReturnedCorrelationId(log, conn,

@@ -776,7 +776,7 @@ public class AuthenticationContext {
                 .getReadonlyHeaderMap());
         final URL url = new URL(this.authenticationAuthority.getTokenUri());
         final AdalTokenRequest request = new AdalTokenRequest(url, clientAuth,
-                authGrant, headers.getReadonlyHeaderMap());
+                authGrant, headers.getReadonlyHeaderMap(), this.proxy);
         AuthenticationResult result = request
                 .executeOAuthRequestAndProcessResponse();
         return result;
