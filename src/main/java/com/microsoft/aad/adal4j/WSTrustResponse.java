@@ -80,7 +80,8 @@ class WSTrustResponse {
                 && !SAML1_ASSERTION.equalsIgnoreCase(tokenType);
     }
 
-    static WSTrustResponse parse(String response, WSTrustVersion version) throws Exception {
+    static WSTrustResponse parse(String response, WSTrustVersion version)
+            throws Exception {
         WSTrustResponse responseValue = new WSTrustResponse();
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory
                 .newInstance();
@@ -91,7 +92,7 @@ class WSTrustResponse {
         XPath xPath = XPathFactory.newInstance().newXPath();
         NamespaceContextImpl namespace = new NamespaceContextImpl();
         xPath.setNamespaceContext(namespace);
-        
+
         if (parseError(responseValue, xmlDocument, xPath)) {
             if (StringHelper.isBlank(responseValue.errorCode)) {
                 responseValue.errorCode = "NONE";
@@ -102,7 +103,8 @@ class WSTrustResponse {
             throw new Exception("Server returned error in RSTR - ErrorCode: "
                     + responseValue.errorCode + " : FaultMessage: "
                     + responseValue.faultMessage.trim());
-        } else {
+        }
+        else {
             parseToken(responseValue, xmlDocument, xPath, version);
         }
 
@@ -110,11 +112,12 @@ class WSTrustResponse {
     }
 
     private static void parseToken(WSTrustResponse responseValue,
-            Document xmlDocument, XPath xPath, WSTrustVersion version) throws Exception {
+            Document xmlDocument, XPath xPath, WSTrustVersion version)
+            throws Exception {
 
-        NodeList tokenTypeNodes = (NodeList) xPath
-                .compile(version.getResponseTokenTypePath())
-                .evaluate(xmlDocument, XPathConstants.NODESET);
+        NodeList tokenTypeNodes = (NodeList) xPath.compile(
+                version.getResponseTokenTypePath()).evaluate(xmlDocument,
+                XPathConstants.NODESET);
         if (tokenTypeNodes.getLength() == 0) {
             log.warn("No TokenType elements found in RSTR");
         }
@@ -145,7 +148,6 @@ class WSTrustResponse {
                 continue;
             }
 
-            
             responseValue.token = innerXml(requestedTokenNodes.item(0));
             if (StringHelper.isBlank(responseValue.token)) {
                 log.warn("Unable to find token associated with TokenType element: "
@@ -216,7 +218,8 @@ class WSTrustResponse {
                 resultBuilder.append(sw.toString());
             }
 
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             ex.printStackTrace();
         }
 

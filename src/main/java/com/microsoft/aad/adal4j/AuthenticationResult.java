@@ -85,7 +85,7 @@ public final class AuthenticationResult implements Serializable {
     public String getIdToken() {
         return idToken;
     }
-    
+
     public UserInfo getUserInfo() {
         return userInfo;
     }

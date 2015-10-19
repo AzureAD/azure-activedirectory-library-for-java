@@ -19,7 +19,6 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
-
 /**
  * Authentication callback Interface that can be implemented by the developer.
  */

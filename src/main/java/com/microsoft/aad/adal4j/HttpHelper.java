@@ -34,129 +34,131 @@ import org.slf4j.Logger;
 
 class HttpHelper {
 
-	static String executeHttpGet(final Logger log, final String url,
-			final Proxy proxy) throws Exception {
-		return executeHttpGet(log, url, null, proxy);
-	}
+    static String executeHttpGet(final Logger log, final String url,
+            final Proxy proxy) throws Exception {
+        return executeHttpGet(log, url, null, proxy);
+    }
 
-	static String executeHttpGet(final Logger log, final String url,
-			final Map<String, String> headers, final Proxy proxy)
-			throws Exception {
-		final HttpURLConnection conn = HttpHelper.openConnection(url, proxy);
-		return executeGetRequest(log, headers, conn);
-	}
+    static String executeHttpGet(final Logger log, final String url,
+            final Map<String, String> headers, final Proxy proxy)
+            throws Exception {
+        final HttpURLConnection conn = HttpHelper.openConnection(url, proxy);
+        return executeGetRequest(log, headers, conn);
+    }
 
-	static String executeHttpPost(final Logger log, final String url,
-			String postData, final Proxy proxy) throws Exception {
-		return executeHttpPost(log, url, postData, null, proxy);
-	}
+    static String executeHttpPost(final Logger log, final String url,
+            String postData, final Proxy proxy) throws Exception {
+        return executeHttpPost(log, url, postData, null, proxy);
+    }
 
-	static String executeHttpPost(final Logger log, final String url,
-			String postData, final Map<String, String> headers,
-			final Proxy proxy) throws Exception {
-		final HttpURLConnection conn = HttpHelper.openConnection(url, proxy);
-		return executePostRequest(log, postData, headers, conn);
-	}
+    static String executeHttpPost(final Logger log, final String url,
+            String postData, final Map<String, String> headers,
+            final Proxy proxy) throws Exception {
+        final HttpURLConnection conn = HttpHelper.openConnection(url, proxy);
+        return executePostRequest(log, postData, headers, conn);
+    }
 
-	static String readResponseFromConnection(final HttpURLConnection conn)
-			throws IOException {
-		final Reader inReader = new InputStreamReader(conn.getInputStream());
-		final BufferedReader reader = new BufferedReader(inReader);
-		final char[] buffer = new char[256];
-		final StringBuilder out = new StringBuilder();
-		try {
-			if (conn.getResponseCode() != 200) {
-				throw new IOException("Failed: HTTP error code "
-						+ conn.getResponseCode());
-			}
+    static String readResponseFromConnection(final HttpURLConnection conn)
+            throws IOException {
+        final Reader inReader = new InputStreamReader(conn.getInputStream());
+        final BufferedReader reader = new BufferedReader(inReader);
+        final char[] buffer = new char[256];
+        final StringBuilder out = new StringBuilder();
+        try {
+            if (conn.getResponseCode() != 200) {
+                throw new IOException("Failed: HTTP error code "
+                        + conn.getResponseCode());
+            }
 
-			int rsz = -1;
-			while ((rsz = reader.read(buffer, 0, buffer.length)) > -1) {
-				out.append(buffer, 0, rsz);
-			}
-		} finally {
-			reader.close();
-		}
+            int rsz = -1;
+            while ((rsz = reader.read(buffer, 0, buffer.length)) > -1) {
+                out.append(buffer, 0, rsz);
+            }
+        }
+        finally {
+            reader.close();
+        }
 
-		return out.toString();
-	}
+        return out.toString();
+    }
 
-	static HttpURLConnection openConnection(final URL finalURL,
-			final Proxy proxy) throws IOException {
-		if (proxy != null) {
-			return (HttpURLConnection) finalURL.openConnection(proxy);
-		}
+    static HttpURLConnection openConnection(final URL finalURL,
+            final Proxy proxy) throws IOException {
+        if (proxy != null) {
+            return (HttpURLConnection) finalURL.openConnection(proxy);
+        }
 
-		return (HttpURLConnection) finalURL.openConnection();
-	}
+        return (HttpURLConnection) finalURL.openConnection();
+    }
 
-	static HttpURLConnection openConnection(final String url, final Proxy proxy)
-			throws IOException {
-		return openConnection(new URL(url), proxy);
-	}
+    static HttpURLConnection openConnection(final String url, final Proxy proxy)
+            throws IOException {
+        return openConnection(new URL(url), proxy);
+    }
 
-	static HttpURLConnection configureAdditionalHeaders(
-			final HttpURLConnection conn, final Map<String, String> headers)
-			throws MalformedURLException, IOException {
-		if (headers != null) {
-			for (final String key : headers.keySet()) {
-				conn.setRequestProperty(key, headers.get(key));
-			}
-		}
-		return conn;
-	}
+    static HttpURLConnection configureAdditionalHeaders(
+            final HttpURLConnection conn, final Map<String, String> headers)
+            throws MalformedURLException, IOException {
+        if (headers != null) {
+            for (final String key : headers.keySet()) {
+                conn.setRequestProperty(key, headers.get(key));
+            }
+        }
+        return conn;
+    }
 
-	static void verifyReturnedCorrelationId(Logger log, HttpURLConnection conn,
-			String sentCorrelationId) {
-		if (StringHelper
-				.isBlank(conn
-						.getHeaderField(ClientDataHttpHeaders.CORRELATION_ID_HEADER_NAME))
-				|| !conn.getHeaderField(
-						ClientDataHttpHeaders.CORRELATION_ID_HEADER_NAME)
-						.equals(sentCorrelationId)) {
-			log.info(LogHelper.createMessage(
-					String.format(
-							"Sent (%s) Correlation Id is not same as received (%s).",
-							sentCorrelationId,
-							conn.getHeaderField(ClientDataHttpHeaders.CORRELATION_ID_HEADER_NAME)),
-					sentCorrelationId));
-		}
-	}
+    static void verifyReturnedCorrelationId(Logger log, HttpURLConnection conn,
+            String sentCorrelationId) {
+        if (StringHelper
+                .isBlank(conn
+                        .getHeaderField(ClientDataHttpHeaders.CORRELATION_ID_HEADER_NAME))
+                || !conn.getHeaderField(
+                        ClientDataHttpHeaders.CORRELATION_ID_HEADER_NAME)
+                        .equals(sentCorrelationId)) {
+            log.info(LogHelper.createMessage(
+                    String.format(
+                            "Sent (%s) Correlation Id is not same as received (%s).",
+                            sentCorrelationId,
+                            conn.getHeaderField(ClientDataHttpHeaders.CORRELATION_ID_HEADER_NAME)),
+                    sentCorrelationId));
+        }
+    }
 
-	private static String executeGetRequest(Logger log,
-			Map<String, String> headers, HttpURLConnection conn)
-			throws IOException {
-		configureAdditionalHeaders(conn, headers);
-		return getResponse(log, headers, conn);
-	}
+    private static String executeGetRequest(Logger log,
+            Map<String, String> headers, HttpURLConnection conn)
+            throws IOException {
+        configureAdditionalHeaders(conn, headers);
+        return getResponse(log, headers, conn);
+    }
 
-	private static String executePostRequest(Logger log, String postData,
-			Map<String, String> headers, HttpURLConnection conn)
-			throws IOException {
-		configureAdditionalHeaders(conn, headers);
-		conn.setRequestMethod("POST");
-		conn.setDoOutput(true);
-		DataOutputStream wr = null;
-		try {
-			wr = new DataOutputStream(conn.getOutputStream());
-			wr.writeBytes(postData);
-			wr.flush();
+    private static String executePostRequest(Logger log, String postData,
+            Map<String, String> headers, HttpURLConnection conn)
+            throws IOException {
+        configureAdditionalHeaders(conn, headers);
+        conn.setRequestMethod("POST");
+        conn.setDoOutput(true);
+        DataOutputStream wr = null;
+        try {
+            wr = new DataOutputStream(conn.getOutputStream());
+            wr.writeBytes(postData);
+            wr.flush();
 
-			return getResponse(log, headers, conn);
-		} finally {
-			if (wr != null) {
-				wr.close();
-			}
-		}
-	}
+            return getResponse(log, headers, conn);
+        }
+        finally {
+            if (wr != null) {
+                wr.close();
+            }
+        }
+    }
 
-	private static String getResponse(Logger log, Map<String, String> headers,
-			HttpURLConnection conn) throws IOException {
-		String response = readResponseFromConnection(conn);
-		if (headers != null) {
-			HttpHelper.verifyReturnedCorrelationId(log, conn, headers
-					.get(ClientDataHttpHeaders.CORRELATION_ID_HEADER_NAME));
-		}
-		return response;
-	}
+    private static String getResponse(Logger log, Map<String, String> headers,
+            HttpURLConnection conn) throws IOException {
+        String response = readResponseFromConnection(conn);
+        if (headers != null) {
+            HttpHelper.verifyReturnedCorrelationId(log, conn, headers
+                    .get(ClientDataHttpHeaders.CORRELATION_ID_HEADER_NAME));
+        }
+        return response;
+    }
 }

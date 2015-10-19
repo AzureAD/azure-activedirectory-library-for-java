@@ -30,17 +30,18 @@ class SAML11BearerGrant extends SAML2BearerGrant {
     /**
      * The grant type.
      */
-    public static GrantType grantType = new GrantType("urn:ietf:params:oauth:grant-type:saml1_1-bearer");
-    
+    public static GrantType grantType = new GrantType(
+            "urn:ietf:params:oauth:grant-type:saml1_1-bearer");
+
     public SAML11BearerGrant(Base64URL assertion) {
         super(assertion);
     }
 
     @Override
-    public Map<String,String> toParameters() {
+    public Map<String, String> toParameters() {
 
-            Map<String,String> params = super.toParameters();
-            params.put("grant_type", grantType.getValue());
-            return params;
+        Map<String, String> params = super.toParameters();
+        params.put("grant_type", grantType.getValue());
+        return params;
     }
 }

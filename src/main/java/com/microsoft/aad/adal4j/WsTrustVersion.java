@@ -23,10 +23,11 @@ package com.microsoft.aad.adal4j;
 
 enum WSTrustVersion {
 
-    WSTRUST13("//s:Envelope/s:Body/wst:RequestSecurityTokenResponseCollection/wst:RequestSecurityTokenResponse/wst:TokenType",
-    "wst:RequestedSecurityToken"),
-    WSTRUST2005("//s:Envelope/s:Body/t:RequestSecurityTokenResponse/t:TokenType",
-    "t:RequestedSecurityToken"), UNDEFINED("", "");
+    WSTRUST13(
+            "//s:Envelope/s:Body/wst:RequestSecurityTokenResponseCollection/wst:RequestSecurityTokenResponse/wst:TokenType",
+            "wst:RequestedSecurityToken"), WSTRUST2005(
+            "//s:Envelope/s:Body/t:RequestSecurityTokenResponse/t:TokenType",
+            "t:RequestedSecurityToken"), UNDEFINED("", "");
     private String responseTokenTypePath = "";
     private String responseSecurityTokenPath = "";
 
@@ -38,8 +39,8 @@ enum WSTrustVersion {
     public String getResponseTokenTypePath() {
         return this.responseTokenTypePath;
     }
-    
-    public String getResponseSecurityTokenPath(){
+
+    public String getResponseSecurityTokenPath() {
         return this.responseSecurityTokenPath;
     }
 }

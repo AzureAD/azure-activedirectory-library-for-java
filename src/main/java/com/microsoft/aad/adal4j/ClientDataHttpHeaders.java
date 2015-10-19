@@ -52,7 +52,8 @@ final class ClientDataHttpHeaders {
     ClientDataHttpHeaders(final String correlationId) {
         if (!StringHelper.isBlank(correlationId)) {
             this.correlationIdHeaderValue = correlationId;
-        } else {
+        }
+        else {
             this.correlationIdHeaderValue = UUID.randomUUID().toString();
         }
         this.headerValues = initHeaderMap();

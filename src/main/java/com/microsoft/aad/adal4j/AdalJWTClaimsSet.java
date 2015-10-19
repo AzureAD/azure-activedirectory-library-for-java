@@ -42,7 +42,8 @@ class AdalJWTClaimsSet extends JWTClaimsSet {
                 final JSONArray arr = (JSONArray) jo.get(AUDIENCE_CLAIM);
                 if (!arr.isEmpty()) {
                     jo.put(AUDIENCE_CLAIM, arr.get(0));
-                } else {
+                }
+                else {
                     jo.remove(AUDIENCE_CLAIM);
                 }
             }

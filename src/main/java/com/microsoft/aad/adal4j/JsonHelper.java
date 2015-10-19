@@ -28,15 +28,14 @@ import com.google.gson.GsonBuilder;
 /**
  *
  */
- class JsonHelper {
+class JsonHelper {
     /**
      * 
      * @param json
      * @param clazz
      * @return
      */
-    static <T> T convertJsonToObject(final String json,
-            final Class<T> clazz) {
+    static <T> T convertJsonToObject(final String json, final Class<T> clazz) {
         final Reader reader = new StringReader(json);
         final Gson gson = new GsonBuilder().create();
         return gson.fromJson(reader, clazz);
