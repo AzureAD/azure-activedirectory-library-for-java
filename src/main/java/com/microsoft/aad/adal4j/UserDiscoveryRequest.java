@@ -31,13 +31,16 @@ class UserDiscoveryRequest {
     private final static Logger log = LoggerFactory
             .getLogger(UserDiscoveryRequest.class);
     private final static Map<String, String> HEADERS;
-    static{
+    static {
         HEADERS = new HashMap<String, String>();
         HEADERS.put("Accept", "application/json, text/javascript, */*");
-        
+
     }
-    static UserDiscoveryResponse execute(final String uri, final Proxy proxy) throws Exception {
+
+    static UserDiscoveryResponse execute(final String uri, final Proxy proxy)
+            throws Exception {
         String response = HttpHelper.executeHttpGet(log, uri, HEADERS, proxy);
-        return JsonHelper.convertJsonToObject(response, UserDiscoveryResponse.class);
+        return JsonHelper.convertJsonToObject(response,
+                UserDiscoveryResponse.class);
     }
 }

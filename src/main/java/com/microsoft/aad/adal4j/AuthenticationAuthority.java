@@ -35,7 +35,8 @@ class AuthenticationAuthority {
             .getLogger(AuthenticationAuthority.class);
 
     private final static String[] TRUSTED_HOST_LIST = { "login.windows.net",
-            "login.chinacloudapi.cn", "login.cloudgovapi.us", "login.microsoftonline.com" };
+            "login.chinacloudapi.cn", "login.cloudgovapi.us",
+            "login.microsoftonline.com" };
     private final static String TENANTLESS_TENANT_NAME = "common";
     private final static String AUTHORIZE_ENDPOINT_TEMPLATE = "https://{host}/{tenant}/oauth2/authorize";
     private final static String DISCOVERY_ENDPOINT = "common/discovery/instance";
@@ -98,11 +99,11 @@ class AuthenticationAuthority {
     String getTokenEndpoint() {
         return tokenEndpoint;
     }
-    
+
     String getUserRealmEndpoint(String username) {
         return String.format(userRealmEndpointFormat, host, username);
     }
-    
+
     AuthorityType getAuthorityType() {
         return authorityType;
     }
@@ -146,7 +147,8 @@ class AuthenticationAuthority {
 
     boolean doDynamicInstanceDiscovery(final Map<String, String> headers)
             throws Exception {
-        final String json = HttpHelper.executeHttpGet(log, instanceDiscoveryEndpoint, headers, proxy);
+        final String json = HttpHelper.executeHttpGet(log,
+                instanceDiscoveryEndpoint, headers, proxy);
         final InstanceDiscoveryResponse discoveryResponse = JsonHelper
                 .convertJsonToObject(json, InstanceDiscoveryResponse.class);
         return !StringHelper.isBlank(discoveryResponse

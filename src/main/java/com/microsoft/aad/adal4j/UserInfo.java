@@ -105,7 +105,8 @@ public class UserInfo implements Serializable {
                 .getStringClaim(AuthenticationConstants.ID_TOKEN_OBJECT_ID))) {
             uniqueId = claims
                     .getStringClaim(AuthenticationConstants.ID_TOKEN_OBJECT_ID);
-        } else if (!StringHelper.isBlank(claims
+        }
+        else if (!StringHelper.isBlank(claims
                 .getStringClaim(AuthenticationConstants.ID_TOKEN_SUBJECT))) {
             uniqueId = claims
                     .getStringClaim(AuthenticationConstants.ID_TOKEN_SUBJECT);
@@ -115,7 +116,8 @@ public class UserInfo implements Serializable {
                 .getStringClaim(AuthenticationConstants.ID_TOKEN_UPN))) {
             displayableId = claims
                     .getStringClaim(AuthenticationConstants.ID_TOKEN_UPN);
-        } else if (!StringHelper.isBlank(claims
+        }
+        else if (!StringHelper.isBlank(claims
                 .getStringClaim(AuthenticationConstants.ID_TOKEN_EMAIL))) {
             displayableId = claims
                     .getStringClaim(AuthenticationConstants.ID_TOKEN_EMAIL);

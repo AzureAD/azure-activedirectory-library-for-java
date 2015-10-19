@@ -34,50 +34,27 @@ import org.slf4j.Logger;
 
 class HttpHelper {
 
-    static String executeHttpGet(final Logger log, final String url)
-            throws Exception {
-        return executeHttpGet(log, url, null, null);
-    }
-
-    static String executeHttpGet(final Logger log, final String url, final Proxy proxy)
-            throws Exception {
+    static String executeHttpGet(final Logger log, final String url,
+            final Proxy proxy) throws Exception {
         return executeHttpGet(log, url, null, proxy);
     }
 
     static String executeHttpGet(final Logger log, final String url,
-            final Map<String, String> headers) throws Exception {
-        final HttpURLConnection conn = HttpHelper.openConnection(url);
-        return executeGetRequest(log, headers, conn);
-    }
-
-    static String executeHttpGet(final Logger log, final String url,
-                                 final Map<String, String> headers, final Proxy proxy) throws Exception {
-        final HttpURLConnection conn =
-                    proxy == null ?
-                            HttpHelper.openConnection(url) :
-                            HttpHelper.openConnection(url, proxy);
+            final Map<String, String> headers, final Proxy proxy)
+            throws Exception {
+        final HttpURLConnection conn = HttpHelper.openConnection(url, proxy);
         return executeGetRequest(log, headers, conn);
     }
 
     static String executeHttpPost(final Logger log, final String url,
-            String postData) throws Exception {
-        return executeHttpPost(log, url, postData, null);
+            String postData, final Proxy proxy) throws Exception {
+        return executeHttpPost(log, url, postData, null, proxy);
     }
 
     static String executeHttpPost(final Logger log, final String url,
-            String postData, final Map<String, String> headers)
-            throws Exception {
-        final HttpURLConnection conn = HttpHelper.openConnection(url);
-        return executePostRequest(log, postData, headers, conn);
-    }
-
-    static String executeHttpPost(final Logger log, final String url,
-                                  String postData, final Map<String, String> headers, final Proxy proxy)
-            throws Exception {
-        final HttpURLConnection conn =
-                    proxy == null ?
-                            HttpHelper.openConnection(url) :
-                            HttpHelper.openConnection(url, proxy);
+            String postData, final Map<String, String> headers,
+            final Proxy proxy) throws Exception {
+        final HttpURLConnection conn = HttpHelper.openConnection(url, proxy);
         return executePostRequest(log, postData, headers, conn);
     }
 
@@ -97,31 +74,26 @@ class HttpHelper {
             while ((rsz = reader.read(buffer, 0, buffer.length)) > -1) {
                 out.append(buffer, 0, rsz);
             }
-        } finally {
+        }
+        finally {
             reader.close();
         }
 
         return out.toString();
     }
 
-    static HttpURLConnection openConnection(final URL finalURL, final Proxy proxy)
-            throws IOException  {
-        return (HttpURLConnection) finalURL.openConnection(proxy);
-    }
+    static HttpURLConnection openConnection(final URL finalURL,
+            final Proxy proxy) throws IOException {
+        if (proxy != null) {
+            return (HttpURLConnection) finalURL.openConnection(proxy);
+        }
 
-    static HttpURLConnection openConnection(final URL finalURL)
-            throws IOException {
         return (HttpURLConnection) finalURL.openConnection();
     }
 
     static HttpURLConnection openConnection(final String url, final Proxy proxy)
             throws IOException {
         return openConnection(new URL(url), proxy);
-    }
-
-    static HttpURLConnection openConnection(final String url)
-            throws IOException {
-        return openConnection(new URL(url));
     }
 
     static HttpURLConnection configureAdditionalHeaders(
@@ -152,14 +124,16 @@ class HttpHelper {
         }
     }
 
-    private static String executeGetRequest(Logger log, Map<String, String> headers, HttpURLConnection conn)
+    private static String executeGetRequest(Logger log,
+            Map<String, String> headers, HttpURLConnection conn)
             throws IOException {
         configureAdditionalHeaders(conn, headers);
         return getResponse(log, headers, conn);
     }
 
-    private static String executePostRequest(Logger log, String postData, Map<String, String> headers,
-                                             HttpURLConnection conn) throws IOException {
+    private static String executePostRequest(Logger log, String postData,
+            Map<String, String> headers, HttpURLConnection conn)
+            throws IOException {
         configureAdditionalHeaders(conn, headers);
         conn.setRequestMethod("POST");
         conn.setDoOutput(true);
@@ -170,15 +144,16 @@ class HttpHelper {
             wr.flush();
 
             return getResponse(log, headers, conn);
-        } finally {
+        }
+        finally {
             if (wr != null) {
                 wr.close();
             }
         }
     }
 
-    private static String getResponse(Logger log, Map<String, String> headers, HttpURLConnection conn)
-            throws IOException {
+    private static String getResponse(Logger log, Map<String, String> headers,
+            HttpURLConnection conn) throws IOException {
         String response = readResponseFromConnection(conn);
         if (headers != null) {
             HttpHelper.verifyReturnedCorrelationId(log, conn, headers

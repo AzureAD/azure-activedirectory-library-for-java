@@ -22,7 +22,7 @@ package com.microsoft.aad.adal4j;
 import com.google.gson.annotations.SerializedName;
 
 class UserDiscoveryResponse {
-    
+
     @SerializedName("ver")
     private float version;
 
@@ -34,28 +34,28 @@ class UserDiscoveryResponse {
 
     @SerializedName("federation_protocol")
     private String federationProtocol;
-    
+
     @SerializedName("federation_active_auth_url")
     private String federationActiveAuthUrl;
-    
-    
+
     float getVersion() {
         return version;
     }
-    
-    boolean isAccountFederated(){
-        return !StringHelper.isBlank(this.accountType) && this.accountType.equalsIgnoreCase("Federated");
+
+    boolean isAccountFederated() {
+        return !StringHelper.isBlank(this.accountType)
+                && this.accountType.equalsIgnoreCase("Federated");
     }
-    
-    String getFederationProtocol(){
+
+    String getFederationProtocol() {
         return federationProtocol;
     }
 
-    String getFederationMetadataUrl(){
+    String getFederationMetadataUrl() {
         return federationMetadataUrl;
     }
 
-    String getFederationActiveAuthUrl(){
+    String getFederationActiveAuthUrl() {
         return federationActiveAuthUrl;
     }
 }

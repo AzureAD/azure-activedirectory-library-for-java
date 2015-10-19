@@ -47,13 +47,15 @@ public class NamespaceContextImpl implements NamespaceContext {
         PREF_MAP.put("wst", "http://docs.oasis-open.org/ws-sx/ws-trust/200512");
         PREF_MAP.put("t", "http://schemas.xmlsoap.org/ws/2005/02/trust");
         PREF_MAP.put("a", "http://www.w3.org/2005/08/addressing");
-        PREF_MAP.put("q", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
+        PREF_MAP.put(
+                "q",
+                "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
     }
 
-    public void modifyNameSpace(String key, String value){
+    public void modifyNameSpace(String key, String value) {
         PREF_MAP.put(key, value);
     }
-    
+
     public String getNamespaceURI(String prefix) {
         return PREF_MAP.get(prefix);
     }
