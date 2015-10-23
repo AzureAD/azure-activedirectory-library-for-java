@@ -45,7 +45,7 @@ public class AdalOAuthRequestTest extends AbstractAdalTests {
     @Test
     public void testConstructor() throws MalformedURLException {
         final AdalOAuthRequest request = new AdalOAuthRequest(Method.POST,
-                new URL("http://login.windows.net"), null, null);
+                new URL("http://login.windows.net"), null, null, null);
         assertNotNull(request);
     }
 
@@ -55,7 +55,7 @@ public class AdalOAuthRequestTest extends AbstractAdalTests {
             throws Exception {
 
         final AdalOAuthRequest request = new AdalOAuthRequest(Method.GET,
-                new URL("https://" + TestConfiguration.AAD_HOST_NAME), null, null);
+                new URL("https://" + TestConfiguration.AAD_HOST_NAME), null, null, null);
         final HttpURLConnection conn = PowerMock
                 .createMock(HttpURLConnection.class);
         EasyMock.expect(conn.getResponseCode()).andReturn(200).times(1);
@@ -72,7 +72,7 @@ public class AdalOAuthRequestTest extends AbstractAdalTests {
     public void testCreateResponseLocationNull()
             throws Exception {
         final AdalOAuthRequest request = new AdalOAuthRequest(Method.GET,
-                new URL("https://" + TestConfiguration.AAD_HOST_NAME), null, null);
+                new URL("https://" + TestConfiguration.AAD_HOST_NAME), null, null, null);
         final HttpURLConnection conn = PowerMock
                 .createMock(HttpURLConnection.class);
         EasyMock.expect(conn.getResponseCode()).andReturn(200).times(1);
@@ -101,7 +101,7 @@ public class AdalOAuthRequestTest extends AbstractAdalTests {
     @Test
     public void testCreateResponse() throws Exception {
         final AdalOAuthRequest request = new AdalOAuthRequest(Method.GET,
-                new URL("https://" + TestConfiguration.AAD_HOST_NAME), null, null);
+                new URL("https://" + TestConfiguration.AAD_HOST_NAME), null, null, null);
         final HttpURLConnection conn = PowerMock
                 .createMock(HttpURLConnection.class);
         EasyMock.expect(conn.getResponseCode()).andReturn(200).times(1);
@@ -132,7 +132,7 @@ public class AdalOAuthRequestTest extends AbstractAdalTests {
     @Test
     public void testCreateResponseFor404() throws Exception {
         final AdalOAuthRequest request = new AdalOAuthRequest(Method.GET,
-                new URL("https://" + TestConfiguration.AAD_HOST_NAME), null, null);
+                new URL("https://" + TestConfiguration.AAD_HOST_NAME), null, null, null);
         final HttpURLConnection conn = PowerMock
                 .createMock(HttpURLConnection.class);
         EasyMock.expect(conn.getResponseCode()).andReturn(404);

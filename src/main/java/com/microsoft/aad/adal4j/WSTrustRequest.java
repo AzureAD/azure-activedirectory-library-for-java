@@ -29,6 +29,8 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
 
+import javax.net.ssl.SSLSocketFactory;
+
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,12 +44,14 @@ class WSTrustRequest {
     private final static String DEFAULT_APPLIES_TO = "urn:federation:MicrosoftOnline";
 
     static WSTrustResponse execute(String url, String username,
-            String password, Proxy proxy) throws Exception {
+            String password, Proxy proxy, SSLSocketFactory sslSocketFactory)
+            throws Exception {
+
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Content-Type", "application/soap+xml; charset=utf-8");
 
         BindingPolicy policy = MexParser.getWsTrustEndpointFromMexEndpoint(url,
-                proxy);
+                proxy, sslSocketFactory);
         String soapAction = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue"; // default
                                                                                           // value
                                                                                           // (WSTrust
@@ -65,7 +69,7 @@ class WSTrustRequest {
         String body = buildMessage(policy.getUrl(), username, password,
                 policy.getVersion()).toString();
         String response = HttpHelper.executeHttpPost(log, policy.getUrl(),
-                body, headers, proxy);
+                body, headers, proxy, sslSocketFactory);
         return WSTrustResponse.parse(response, policy.getVersion());
     }
 
