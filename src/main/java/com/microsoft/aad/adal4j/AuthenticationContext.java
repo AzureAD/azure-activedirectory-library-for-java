@@ -144,7 +144,7 @@ public class AuthenticationContext {
      * 
      * @param sslSocketFactory
      */
-    public void setProxy(SSLSocketFactory sslSocketFactory) {
+    public void setSslSocketFactory(SSLSocketFactory sslSocketFactory) {
         this.sslSocketFactory = sslSocketFactory;
     }
 

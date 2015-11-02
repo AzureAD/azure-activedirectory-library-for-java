@@ -19,12 +19,7 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.security.KeyStore;
@@ -164,79 +159,6 @@ public class AuthenticationContextTest extends AbstractAdalTests {
         PowerMock.resetAll(ctx);
     }
 
-    @Test
-    public void testAcquireToken_Username_Password() throws Exception {
-        ctx = PowerMock.createPartialMock(AuthenticationContext.class,
-                new String[] { "acquireTokenCommon" },
-                TestConfiguration.AAD_TENANT_ENDPOINT, true, service);
-        PowerMock.expectPrivate(ctx, "acquireTokenCommon",
-                EasyMock.isA(AdalAuthorizatonGrant.class),
-                EasyMock.isA(ClientAuthentication.class),
-                EasyMock.isA(ClientDataHttpHeaders.class)).andReturn(
-                new AuthenticationResult("bearer", "accessToken",
-                        "refreshToken", new Date().getTime(), null, null, false));
-
-        PowerMock.replay(ctx);
-        Future<AuthenticationResult> result = ctx.acquireToken("resource",
-        "clientId", "username",
-        "password", null);
-
-        AuthenticationResult ar = result.get();
-        Assert.assertNotNull(ar);
-        PowerMock.verifyAll();
-        PowerMock.resetAll(ctx);
-    }
-
-    @Test(groups = { "end-to-end" })
-    public void testAcquireToken_KeyCred() throws Exception {
-        final KeyStore keystore = KeyStore.getInstance("PKCS12", "SunJSSE");
-        keystore.load(
-                new FileInputStream(this.getClass()
-                        .getResource(TestConfiguration.AAD_CERTIFICATE_PATH)
-                        .getFile()),
-                TestConfiguration.AAD_CERTIFICATE_PASSWORD.toCharArray());
-        final String alias = keystore.aliases().nextElement();
-        final PrivateKey key = (PrivateKey) keystore.getKey(alias,
-                TestConfiguration.AAD_CERTIFICATE_PASSWORD.toCharArray());
-        final X509Certificate cert = (X509Certificate) keystore
-                .getCertificate(alias);
-        ctx = new AuthenticationContext(TestConfiguration.AAD_TENANT_ENDPOINT,
-                true, service);
-        final Future<AuthenticationResult> result = ctx.acquireToken(
-                TestConfiguration.AAD_RESOURCE_ID, AsymmetricKeyCredential
-                        .create(TestConfiguration.AAD_CLIENT_ID, key, cert),
-                null);
-        final AuthenticationResult ar = result.get();
-        assertNotNull(ar);
-        assertFalse(StringHelper.isBlank(result.get().getAccessToken()));
-        assertTrue(StringHelper.isBlank(result.get().getRefreshToken()));
-    }
-
-    @Test(groups = { "end-to-end" })
-    public void testAcquireToken_RefreshToken() throws Exception {
-        final KeyStore keystore = KeyStore.getInstance("PKCS12", "SunJSSE");
-        keystore.load(
-                new FileInputStream(this.getClass()
-                        .getResource(TestConfiguration.AAD_CERTIFICATE_PATH)
-                        .getFile()),
-                TestConfiguration.AAD_CERTIFICATE_PASSWORD.toCharArray());
-        final String alias = keystore.aliases().nextElement();
-        final PrivateKey key = (PrivateKey) keystore.getKey(alias,
-                TestConfiguration.AAD_CERTIFICATE_PASSWORD.toCharArray());
-        final X509Certificate cert = (X509Certificate) keystore
-                .getCertificate(alias);
-        ctx = new AuthenticationContext(TestConfiguration.AAD_TENANT_ENDPOINT,
-                true, service);
-        final Future<AuthenticationResult> result = ctx.acquireToken(
-                TestConfiguration.AAD_RESOURCE_ID, AsymmetricKeyCredential
-                        .create(TestConfiguration.AAD_CLIENT_ID, key, cert),
-                null);
-        final AuthenticationResult ar = result.get();
-        assertNotNull(ar);
-        assertFalse(StringHelper.isBlank(result.get().getAccessToken()));
-        assertTrue(StringHelper.isBlank(result.get().getRefreshToken()));
-    }
-
     @Test(expectedExceptions = AuthenticationException.class)
     public void testInvalidClientAssertion() throws MalformedURLException {
         ctx = new AuthenticationContext(TestConfiguration.AAD_TENANT_ENDPOINT,
@@ -277,20 +199,6 @@ public class AuthenticationContextTest extends AbstractAdalTests {
                 true, service);
         ctx.acquireTokenByRefreshToken("refresh_token", null,
                 new ClientAssertion("invalid_assertion"), null);
-    }
-
-    @Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = "lgn.windows.net")
-    public void testFailedAcquireTokenRequest() throws Throwable {
-        ctx = new AuthenticationContext(
-                TestConfiguration.AAD_UNKNOWN_TENANT_ENDPOINT, true, service);
-        Future<AuthenticationResult> result = ctx.acquireTokenByRefreshToken(
-                "refresh", new ClientCredential("clientId", "clientSecret"),
-                "resource", null);
-        try {
-            result.get();
-        } catch (ExecutionException ee) {
-            throw ee.getCause();
-        }
     }
 
     @Test

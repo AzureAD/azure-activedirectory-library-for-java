@@ -186,7 +186,7 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
 
         final AdalTokenRequest request = PowerMock.createPartialMock(
                 AdalTokenRequest.class, new String[] { "toOAuthRequest" },
-                new URL("http://login.windows.net"), null, grant, null, null, null, null);
+                new URL("http://login.windows.net"), null, grant, null, null, null);
         final AdalOAuthRequest adalOAuthHttpRequest = PowerMock
                 .createMock(AdalOAuthRequest.class);
         final HTTPResponse httpResponse = PowerMock
