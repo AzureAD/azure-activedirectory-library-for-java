@@ -31,6 +31,9 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +51,7 @@ class AdalOAuthRequest extends HTTPRequest {
     private final Map<String, String> extraHeaderParams;
     private final Logger log = LoggerFactory.getLogger(AdalOAuthRequest.class);
     private final Proxy proxy;
+    private final SSLSocketFactory sslSocketFactory;
 
     /**
      * 
@@ -56,10 +60,12 @@ class AdalOAuthRequest extends HTTPRequest {
      * @param correlationId
      */
     AdalOAuthRequest(final Method method, final URL url,
-            final Map<String, String> extraHeaderParams, final Proxy proxy) {
+            final Map<String, String> extraHeaderParams, final Proxy proxy,
+            final SSLSocketFactory sslSocketFactory) {
         super(method, url);
         this.extraHeaderParams = extraHeaderParams;
         this.proxy = proxy;
+        this.sslSocketFactory = sslSocketFactory;
     }
 
     Map<String, String> getReadOnlyExtraHeaderParameters() {
@@ -72,8 +78,8 @@ class AdalOAuthRequest extends HTTPRequest {
     @Override
     public HTTPResponse send() throws IOException {
 
-        final HttpURLConnection conn = HttpHelper.openConnection(this.getURL(),
-                this.proxy);
+        final HttpsURLConnection conn = HttpHelper.openConnection(this.getURL(),
+                this.proxy, this.sslSocketFactory);
         this.configureHeaderAndExecuteOAuthCall(conn);
         final String out = this.processAndReadResponse(conn);
         HttpHelper.verifyReturnedCorrelationId(log, conn,
@@ -107,7 +113,7 @@ class AdalOAuthRequest extends HTTPRequest {
         return response;
     }
 
-    void configureHeaderAndExecuteOAuthCall(final HttpURLConnection conn)
+    void configureHeaderAndExecuteOAuthCall(final HttpsURLConnection conn)
             throws IOException {
 
         if (this.getAuthorization() != null) {

@@ -21,7 +21,8 @@ package com.microsoft.aad.adal4j;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import org.easymock.EasyMock;
 import org.powermock.api.easymock.PowerMock;
@@ -37,8 +38,8 @@ public class HttpHelperTest extends AbstractAdalTests {
     @Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = "Failed: HTTP error code 403")
     public void testReadResponseFromConnection_ResponseCodeNot200()
             throws Exception {
-        final HttpURLConnection connection = PowerMock
-                .createMock(HttpURLConnection.class);
+        final HttpsURLConnection connection = PowerMock
+                .createMock(HttpsURLConnection.class);
         EasyMock.expect(connection.getResponseCode()).andReturn(403).times(2);
         final InputStream is = PowerMock.createMock(InputStream.class);
         is.close();

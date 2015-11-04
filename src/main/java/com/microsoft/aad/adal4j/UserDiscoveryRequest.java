@@ -23,6 +23,8 @@ import java.net.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.net.ssl.SSLSocketFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,9 +39,11 @@ class UserDiscoveryRequest {
 
     }
 
-    static UserDiscoveryResponse execute(final String uri, final Proxy proxy)
-            throws Exception {
-        String response = HttpHelper.executeHttpGet(log, uri, HEADERS, proxy);
+    static UserDiscoveryResponse execute(final String uri, final Proxy proxy,
+            final SSLSocketFactory sslSocketFactory) throws Exception {
+
+        String response = HttpHelper.executeHttpGet(log, uri, HEADERS, proxy,
+                sslSocketFactory);
         return JsonHelper.convertJsonToObject(response,
                 UserDiscoveryResponse.class);
     }

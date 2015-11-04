@@ -63,7 +63,7 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
                 (String) null);
         final ClientDataHttpHeaders cdhh = new ClientDataHttpHeaders("corr-id");
         final AdalTokenRequest request = new AdalTokenRequest(null, ca, grant,
-                cdhh.getReadonlyHeaderMap(), null);
+                cdhh.getReadonlyHeaderMap(), null, null);
         Assert.assertNotNull(request);
         request.executeOAuthRequestAndProcessResponse();
     }
@@ -81,7 +81,7 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
         final ClientDataHttpHeaders cdhh = new ClientDataHttpHeaders("corr-id");
         final AdalTokenRequest request = new AdalTokenRequest(new URL(
                 "http://login.windows.net"), ca, grant,
-                cdhh.getReadonlyHeaderMap(), null);
+                cdhh.getReadonlyHeaderMap(), null, null);
         Assert.assertNotNull(request);
     }
 
@@ -99,7 +99,7 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
         final ClientDataHttpHeaders cdhh = new ClientDataHttpHeaders("corr-id");
         final AdalTokenRequest request = new AdalTokenRequest(new URL(
                 "http://login.windows.net"), ca, grant,
-                cdhh.getReadonlyHeaderMap(), null);
+                cdhh.getReadonlyHeaderMap(), null, null);
         Assert.assertNotNull(request);
         final AdalOAuthRequest req = request.toOAuthRequest();
         Assert.assertNotNull(req);
@@ -119,7 +119,7 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
         final AdalAuthorizatonGrant grant = new AdalAuthorizatonGrant(ag,
                 (String) null);
         final AdalTokenRequest request = new AdalTokenRequest(new URL(
-                "http://login.windows.net"), null, grant, null, null);
+                "http://login.windows.net"), null, grant, null, null, null);
         Assert.assertNotNull(request);
         final AdalOAuthRequest req = request.toOAuthRequest();
         Assert.assertNotNull(req);
@@ -137,7 +137,7 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
 
         final AdalTokenRequest request = PowerMock.createPartialMock(
                 AdalTokenRequest.class, new String[] { "toOAuthRequest" },
-                new URL("http://login.windows.net"), null, grant, null, null);
+                new URL("http://login.windows.net"), null, grant, null, null, null);
         final AdalOAuthRequest adalOAuthHttpRequest = PowerMock
                 .createMock(AdalOAuthRequest.class);
         final HTTPResponse httpResponse = PowerMock
@@ -186,7 +186,7 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
 
         final AdalTokenRequest request = PowerMock.createPartialMock(
                 AdalTokenRequest.class, new String[] { "toOAuthRequest" },
-                new URL("http://login.windows.net"), null, grant, null, null);
+                new URL("http://login.windows.net"), null, grant, null, null, null);
         final AdalOAuthRequest adalOAuthHttpRequest = PowerMock
                 .createMock(AdalOAuthRequest.class);
         final HTTPResponse httpResponse = PowerMock
@@ -216,7 +216,8 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
         try {
             request.executeOAuthRequestAndProcessResponse();
             PowerMock.verifyAll();
-        } finally {
+        }
+        finally {
             PowerMock.reset(request, adalOAuthHttpRequest, httpResponse,
                     TokenErrorResponse.class, jsonObj, errorResponse);
         }

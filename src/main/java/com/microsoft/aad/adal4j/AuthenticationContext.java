@@ -32,6 +32,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import javax.net.ssl.SSLSocketFactory;
+
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +74,7 @@ public class AuthenticationContext {
     private final ExecutorService service;
     private final boolean validateAuthority;
     private Proxy proxy;
+    private SSLSocketFactory sslSocketFactory;
 
     /**
      * Constructor to create the context with the address of the authority.
@@ -106,13 +109,43 @@ public class AuthenticationContext {
                 this.getAuthority()), this.shouldValidateAuthority());
     }
 
+    /**
+     * Returns Proxy configuration
+     * 
+     * @return Proxy Object
+     */
     public Proxy getProxy() {
         return proxy;
     }
 
+    /**
+     * Sets Proxy configuration to be used by the context for all network
+     * communication. Default is null and system defined properties if any,
+     * would be used.
+     * 
+     * @param proxy
+     *            Proxy configuration object
+     */
     public void setProxy(Proxy proxy) {
         this.proxy = proxy;
-        authenticationAuthority.setProxy(proxy);
+    }
+
+    /**
+     * Returns SSLSocketFactory configuration object.
+     * 
+     * @return SSLSocketFactory object
+     */
+    public SSLSocketFactory getSslSocketFactory() {
+        return sslSocketFactory;
+    }
+
+    /**
+     * Sets SSLSocketFactory object to be used by the context.
+     * 
+     * @param sslSocketFactory
+     */
+    public void setSslSocketFactory(SSLSocketFactory sslSocketFactory) {
+        this.sslSocketFactory = sslSocketFactory;
     }
 
     private String canonicalizeUri(String authority) {
@@ -775,11 +808,13 @@ public class AuthenticationContext {
         log.debug(LogHelper.createMessage(
                 String.format("Using Client Http Headers: %s", headers),
                 headers.getHeaderCorrelationIdValue()));
-        this.authenticationAuthority.doInstanceDiscovery(headers
-                .getReadonlyHeaderMap());
+        this.authenticationAuthority.doInstanceDiscovery(
+                headers.getReadonlyHeaderMap(), this.proxy,
+                this.sslSocketFactory);
         final URL url = new URL(this.authenticationAuthority.getTokenUri());
         final AdalTokenRequest request = new AdalTokenRequest(url, clientAuth,
-                authGrant, headers.getReadonlyHeaderMap(), this.proxy);
+                authGrant, headers.getReadonlyHeaderMap(), this.proxy,
+                this.sslSocketFactory);
         AuthenticationResult result = request
                 .executeOAuthRequestAndProcessResponse();
         return result;
@@ -791,6 +826,7 @@ public class AuthenticationContext {
      */
     private AdalAuthorizatonGrant processPasswordGrant(
             AdalAuthorizatonGrant authGrant) throws Exception {
+
         if (!(authGrant.getAuthorizationGrant() instanceof ResourceOwnerPasswordCredentialsGrant)) {
             return authGrant;
         }
@@ -800,11 +836,12 @@ public class AuthenticationContext {
 
         UserDiscoveryResponse discoveryResponse = UserDiscoveryRequest.execute(
                 this.authenticationAuthority.getUserRealmEndpoint(grant
-                        .getUsername()), proxy);
+                        .getUsername()), this.proxy, this.sslSocketFactory);
         if (discoveryResponse.isAccountFederated()) {
             WSTrustResponse response = WSTrustRequest.execute(
                     discoveryResponse.getFederationMetadataUrl(),
-                    grant.getUsername(), grant.getPassword().getValue(), proxy);
+                    grant.getUsername(), grant.getPassword().getValue(),
+                    this.proxy, this.sslSocketFactory);
 
             AuthorizationGrant updatedGrant = null;
             if (response.isTokenSaml2()) {

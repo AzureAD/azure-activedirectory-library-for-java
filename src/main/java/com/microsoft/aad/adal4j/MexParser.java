@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.net.ssl.SSLSocketFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
@@ -100,9 +101,10 @@ class MexParser {
     }
 
     static BindingPolicy getWsTrustEndpointFromMexEndpoint(
-            String metadataEndpoint, Proxy proxy) throws Exception {
+            String metadataEndpoint, Proxy proxy,
+            SSLSocketFactory sslSocketFactory) throws Exception {
         String mexResponse = HttpHelper.executeHttpGet(log, metadataEndpoint,
-                proxy);
+                proxy, sslSocketFactory);
         return getWsTrustEndpointFromMexResponse(mexResponse);
     }
 
@@ -217,7 +219,6 @@ class MexParser {
             Node bindingNode) throws XPathExpressionException {
         NodeList soapTransportAttributes = null;
         String soapAction = null;
-        String soapTransport = null;
         String bindingName = bindingNode.getAttributes().getNamedItem("name")
                 .getNodeValue();
         NodeList soapActionAttributes = (NodeList) xPath.compile(
