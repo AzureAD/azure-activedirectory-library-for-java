@@ -19,6 +19,10 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
 import java.io.FileInputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -36,6 +40,7 @@ import java.util.concurrent.Future;
 
 import org.easymock.EasyMock;
 import org.powermock.api.easymock.PowerMock;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
@@ -44,6 +49,7 @@ import org.testng.annotations.Test;
 
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 
+@PowerMockIgnore({"javax.net.ssl.*"})
 @Test(groups = { "checkin" })
 @PrepareForTest({ AuthenticationContext.class, AuthenticationCallback.class,
         AsymmetricKeyCredential.class })
@@ -155,6 +161,44 @@ public class AuthenticationContextTest extends AbstractAdalTests {
                         null);
         AuthenticationResult ar = result.get();
         Assert.assertNotNull(ar);
+        PowerMock.verifyAll();
+        PowerMock.resetAll(ctx);
+    }
+
+    public void testAcquireToken_KeyCred() throws Exception {
+    	
+        ctx = PowerMock.createPartialMock(AuthenticationContext.class,
+                new String[] { "acquireTokenCommon" },
+                TestConfiguration.AAD_TENANT_ENDPOINT, true, service);
+        PowerMock.expectPrivate(ctx, "acquireTokenCommon",
+                EasyMock.isA(AdalAuthorizatonGrant.class),
+                EasyMock.isA(ClientAuthentication.class),
+                EasyMock.isA(ClientDataHttpHeaders.class)).andReturn(
+                new AuthenticationResult("bearer", "accessToken",
+                        null, new Date().getTime(), null, null,
+                        false));
+    	
+        final KeyStore keystore = KeyStore.getInstance("PKCS12", "SunJSSE");
+        keystore.load(
+                new FileInputStream(this.getClass()
+                        .getResource(TestConfiguration.AAD_CERTIFICATE_PATH)
+                        .getFile()),
+                TestConfiguration.AAD_CERTIFICATE_PASSWORD.toCharArray());
+        final String alias = keystore.aliases().nextElement();
+        final PrivateKey key = (PrivateKey) keystore.getKey(alias,
+                TestConfiguration.AAD_CERTIFICATE_PASSWORD.toCharArray());
+        final X509Certificate cert = (X509Certificate) keystore
+                .getCertificate(alias);
+
+        PowerMock.replay(ctx);
+        final Future<AuthenticationResult> result = ctx.acquireToken(
+                TestConfiguration.AAD_RESOURCE_ID, AsymmetricKeyCredential
+                        .create(TestConfiguration.AAD_CLIENT_ID, key, cert),
+                null);
+        final AuthenticationResult ar = result.get();
+        assertNotNull(ar);
+        assertFalse(StringHelper.isBlank(result.get().getAccessToken()));
+        assertTrue(StringHelper.isBlank(result.get().getRefreshToken()));
         PowerMock.verifyAll();
         PowerMock.resetAll(ctx);
     }
