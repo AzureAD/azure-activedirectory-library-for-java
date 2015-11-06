@@ -26,9 +26,13 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.net.HttpURLConnection;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +50,8 @@ class AdalOAuthRequest extends HTTPRequest {
 
     private final Map<String, String> extraHeaderParams;
     private final Logger log = LoggerFactory.getLogger(AdalOAuthRequest.class);
+    private final Proxy proxy;
+    private final SSLSocketFactory sslSocketFactory;
 
     /**
      * 
@@ -54,9 +60,12 @@ class AdalOAuthRequest extends HTTPRequest {
      * @param correlationId
      */
     AdalOAuthRequest(final Method method, final URL url,
-            final Map<String, String> extraHeaderParams) {
+            final Map<String, String> extraHeaderParams, final Proxy proxy,
+            final SSLSocketFactory sslSocketFactory) {
         super(method, url);
         this.extraHeaderParams = extraHeaderParams;
+        this.proxy = proxy;
+        this.sslSocketFactory = sslSocketFactory;
     }
 
     Map<String, String> getReadOnlyExtraHeaderParameters() {
@@ -69,7 +78,8 @@ class AdalOAuthRequest extends HTTPRequest {
     @Override
     public HTTPResponse send() throws IOException {
 
-        final HttpURLConnection conn = HttpHelper.openConnection(this.getURL());
+        final HttpsURLConnection conn = HttpHelper.openConnection(this.getURL(),
+                this.proxy, this.sslSocketFactory);
         this.configureHeaderAndExecuteOAuthCall(conn);
         final String out = this.processAndReadResponse(conn);
         HttpHelper.verifyReturnedCorrelationId(log, conn,
@@ -88,7 +98,8 @@ class AdalOAuthRequest extends HTTPRequest {
 
         try {
             response.setContentType(conn.getContentType());
-        } catch (final ParseException e) {
+        }
+        catch (final ParseException e) {
             throw new IOException("Couldn't parse Content-Type header: "
                     + e.getMessage(), e);
         }
@@ -102,7 +113,7 @@ class AdalOAuthRequest extends HTTPRequest {
         return response;
     }
 
-    void configureHeaderAndExecuteOAuthCall(final HttpURLConnection conn)
+    void configureHeaderAndExecuteOAuthCall(final HttpsURLConnection conn)
             throws IOException {
 
         if (this.getAuthorization() != null) {
@@ -111,14 +122,15 @@ class AdalOAuthRequest extends HTTPRequest {
 
         Map<String, String> params = new java.util.HashMap<>();
         if (this.extraHeaderParams != null && !this.extraHeaderParams.isEmpty()) {
-            for (java.util.Map.Entry<String, String> entry : this.extraHeaderParams.entrySet()) {
+            for (java.util.Map.Entry<String, String> entry : this.extraHeaderParams
+                    .entrySet()) {
                 if (entry.getValue() == null || entry.getValue().isEmpty()) {
                     continue;
                 }
                 params.put(entry.getKey(), entry.getValue());
             }
         }
-        
+
         HttpHelper.configureAdditionalHeaders(conn, params);
         conn.setDoOutput(true);
         conn.setRequestProperty("Content-Type",
@@ -139,13 +151,13 @@ class AdalOAuthRequest extends HTTPRequest {
         final int responseCode = conn.getResponseCode();
         if (responseCode == 200) {
             inReader = new InputStreamReader(conn.getInputStream());
-        } else {
-        	InputStream stream = conn.getErrorStream();
-        	if(stream == null && responseCode == 404)
-        	{
-        		stream = conn.getInputStream();
-        	}
-        	
+        }
+        else {
+            InputStream stream = conn.getErrorStream();
+            if (stream == null && responseCode == 404) {
+                stream = conn.getInputStream();
+            }
+
             inReader = new InputStreamReader(stream);
         }
         final BufferedReader reader = new BufferedReader(inReader);
@@ -159,7 +171,8 @@ class AdalOAuthRequest extends HTTPRequest {
                 }
                 out.append(buffer, 0, rsz);
             }
-        } finally {
+        }
+        finally {
             reader.close();
         }
         return out.toString();

@@ -32,6 +32,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import javax.net.ssl.SSLSocketFactory;
+
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +74,7 @@ public class AuthenticationContext {
     private final ExecutorService service;
     private final boolean validateAuthority;
     private Proxy proxy;
+    private SSLSocketFactory sslSocketFactory;
 
     /**
      * Constructor to create the context with the address of the authority.
@@ -88,7 +91,7 @@ public class AuthenticationContext {
      *             thrown if URL is invalid
      */
     public AuthenticationContext(final String authority,
-                                 final boolean validateAuthority, final ExecutorService service)
+            final boolean validateAuthority, final ExecutorService service)
             throws MalformedURLException {
 
         if (StringHelper.isBlank(authority)) {
@@ -106,13 +109,43 @@ public class AuthenticationContext {
                 this.getAuthority()), this.shouldValidateAuthority());
     }
 
+    /**
+     * Returns Proxy configuration
+     * 
+     * @return Proxy Object
+     */
     public Proxy getProxy() {
         return proxy;
     }
 
+    /**
+     * Sets Proxy configuration to be used by the context for all network
+     * communication. Default is null and system defined properties if any,
+     * would be used.
+     * 
+     * @param proxy
+     *            Proxy configuration object
+     */
     public void setProxy(Proxy proxy) {
         this.proxy = proxy;
-        authenticationAuthority.setProxy(proxy);
+    }
+
+    /**
+     * Returns SSLSocketFactory configuration object.
+     * 
+     * @return SSLSocketFactory object
+     */
+    public SSLSocketFactory getSslSocketFactory() {
+        return sslSocketFactory;
+    }
+
+    /**
+     * Sets SSLSocketFactory object to be used by the context.
+     * 
+     * @param sslSocketFactory
+     */
+    public void setSslSocketFactory(SSLSocketFactory sslSocketFactory) {
+        this.sslSocketFactory = sslSocketFactory;
     }
 
     private String canonicalizeUri(String authority) {
@@ -144,13 +177,15 @@ public class AuthenticationContext {
                     if (callback != null) {
                         callback.onSuccess(result);
                     }
-                } catch (final Exception ex) {
+                }
+                catch (final Exception ex) {
                     log.error(LogHelper.createMessage(
                             "Request to acquire token failed.",
                             this.headers.getHeaderCorrelationIdValue()), ex);
                     if (callback != null) {
                         callback.onFailure(ex);
-                    } else {
+                    }
+                    else {
                         throw ex;
                     }
                 }
@@ -194,8 +229,8 @@ public class AuthenticationContext {
      *         Token, Refresh Token and the Access Token's expiration time.
      */
     public Future<AuthenticationResult> acquireToken(final String resource,
-                                                     final String clientId, final String username,
-                                                     final String password, final AuthenticationCallback callback) {
+            final String clientId, final String username,
+            final String password, final AuthenticationCallback callback) {
         if (StringHelper.isBlank(resource)) {
             throw new IllegalArgumentException("resource is null or empty");
         }
@@ -213,9 +248,9 @@ public class AuthenticationContext {
         }
 
         return this.acquireToken(new AdalAuthorizatonGrant(
-                        new ResourceOwnerPasswordCredentialsGrant(username, new Secret(
-                                password)), resource), new ClientAuthenticationPost(
-                        ClientAuthenticationMethod.NONE, new ClientID(clientId)),
+                new ResourceOwnerPasswordCredentialsGrant(username, new Secret(
+                        password)), resource), new ClientAuthenticationPost(
+                ClientAuthenticationMethod.NONE, new ClientID(clientId)),
                 callback);
     }
 
@@ -235,8 +270,8 @@ public class AuthenticationContext {
      *         property will be null for this overload.
      */
     public Future<AuthenticationResult> acquireToken(final String resource,
-                                                     final ClientAssertion credential,
-                                                     final AuthenticationCallback callback) {
+            final ClientAssertion credential,
+            final AuthenticationCallback callback) {
 
         this.validateInput(resource, credential, true);
         final ClientAuthentication clientAuth = createClientAuthFromClientAssertion(credential);
@@ -246,7 +281,7 @@ public class AuthenticationContext {
     }
 
     private void validateInput(final String resource, final Object credential,
-                               final boolean validateResource) {
+            final boolean validateResource) {
         if (validateResource && StringHelper.isBlank(resource)) {
             throw new IllegalArgumentException("resource is null or empty");
         }
@@ -275,8 +310,8 @@ public class AuthenticationContext {
      * @throws AuthenticationException
      */
     public Future<AuthenticationResult> acquireToken(final String resource,
-                                                     final ClientAssertion assertion, final ClientCredential credential,
-                                                     final AuthenticationCallback callback) {
+            final ClientAssertion assertion, final ClientCredential credential,
+            final AuthenticationCallback callback) {
 
         this.validateInput(resource, credential, true);
         Map<String, String> params = new HashMap<String, String>();
@@ -289,9 +324,10 @@ public class AuthenticationContext {
 
             final ClientAuthentication clientAuth = new ClientSecretPost(
                     new ClientID(credential.getClientId()), new Secret(
-                    credential.getClientSecret()));
+                            credential.getClientSecret()));
             return this.acquireToken(grant, clientAuth, callback);
-        } catch (final Exception e) {
+        }
+        catch (final Exception e) {
             throw new AuthenticationException(e);
         }
     }
@@ -312,12 +348,12 @@ public class AuthenticationContext {
      *         property will be null for this overload.
      */
     public Future<AuthenticationResult> acquireToken(final String resource,
-                                                     final ClientCredential credential,
-                                                     final AuthenticationCallback callback) {
+            final ClientCredential credential,
+            final AuthenticationCallback callback) {
         this.validateInput(resource, credential, true);
         final ClientAuthentication clientAuth = new ClientSecretPost(
                 new ClientID(credential.getClientId()), new Secret(
-                credential.getClientSecret()));
+                        credential.getClientSecret()));
         final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
                 new ClientCredentialsGrant(), resource);
         return this.acquireToken(authGrant, clientAuth, callback);
@@ -340,11 +376,11 @@ public class AuthenticationContext {
      * @throws AuthenticationException
      */
     public Future<AuthenticationResult> acquireToken(final String resource,
-                                                     final AsymmetricKeyCredential credential,
-                                                     final AuthenticationCallback callback)
+            final AsymmetricKeyCredential credential,
+            final AuthenticationCallback callback)
             throws AuthenticationException {
         return this.acquireToken(resource, JwtHelper.buildJwt(credential,
-                        this.authenticationAuthority.getSelfSignedJwtAudience()),
+                this.authenticationAuthority.getSelfSignedJwtAudience()),
                 callback);
     }
 
@@ -500,7 +536,7 @@ public class AuthenticationContext {
                 credential, resource);
         final ClientAuthentication clientAuth = new ClientSecretPost(
                 new ClientID(credential.getClientId()), new Secret(
-                credential.getClientSecret()));
+                        credential.getClientSecret()));
         final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
                 new AuthorizationCodeGrant(new AuthorizationCode(
                         authorizationCode), redirectUri), resource);
@@ -682,7 +718,7 @@ public class AuthenticationContext {
 
         final ClientAuthentication clientAuth = new ClientSecretPost(
                 new ClientID(credential.getClientId()), new Secret(
-                credential.getClientSecret()));
+                        credential.getClientSecret()));
         final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
                 new RefreshTokenGrant(new RefreshToken(refreshToken)), resource);
         return this.acquireToken(authGrant, clientAuth, callback);
@@ -753,7 +789,7 @@ public class AuthenticationContext {
     }
 
     private void validateRefreshTokenRequestInput(final String refreshToken,
-                                                  final String clientId, final Object credential) {
+            final String clientId, final Object credential) {
 
         if (StringHelper.isBlank(refreshToken)) {
             throw new IllegalArgumentException("refreshToken is null or empty");
@@ -772,11 +808,13 @@ public class AuthenticationContext {
         log.debug(LogHelper.createMessage(
                 String.format("Using Client Http Headers: %s", headers),
                 headers.getHeaderCorrelationIdValue()));
-        this.authenticationAuthority.doInstanceDiscovery(headers
-                .getReadonlyHeaderMap());
+        this.authenticationAuthority.doInstanceDiscovery(
+                headers.getReadonlyHeaderMap(), this.proxy,
+                this.sslSocketFactory);
         final URL url = new URL(this.authenticationAuthority.getTokenUri());
         final AdalTokenRequest request = new AdalTokenRequest(url, clientAuth,
-                authGrant, headers.getReadonlyHeaderMap());
+                authGrant, headers.getReadonlyHeaderMap(), this.proxy,
+                this.sslSocketFactory);
         AuthenticationResult result = request
                 .executeOAuthRequestAndProcessResponse();
         return result;
@@ -788,26 +826,30 @@ public class AuthenticationContext {
      */
     private AdalAuthorizatonGrant processPasswordGrant(
             AdalAuthorizatonGrant authGrant) throws Exception {
+
         if (!(authGrant.getAuthorizationGrant() instanceof ResourceOwnerPasswordCredentialsGrant)) {
             return authGrant;
         }
-        
+
         ResourceOwnerPasswordCredentialsGrant grant = (ResourceOwnerPasswordCredentialsGrant) authGrant
                 .getAuthorizationGrant();
 
-        UserDiscoveryResponse discoveryResponse =
-                UserDiscoveryRequest.execute(this.authenticationAuthority.getUserRealmEndpoint(grant.getUsername()), proxy);
+        UserDiscoveryResponse discoveryResponse = UserDiscoveryRequest.execute(
+                this.authenticationAuthority.getUserRealmEndpoint(grant
+                        .getUsername()), this.proxy, this.sslSocketFactory);
         if (discoveryResponse.isAccountFederated()) {
-            WSTrustResponse response = WSTrustRequest.execute(discoveryResponse
-                            .getFederationMetadataUrl(), grant.getUsername(),
-                    grant.getPassword().getValue(), proxy);
+            WSTrustResponse response = WSTrustRequest.execute(
+                    discoveryResponse.getFederationMetadataUrl(),
+                    grant.getUsername(), grant.getPassword().getValue(),
+                    this.proxy, this.sslSocketFactory);
 
             AuthorizationGrant updatedGrant = null;
             if (response.isTokenSaml2()) {
                 updatedGrant = new SAML2BearerGrant(new Base64URL(
                         Base64.encodeBase64String(response.getToken().getBytes(
                                 "UTF-8"))));
-            } else {
+            }
+            else {
                 updatedGrant = new SAML11BearerGrant(new Base64URL(
                         Base64.encodeBase64String(response.getToken()
                                 .getBytes())));
@@ -821,7 +863,7 @@ public class AuthenticationContext {
     }
 
     private void logResult(AuthenticationResult result,
-                           ClientDataHttpHeaders headers) throws NoSuchAlgorithmException,
+            ClientDataHttpHeaders headers) throws NoSuchAlgorithmException,
             UnsupportedEncodingException {
         if (!StringHelper.isBlank(result.getAccessToken())) {
             String logMessage = "";
@@ -833,7 +875,8 @@ public class AuthenticationContext {
                 logMessage = String
                         .format("Access Token with hash '%s' and Refresh Token with hash '%s' returned",
                                 accessTokenHash, refreshTokenHash);
-            } else {
+            }
+            else {
                 logMessage = String
                         .format("Access Token with hash '%s' returned",
                                 accessTokenHash);
@@ -860,7 +903,8 @@ public class AuthenticationContext {
                     JWTAuthentication.CLIENT_ASSERTION_TYPE);
             map.put("client_assertion", credential.getAssertion());
             return PrivateKeyJWT.parse(map);
-        } catch (final ParseException e) {
+        }
+        catch (final ParseException e) {
             throw new AuthenticationException(e);
         }
     }
@@ -907,8 +951,8 @@ public class AuthenticationContext {
     }
 
     private void validateAuthCodeRequestInput(final String authorizationCode,
-                                              final URI redirectUri, final Object credential,
-                                              final String resource) {
+            final URI redirectUri, final Object credential,
+            final String resource) {
         if (StringHelper.isBlank(authorizationCode)) {
             throw new IllegalArgumentException(
                     "authorization code is null or empty");

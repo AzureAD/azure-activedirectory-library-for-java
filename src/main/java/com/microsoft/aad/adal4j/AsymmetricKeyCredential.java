@@ -108,11 +108,11 @@ public final class AsymmetricKeyCredential {
      * @throws CertificateEncodingException
      * @throws NoSuchAlgorithmException
      */
-    public String getPublicCertificate()
-            throws CertificateEncodingException, NoSuchAlgorithmException {
+    public String getPublicCertificate() throws CertificateEncodingException,
+            NoSuchAlgorithmException {
         return Base64.encodeBase64String(this.publicCertificate.getEncoded());
     }
-    
+
     /**
      * Returns private key of the credential.
      * 

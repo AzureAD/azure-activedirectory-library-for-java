@@ -70,13 +70,14 @@ final class JwtHelper {
             certs.add(new Base64(credential.getPublicCertificate()));
             builder.x509CertChain(certs);
             builder.x509CertThumbprint(new Base64URL(credential
-                  .getPublicCertificateHash()));
+                    .getPublicCertificateHash()));
             jwt = new SignedJWT(builder.build(), claimsSet);
             final RSASSASigner signer = new RSASSASigner(
                     (RSAPrivateKey) credential.getKey());
 
             jwt.sign(signer);
-        } catch (final Exception e) {
+        }
+        catch (final Exception e) {
             throw new AuthenticationException(e);
         }
 

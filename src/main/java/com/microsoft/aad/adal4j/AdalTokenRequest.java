@@ -20,8 +20,11 @@
 package com.microsoft.aad.adal4j;
 
 import java.io.IOException;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.Map;
+
+import javax.net.ssl.SSLSocketFactory;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.SerializeException;
@@ -42,14 +45,19 @@ class AdalTokenRequest {
     private final ClientAuthentication clientAuth;
     private final AdalAuthorizatonGrant authzGrant;
     private final Map<String, String> headerMap;
+    private final Proxy proxy;
+    private final SSLSocketFactory sslSocketFactory;
 
     AdalTokenRequest(final URL uri, final ClientAuthentication clientAuth,
             final AdalAuthorizatonGrant authzGrant,
-            final Map<String, String> headerMap) {
+            final Map<String, String> headerMap, final Proxy proxy,
+            final SSLSocketFactory sslSocketFactory) {
         this.clientAuth = clientAuth;
         this.authzGrant = authzGrant;
         this.uri = uri;
         this.headerMap = headerMap;
+        this.proxy = proxy;
+        this.sslSocketFactory = sslSocketFactory;
     }
 
     /**
@@ -86,15 +94,14 @@ class AdalTokenRequest {
                         .getJWTClaimsSet());
             }
 
-            result = new AuthenticationResult(
-                        response.getAccessToken().getType().getValue(),
-                        response.getAccessToken().getValue(),
-                        refreshToken,
-                        response.getAccessToken().getLifetime(),
-                        response.getIDTokenString(),
-                        info,
-                        !StringHelper.isBlank(response.getResource()));
-        } else {
+            result = new AuthenticationResult(response.getAccessToken()
+                    .getType().getValue(),
+                    response.getAccessToken().getValue(), refreshToken,
+                    response.getAccessToken().getLifetime(),
+                    response.getIDTokenString(), info,
+                    !StringHelper.isBlank(response.getResource()));
+        }
+        else {
             final TokenErrorResponse errorResponse = TokenErrorResponse
                     .parse(httpResponse);
             throw new AuthenticationException(errorResponse.toJSONObject()
@@ -116,7 +123,8 @@ class AdalTokenRequest {
         }
 
         final AdalOAuthRequest httpRequest = new AdalOAuthRequest(
-                HTTPRequest.Method.POST, this.uri, headerMap);
+                HTTPRequest.Method.POST, this.uri, headerMap, this.proxy,
+                this.sslSocketFactory);
         httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
         final Map<String, String> params = this.authzGrant.toParameters();
         httpRequest.setQuery(URLUtils.serializeParameters(params));

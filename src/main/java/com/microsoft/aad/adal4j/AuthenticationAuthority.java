@@ -24,6 +24,8 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Map;
 
+import javax.net.ssl.SSLSocketFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +37,8 @@ class AuthenticationAuthority {
             .getLogger(AuthenticationAuthority.class);
 
     private final static String[] TRUSTED_HOST_LIST = { "login.windows.net",
-            "login.chinacloudapi.cn", "login.cloudgovapi.us", "login.microsoftonline.com" };
+            "login.chinacloudapi.cn", "login.cloudgovapi.us",
+            "login.microsoftonline.com" };
     private final static String TENANTLESS_TENANT_NAME = "common";
     private final static String AUTHORIZE_ENDPOINT_TEMPLATE = "https://{host}/{tenant}/oauth2/authorize";
     private final static String DISCOVERY_ENDPOINT = "common/discovery/instance";
@@ -63,8 +66,6 @@ class AuthenticationAuthority {
     private final URL authorityUrl;
     private final boolean validateAuthority;
 
-    private Proxy proxy;
-
     AuthenticationAuthority(final URL authorityUrl,
             final boolean validateAuthority) {
 
@@ -73,14 +74,6 @@ class AuthenticationAuthority {
         this.validateAuthority = validateAuthority;
         validateAuthorityUrl();
         setupAuthorityProperties();
-    }
-
-    public Proxy getProxy() {
-        return proxy;
-    }
-
-    public void setProxy(Proxy proxy) {
-        this.proxy = proxy;
     }
 
     String getHost() {
@@ -98,11 +91,11 @@ class AuthenticationAuthority {
     String getTokenEndpoint() {
         return tokenEndpoint;
     }
-    
+
     String getUserRealmEndpoint(String username) {
         return String.format(userRealmEndpointFormat, host, username);
     }
-    
+
     AuthorityType getAuthorityType() {
         return authorityType;
     }
@@ -123,7 +116,8 @@ class AuthenticationAuthority {
         this.selfSignedJwtAudience = selfSignedJwtAudience;
     }
 
-    void doInstanceDiscovery(final Map<String, String> headers)
+    void doInstanceDiscovery(final Map<String, String> headers,
+            final Proxy proxy, final SSLSocketFactory sslSocketFactory)
             throws Exception {
 
         // instance discovery should be executed only once per context instance.
@@ -132,7 +126,9 @@ class AuthenticationAuthority {
             if (!doStaticInstanceDiscovery()) {
                 // if authority must be validated and dynamic discovery request
                 // as a fall back is success
-                if (validateAuthority && !doDynamicInstanceDiscovery(headers)) {
+                if (validateAuthority
+                        && !doDynamicInstanceDiscovery(headers, proxy,
+                                sslSocketFactory)) {
                     throw new AuthenticationException(
                             AuthenticationErrorMessage.AUTHORITY_NOT_IN_VALID_LIST);
                 }
@@ -144,9 +140,11 @@ class AuthenticationAuthority {
         }
     }
 
-    boolean doDynamicInstanceDiscovery(final Map<String, String> headers)
+    boolean doDynamicInstanceDiscovery(final Map<String, String> headers,
+            final Proxy proxy, final SSLSocketFactory sslSocketFactory)
             throws Exception {
-        final String json = HttpHelper.executeHttpGet(log, instanceDiscoveryEndpoint, headers, proxy);
+        final String json = HttpHelper.executeHttpGet(log,
+                instanceDiscoveryEndpoint, headers, proxy, sslSocketFactory);
         final InstanceDiscoveryResponse discoveryResponse = JsonHelper
                 .convertJsonToObject(json, InstanceDiscoveryResponse.class);
         return !StringHelper.isBlank(discoveryResponse
