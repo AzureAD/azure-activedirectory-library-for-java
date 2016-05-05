@@ -39,7 +39,6 @@ public class User extends DirectoryObject{
 	protected String objectType;
 	protected String accountEnabled;
 	protected String city;
-	protected String country;
 	protected String department;
 	protected String dirSyncEnabled;
 	protected String displayName;
@@ -425,20 +424,6 @@ public class User extends DirectoryObject{
 	 */
 	public void setLastDirSyncTime(String lastDirSyncTime) {
 		this.lastDirSyncTime = lastDirSyncTime;
-	}
-
-	/**
-	 * @return The country of this User.
-	 */
-	public String getCountry() {
-		return country;
-	}
-
-	/**
-	 * @param country The country to set to this User.
-	 */
-	public void setCountry(String country) {
-		this.country = country;
 	}
 
 	/**
