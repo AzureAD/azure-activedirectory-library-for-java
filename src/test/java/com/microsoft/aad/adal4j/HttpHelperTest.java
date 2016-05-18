@@ -19,10 +19,9 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
+import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
 import java.io.InputStream;
-
-import javax.net.ssl.HttpsURLConnection;
 
 import org.easymock.EasyMock;
 import org.powermock.api.easymock.PowerMock;

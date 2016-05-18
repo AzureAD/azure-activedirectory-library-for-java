@@ -23,25 +23,26 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.nimbusds.jwt.JWTClaimsSet;
 import org.easymock.EasyMock;
 import org.powermock.api.easymock.PowerMock;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import com.nimbusds.jwt.ReadOnlyJWTClaimsSet;
 
 /**
  *
  */
 @Test(groups = { "checkin" })
+@PrepareForTest(JWTClaimsSet.class)
 public class UserInfoTest extends AbstractAdalTests {
 
     @Test
     public void testCreateFromIdTokenClaims_EmptyClaims() throws ParseException {
 
-        final ReadOnlyJWTClaimsSet claimSet = PowerMock
-                .createMock(ReadOnlyJWTClaimsSet.class);
-        EasyMock.expect(claimSet.getAllClaims())
+        final JWTClaimsSet claimSet = PowerMock
+                .createMock(JWTClaimsSet.class);
+        EasyMock.expect(claimSet.getClaims())
                 .andReturn(new HashMap<String, Object>()).times(1);
         EasyMock.replay(claimSet);
         Assert.assertNull(UserInfo.createFromIdTokenClaims(claimSet));
@@ -58,11 +59,11 @@ public class UserInfoTest extends AbstractAdalTests {
     public void testCreateFromIdTokenClaims_HasEmailSubjectPasswordClaims()
             throws ParseException {
 
-        final ReadOnlyJWTClaimsSet claimSet = PowerMock
-                .createMock(ReadOnlyJWTClaimsSet.class);
+        final JWTClaimsSet claimSet = PowerMock
+                .createMock(JWTClaimsSet.class);
         final Map<String, Object> map = new HashMap<String, Object>();
         map.put("", "");
-        EasyMock.expect(claimSet.getAllClaims()).andReturn(map).times(1);
+        EasyMock.expect(claimSet.getClaims()).andReturn(map).times(1);
         EasyMock.expect(
                 claimSet.getStringClaim(AuthenticationConstants.ID_TOKEN_OBJECT_ID))
                 .andReturn(null).times(1);
@@ -107,11 +108,11 @@ public class UserInfoTest extends AbstractAdalTests {
     public void testCreateFromIdTokenClaims_HasUpnObjectIdNoPasswordClaims()
             throws ParseException {
 
-        final ReadOnlyJWTClaimsSet claimSet = PowerMock
-                .createMock(ReadOnlyJWTClaimsSet.class);
+        final JWTClaimsSet claimSet = PowerMock
+                .createMock(JWTClaimsSet.class);
         final Map<String, Object> map = new HashMap<String, Object>();
         map.put("", "");
-        EasyMock.expect(claimSet.getAllClaims()).andReturn(map).times(1);
+        EasyMock.expect(claimSet.getClaims()).andReturn(map).times(1);
         EasyMock.expect(
                 claimSet.getStringClaim(AuthenticationConstants.ID_TOKEN_OBJECT_ID))
                 .andReturn(null).times(1);

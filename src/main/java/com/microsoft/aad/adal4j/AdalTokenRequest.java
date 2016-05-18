@@ -19,12 +19,11 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
+import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.net.Proxy;
 import java.net.URL;
 import java.util.Map;
-
-import javax.net.ssl.SSLSocketFactory;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.SerializeException;
@@ -34,6 +33,7 @@ import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
+import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 
 /**
  * Extension for TokenRequest to support additional header values like
@@ -61,8 +61,7 @@ class AdalTokenRequest {
     }
 
     /**
-     * 
-     * @param request
+     *
      * @return
      * @throws ParseException
      * @throws AuthenticationException
@@ -83,22 +82,23 @@ class AdalTokenRequest {
             final AdalAccessTokenResponse response = AdalAccessTokenResponse
                     .parseHttpResponse(httpResponse);
 
+            OIDCTokens tokens = response.getOIDCTokens();
             String refreshToken = null;
-            if (response.getRefreshToken() != null) {
-                refreshToken = response.getRefreshToken().getValue();
+            if (tokens.getRefreshToken() != null) {
+                refreshToken = tokens.getRefreshToken().getValue();
             }
 
             UserInfo info = null;
-            if (response.getIDToken() != null) {
-                info = UserInfo.createFromIdTokenClaims(response.getIDToken()
+            if (tokens.getIDToken() != null) {
+                info = UserInfo.createFromIdTokenClaims(tokens.getIDToken()
                         .getJWTClaimsSet());
             }
 
-            result = new AuthenticationResult(response.getAccessToken()
+            result = new AuthenticationResult(tokens.getAccessToken()
                     .getType().getValue(),
-                    response.getAccessToken().getValue(), refreshToken,
-                    response.getAccessToken().getLifetime(),
-                    response.getIDTokenString(), info,
+                    tokens.getAccessToken().getValue(), refreshToken,
+                    tokens.getAccessToken().getLifetime(),
+                    tokens.getIDTokenString(), info,
                     !StringHelper.isBlank(response.getResource()));
         }
         else {

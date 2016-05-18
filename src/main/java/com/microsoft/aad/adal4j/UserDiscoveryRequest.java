@@ -19,11 +19,10 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
+import javax.net.ssl.SSLSocketFactory;
 import java.net.Proxy;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.net.ssl.SSLSocketFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +33,7 @@ class UserDiscoveryRequest {
             .getLogger(UserDiscoveryRequest.class);
     private final static Map<String, String> HEADERS;
     static {
-        HEADERS = new HashMap<String, String>();
+        HEADERS = new HashMap<>();
         HEADERS.put("Accept", "application/json, text/javascript, */*");
 
     }

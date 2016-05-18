@@ -21,13 +21,13 @@ package com.microsoft.aad.adal4j;
 
 import java.text.ParseException;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 @Test(groups = { "checkin" })
 public class AdalAccessTokenResponseTest extends AbstractAdalTests {
@@ -51,8 +51,10 @@ public class AdalAccessTokenResponseTest extends AbstractAdalTests {
                 new BearerAccessToken("access_token"), new RefreshToken(
                         "refresh_token"), idToken);
         Assert.assertNotNull(response);
-        final JWT jwt = response.getIDToken();
-        Assert.assertTrue(jwt.getJWTClaimsSet().getAllClaims().size() >= 0);
+        OIDCTokens tokens = response.getOIDCTokens();
+        Assert.assertNotNull(tokens);
+        final JWT jwt = tokens.getIDToken();
+        Assert.assertTrue(jwt.getJWTClaimsSet().getClaims().size() >= 0);
     }
 
     @Test
@@ -62,8 +64,10 @@ public class AdalAccessTokenResponseTest extends AbstractAdalTests {
                 .parseJsonObject(JSONObjectUtils
                         .parseJSONObject(TestConfiguration.HTTP_RESPONSE_FROM_AUTH_CODE));
         Assert.assertNotNull(response);
-        Assert.assertNotNull(response.getIDToken());
-        Assert.assertFalse(StringHelper.isBlank(response.getIDTokenString()));
+        OIDCTokens tokens = response.getOIDCTokens();
+        Assert.assertNotNull(tokens);
+        Assert.assertNotNull(tokens.getIDToken());
+        Assert.assertFalse(StringHelper.isBlank(tokens.getIDTokenString()));
         Assert.assertFalse(StringHelper.isBlank(response.getResource()));
     }
 }

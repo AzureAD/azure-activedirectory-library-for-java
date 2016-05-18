@@ -31,7 +31,7 @@ enum WSTrustVersion {
     private String responseTokenTypePath = "";
     private String responseSecurityTokenPath = "";
 
-    private WSTrustVersion(String tokenType, String responseSecurityToken) {
+    WSTrustVersion(String tokenType, String responseSecurityToken) {
         this.responseTokenTypePath = tokenType;
         this.responseSecurityTokenPath = responseSecurityToken;
     }
