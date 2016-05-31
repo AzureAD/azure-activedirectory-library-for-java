@@ -129,7 +129,7 @@ class MexParser {
         }
 
         if (wstrust13 == null && wstrust2005 == null) {
-            log.warn("no policies found with an url");
+            log.warn("no policies found with the url");
             return null;
         }
 

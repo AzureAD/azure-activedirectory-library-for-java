@@ -30,7 +30,7 @@ class AuthenticationErrorMessage {
     final static String CERTIFICATE_KEY_SIZE_TOO_SMALL_TEMPLATE = "The certificate used must have a key size of at least %s bits";
     final static String EMAIL_ADDRESS_SUFFIX_MISMATCH = "No identity provider email address suffix matches the provided address";
     final static String ENCODED_TOKEN_TOO_LONG = "Encoded token size is beyond the upper limit";
-    final static String FEDERATED_SERVICE_RETURNED_ERROR_TEMPLATE = "Federated serviced at %s returned error: %s";
+    final static String FEDERATED_SERVICE_RETURNED_ERROR_TEMPLATE = "Federated service at %s returned error: %s";
     final static String IDENTITY_PROTOCOL_LOGIN_URL_NULL = "The LoginUrl property in identityProvider cannot be null";
     final static String IDENTITY_PROTOCOL_MISMATCH = "No identity provider matches the requested protocol";
     final static String IDENTITY_PROVIDER_REQUEST_FAILED = "Token request to identity provider failed. Check InnerException for more details";
@@ -47,7 +47,7 @@ class AuthenticationErrorMessage {
     final static String PARSING_METADATA_DOCUMENT_FAILED = "Parsing WS metadata exchange failed";
     final static String PARSING_WS_TRUST_RESPONSE_FAILED = "Parsing WS-Trust response failed";
     final static String REDIRECT_URI_CONTAINS_FRAGMENT = "'redirectUri' must NOT include a fragment component";
-    final static String SERVICE_RETURNED_ERROR = "Serviced returned error. Check InnerException for more details";
+    final static String SERVICE_RETURNED_ERROR = "Service returned error. Check InnerException for more details";
     final static String STS_METADATA_REQUEST_FAILED = "Metadata request to Access Control service failed. Check InnerException for more details";
     final static String STS_TOKEN_REQUEST_FAILED = "Token request to security token service failed.  Check InnerException for more details";
     final static String UNAUTHORIZED_HTTP_STATUS_CODE_EXPECTED = "Unauthorized Http Status Code (401) was expected in the response";
