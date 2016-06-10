@@ -98,19 +98,19 @@
 		<dependency>
 			<groupId>org.powermock</groupId>
 			<artifactId>powermock-module-testng</artifactId>
-			<version>1.5.6</version>
+			<version>1.6.5</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.powermock</groupId>
 			<artifactId>powermock-api-easymock</artifactId>
-			<version>1.5.6</version>
+			<version>1.6.5</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.easymock</groupId>
 			<artifactId>easymock</artifactId>
-			<version>3.2</version>
+			<version>3.4</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

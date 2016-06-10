@@ -23,11 +23,23 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 
 import org.testng.Assert;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 @Test(groups = { "checkin" })
 public class WSTrustResponseTest {
 
+    @BeforeTest
+    public void setup(){
+        System.setProperty("javax.xml.parsers.DocumentBuilderFactory","com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl");
+    }
+    
+    @AfterTest
+    public void cleanup(){
+        System.clearProperty("javax.xml.parsers.DocumentBuilderFactory");
+    }
+    
     @Test
     public void testWSTrustResponseParseSuccess() throws Exception {
         StringBuilder sb = new StringBuilder();
@@ -48,6 +60,7 @@ public class WSTrustResponseTest {
 
     @Test(expectedExceptions = Exception.class, expectedExceptionsMessageRegExp = "Server returned error in RSTR - ErrorCode: RequestFailed : FaultMessage: MSIS3127: The specified request failed.")
     public void testWSTrustResponseParseError() throws Exception {
+
         StringBuilder sb = new StringBuilder();
         try (BufferedReader br = new BufferedReader(new FileReader(
                 (this.getClass().getResource(

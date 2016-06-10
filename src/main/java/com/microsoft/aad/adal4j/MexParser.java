@@ -56,8 +56,7 @@ class MexParser {
 
     static BindingPolicy getWsTrustEndpointFromMexResponse(String mexResponse)
             throws Exception {
-        DocumentBuilderFactory builderFactory = DocumentBuilderFactory
-                .newInstance();
+        DocumentBuilderFactory builderFactory = SafeDocumentBuilderFactory.createInstance();
         builderFactory.setNamespaceAware(true);
         DocumentBuilder builder = builderFactory.newDocumentBuilder();
         Document xmlDocument = builder.parse(new ByteArrayInputStream(
