@@ -65,7 +65,7 @@ public final class AsymmetricKeyCredential {
         }
 
         if (key == null) {
-            throw new NullPointerException("PrivateKey");
+            throw new NullPointerException("PrivateKey is null or empty");
         }
 
         this.clientId = clientId;
@@ -91,7 +91,7 @@ public final class AsymmetricKeyCredential {
     /**
      * Base64 encoded hash of the the public certificate.
      * 
-     * @return base64 endoded string
+     * @return base64 encoded string
      * @throws CertificateEncodingException
      * @throws NoSuchAlgorithmException
      */
@@ -104,7 +104,7 @@ public final class AsymmetricKeyCredential {
     /**
      * Base64 encoded public certificate.
      * 
-     * @return base64 endoded string
+     * @return base64 encoded string
      * @throws CertificateEncodingException
      * @throws NoSuchAlgorithmException
      */
@@ -129,7 +129,7 @@ public final class AsymmetricKeyCredential {
      *            Identifier of the client requesting the token.
      * @param pkcs12Certificate
      *            PKCS12 certificate stream containing public and private key.
-     *            Caller is responsible to handling the inputstream.
+     *            Caller is responsible for handling the input stream.
      * @param password
      *            certificate password
      * @return KeyCredential instance

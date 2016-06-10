@@ -57,8 +57,7 @@ class MexParser {
 
     static BindingPolicy getWsTrustEndpointFromMexResponse(String mexResponse)
             throws Exception {
-        DocumentBuilderFactory builderFactory = DocumentBuilderFactory
-                .newInstance();
+        DocumentBuilderFactory builderFactory = SafeDocumentBuilderFactory.createInstance();
         builderFactory.setNamespaceAware(true);
         DocumentBuilder builder = builderFactory.newDocumentBuilder();
         Document xmlDocument = builder.parse(new ByteArrayInputStream(
@@ -129,7 +128,7 @@ class MexParser {
         }
 
         if (wstrust13 == null && wstrust2005 == null) {
-            log.warn("no policies found with an url");
+            log.warn("no policies found with the url");
             return null;
         }
 

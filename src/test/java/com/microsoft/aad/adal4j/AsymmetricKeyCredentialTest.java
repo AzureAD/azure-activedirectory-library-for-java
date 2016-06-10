@@ -44,7 +44,7 @@ public class AsymmetricKeyCredentialTest extends AbstractAdalTests {
         AsymmetricKeyCredential.create("", (PrivateKey) null, null);
     }
 
-    @Test(expectedExceptions = NullPointerException.class, expectedExceptionsMessageRegExp = "PrivateKey")
+    @Test(expectedExceptions = NullPointerException.class, expectedExceptionsMessageRegExp = "PrivateKey is null or empty")
     public void testNullKey() {
         AsymmetricKeyCredential.create("id", (PrivateKey) null, null);
     }

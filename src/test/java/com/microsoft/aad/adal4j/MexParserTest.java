@@ -23,11 +23,23 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 
 import org.testng.Assert;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 @Test(groups = { "checkin" })
 public class MexParserTest {
 
+    @BeforeTest
+    public void setup(){
+        System.setProperty("javax.xml.parsers.DocumentBuilderFactory","com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl");
+    }
+    
+    @AfterTest
+    public void cleanup(){
+        System.clearProperty("javax.xml.parsers.DocumentBuilderFactory");
+    }
+    
     @Test
     public void testMexParsing() throws Exception {
 

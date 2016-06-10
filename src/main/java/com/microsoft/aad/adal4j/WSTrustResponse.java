@@ -83,8 +83,8 @@ class WSTrustResponse {
     static WSTrustResponse parse(String response, WSTrustVersion version)
             throws Exception {
         WSTrustResponse responseValue = new WSTrustResponse();
-        DocumentBuilderFactory builderFactory = DocumentBuilderFactory
-                .newInstance();
+        DocumentBuilderFactory builderFactory = SafeDocumentBuilderFactory
+                .createInstance();
         builderFactory.setNamespaceAware(true);
         DocumentBuilder builder = builderFactory.newDocumentBuilder();
         Document xmlDocument = builder.parse(new ByteArrayInputStream(response
