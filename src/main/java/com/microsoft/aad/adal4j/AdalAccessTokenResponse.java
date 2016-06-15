@@ -80,7 +80,9 @@ class AdalAccessTokenResponse extends OIDCTokenResponse {
         final AccessToken accessToken = AccessToken.parse(jsonObject);
         final RefreshToken refreshToken = RefreshToken.parse(jsonObject);
 
-        String idTokenValue = null;
+        // In same cases such as client credentials there isn't an id token. Instead of a null value
+        // use an empty string in order to avoid an IllegalArgumentException from OIDCTokens.
+        String idTokenValue = "";
         if (jsonObject.containsKey("id_token")) {
             idTokenValue = JSONObjectUtils.getString(jsonObject, "id_token");
         }
