@@ -1,4 +1,4 @@
-/*******************************************************************************
+	/*******************************************************************************
  * Copyright © Microsoft Open Technologies, Inc.
  *
  * All Rights Reserved
@@ -252,6 +252,53 @@ public class AuthenticationContext {
                 callback);
     }
 
+    /**
+     * Acquires a security token from authority using an authenticated client with password credential
+     * grant.
+     *
+     * @param resource
+     *            Identifier of the target resource that is the recipient of the
+     *            requested token. If null, token is requested for the same
+     *            resource refresh token was originally issued for. If passed,
+     *            resource should match the original resource used to acquire
+     *            refresh token unless token service supports refresh token for
+     *            multiple resources.
+      @param credential
+     *            object representing Private Key to use for token acquisition.
+     * @param username
+     *            Username of the managed or federated user.
+     * @param password
+     *            Password of the managed or federated user.
+     * @param callback
+     *            optional callback object for non-blocking execution.
+     * @return A {@link Future} object representing the
+     *         {@link AuthenticationResult} of the call. It contains Access
+     *         Token, Refresh Token and the Access Token's expiration time.
+     */
+    public Future<AuthenticationResult> acquireToken(final String resource,
+                                                     final AsymmetricKeyCredential credential,
+                                                     final String username,
+                                                     final String password,
+                                                     final AuthenticationCallback callback) {
+        if (StringHelper.isBlank(resource)) {
+            throw new IllegalArgumentException("resource is null or empty");
+        }
+
+        if (StringHelper.isBlank(username)) {
+            throw new IllegalArgumentException("username is null or empty");
+        }
+
+        if (StringHelper.isBlank(password)) {
+            throw new IllegalArgumentException("password is null or empty");
+        }
+
+        ClientAssertion assertion = JwtHelper.buildJwt(credential, this.authenticationAuthority.getSelfSignedJwtAudience());
+        final ClientAuthentication clientAuth = createClientAuthFromClientAssertion(assertion);
+        final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
+                new ResourceOwnerPasswordCredentialsGrant(username, new Secret(password)), resource);
+
+        return this.acquireToken(authGrant, clientAuth, callback);
+    }
     /**
      * Acquires security token from the authority.
      *
