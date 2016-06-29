@@ -44,15 +44,21 @@ public class MexParserTest {
     public void testMexParsing() throws Exception {
 
         StringBuilder sb = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(new FileReader(
+        BufferedReader br = null;
+        try {
+            br  = new BufferedReader(new FileReader(
                 (this.getClass().getResource(
-                        TestConfiguration.AAD_MEX_RESPONSE_FILE).getFile())))) {
+                    TestConfiguration.AAD_MEX_RESPONSE_FILE).getFile())));
             String line = br.readLine();
 
             while (line != null) {
                 sb.append(line);
-                sb.append(System.lineSeparator());
+                sb.append(String.format("%n"));
                 line = br.readLine();
+            }
+        } finally {
+            if (br != null){
+                br.close();
             }
         }
         BindingPolicy endpoint = MexParser.getWsTrustEndpointFromMexResponse(sb
@@ -65,15 +71,21 @@ public class MexParserTest {
     public void testMexParsingWs2005() throws Exception {
 
         StringBuilder sb = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(new FileReader(
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new FileReader(
                 this.getClass().getResource(
-                TestConfiguration.AAD_MEX_2005_RESPONSE_FILE).getFile()))) {
+                    TestConfiguration.AAD_MEX_2005_RESPONSE_FILE).getFile()));
             String line = br.readLine();
 
             while (line != null) {
                 sb.append(line);
-                sb.append(System.lineSeparator());
+                sb.append(String.format("%n"));
                 line = br.readLine();
+            }
+        } finally {
+            if (br != null) {
+                br.close();
             }
         }
         BindingPolicy endpoint = MexParser.getWsTrustEndpointFromMexResponse(sb

@@ -120,7 +120,7 @@ class AdalOAuthRequest extends HTTPRequest {
             conn.setRequestProperty("Authorization", this.getAuthorization());
         }
 
-        Map<String, String> params = new java.util.HashMap<>();
+        Map<String, String> params = new java.util.HashMap<String, String>();
         if (this.extraHeaderParams != null && !this.extraHeaderParams.isEmpty()) {
             for (java.util.Map.Entry<String, String> entry : this.extraHeaderParams
                     .entrySet()) {
