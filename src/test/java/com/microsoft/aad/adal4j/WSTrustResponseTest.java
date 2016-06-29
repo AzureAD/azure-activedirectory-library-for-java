@@ -52,7 +52,7 @@ public class WSTrustResponseTest {
 
             while (line != null) {
                 sb.append(line);
-                sb.append(String.format("%n"));
+                sb.append(System.getProperty("line.separator"));
                 line = br.readLine();
             }
         } finally {
@@ -76,7 +76,7 @@ public class WSTrustResponseTest {
 
             while (line != null) {
                 sb.append(line);
-                sb.append(String.format("%n"));
+                sb.append(System.getProperty("line.separator"));
                 line = br.readLine();
             }
         } finally {
