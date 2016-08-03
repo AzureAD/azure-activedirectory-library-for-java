@@ -21,6 +21,7 @@ package com.microsoft.aad.adal4j;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -50,20 +51,19 @@ final class JwtHelper {
             throw new IllegalArgumentException("credential is null");
         }
 
-        final JWTClaimsSet claimsSet = new AdalJWTClaimsSet();
-        final List<String> audience = new ArrayList<String>();
-        audience.add(jwtAudience);
-        claimsSet.setAudience(audience);
-        claimsSet.setIssuer(credential.getClientId());
         final long time = System.currentTimeMillis();
-        claimsSet.setNotBeforeTime(new Date(time));
-        claimsSet
-                .setExpirationTime(new Date(
-                        time
+
+        final JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+                .audience(Collections.singletonList(jwtAudience))
+                .issuer(credential.getClientId())
+                .notBeforeTime(new Date(time))
+                .expirationTime(new Date(time
                                 + AuthenticationConstants.AAD_JWT_TOKEN_LIFETIME_SECONDS
-                                * 1000));
-        claimsSet.setSubject(credential.getClientId());
-        SignedJWT jwt = null;
+                                * 1000))
+                .subject(credential.getClientId())
+                .build();
+
+        SignedJWT jwt;
         try {
             JWSHeader.Builder builder = new Builder(JWSAlgorithm.RS256);
             List<Base64> certs = new ArrayList<Base64>();

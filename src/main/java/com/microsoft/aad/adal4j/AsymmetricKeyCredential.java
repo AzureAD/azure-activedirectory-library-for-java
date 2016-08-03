@@ -19,7 +19,6 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.Key;
@@ -133,19 +132,17 @@ public final class AsymmetricKeyCredential {
      * @param password
      *            certificate password
      * @return KeyCredential instance
-     * @throws KeyStoreException
-     * @throws NoSuchProviderException
-     * @throws NoSuchAlgorithmException
-     * @throws CertificateException
-     * @throws FileNotFoundException
-     * @throws IOException
-     * @throws UnrecoverableKeyException
+     * @throws KeyStoreException {@link KeyStoreException}
+     * @throws NoSuchProviderException {@link NoSuchProviderException}
+     * @throws NoSuchAlgorithmException {@link NoSuchAlgorithmException}
+     * @throws CertificateException {@link CertificateException}
+     * @throws IOException {@link IOException}
+     * @throws UnrecoverableKeyException {@link UnrecoverableKeyException}
      */
     public static AsymmetricKeyCredential create(final String clientId,
             final InputStream pkcs12Certificate, final String password)
             throws KeyStoreException, NoSuchProviderException,
-            NoSuchAlgorithmException, CertificateException,
-            FileNotFoundException, IOException, UnrecoverableKeyException {
+            NoSuchAlgorithmException, CertificateException, IOException, UnrecoverableKeyException {
         final KeyStore keystore = KeyStore.getInstance("PKCS12", "SunJSSE");
         keystore.load(pkcs12Certificate, password.toCharArray());
         final Enumeration<String> aliases = keystore.aliases();

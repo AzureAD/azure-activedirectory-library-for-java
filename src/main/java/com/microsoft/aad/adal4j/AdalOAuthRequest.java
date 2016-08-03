@@ -19,6 +19,8 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,20 +29,18 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.Proxy;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSocketFactory;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -57,7 +57,6 @@ class AdalOAuthRequest extends HTTPRequest {
      * 
      * @param method
      * @param url
-     * @param correlationId
      */
     AdalOAuthRequest(final Method method, final URL url,
             final Map<String, String> extraHeaderParams, final Proxy proxy,
@@ -93,7 +92,11 @@ class AdalOAuthRequest extends HTTPRequest {
         final HTTPResponse response = new HTTPResponse(conn.getResponseCode());
         final String location = conn.getHeaderField("Location");
         if (!StringHelper.isBlank(location)) {
-            response.setLocation(new URL(location));
+            try {
+                response.setLocation(new URI(location));
+            } catch (URISyntaxException e) {
+                throw new IOException("Invalid location URI " + location, e);
+            }
         }
 
         try {

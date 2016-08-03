@@ -19,6 +19,8 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -28,9 +30,6 @@ import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
 import java.util.Map;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSocketFactory;
 
 import org.slf4j.Logger;
 
@@ -93,7 +92,7 @@ class HttpHelper {
     static HttpsURLConnection openConnection(final URL finalURL,
             final Proxy proxy, final SSLSocketFactory sslSocketFactory)
             throws IOException {
-        HttpsURLConnection connection = null;
+        HttpsURLConnection connection;
         if (proxy != null) {
             connection = (HttpsURLConnection) finalURL.openConnection(proxy);
         }

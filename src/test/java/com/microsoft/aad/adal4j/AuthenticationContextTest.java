@@ -23,6 +23,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import javax.net.ssl.SSLSocketFactory;
 import java.io.FileInputStream;
 import java.net.MalformedURLException;
 import java.net.Proxy;
@@ -39,8 +40,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import javax.net.ssl.SSLSocketFactory;
-
+import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import org.easymock.EasyMock;
 import org.powermock.api.easymock.PowerMock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -48,8 +48,6 @@ import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-
-import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 
 @Test(groups = { "checkin" })
 @PrepareForTest({ AuthenticationContext.class, AuthenticationCallback.class,

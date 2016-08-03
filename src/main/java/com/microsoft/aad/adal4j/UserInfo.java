@@ -24,7 +24,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-import com.nimbusds.jwt.ReadOnlyJWTClaimsSet;
+import com.nimbusds.jwt.JWTClaimsSet;
 
 /**
  * Contains information of a single user.
@@ -91,10 +91,10 @@ public class UserInfo implements Serializable {
         return passwordExpiresOn;
     }
 
-    static UserInfo createFromIdTokenClaims(final ReadOnlyJWTClaimsSet claims)
+    static UserInfo createFromIdTokenClaims(final JWTClaimsSet claims)
             throws java.text.ParseException {
 
-        if (claims == null || claims.getAllClaims().size() == 0) {
+        if (claims == null || claims.getClaims().size() == 0) {
             return null;
         }
 

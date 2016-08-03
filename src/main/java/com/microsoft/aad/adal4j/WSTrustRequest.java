@@ -19,6 +19,7 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
+import javax.net.ssl.SSLSocketFactory;
 import java.net.Proxy;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -28,8 +29,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
-
-import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;

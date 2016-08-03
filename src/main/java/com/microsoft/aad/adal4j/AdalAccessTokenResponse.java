@@ -19,25 +19,26 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
-import net.minidev.json.JSONObject;
-
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-import com.nimbusds.openid.connect.sdk.OIDCAccessTokenResponse;
+import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
+import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
+import net.minidev.json.JSONObject;
+
 
 /**
  * 
  */
-class AdalAccessTokenResponse extends OIDCAccessTokenResponse {
+class AdalAccessTokenResponse extends OIDCTokenResponse {
 
     private String resource;
 
     AdalAccessTokenResponse(final AccessToken accessToken,
-            final RefreshToken refreshToken, final String idToken) {
-        super(accessToken, refreshToken, idToken);
+                            final RefreshToken refreshToken, final String idToken) {
+        super(new OIDCTokens(idToken, accessToken, refreshToken));
     }
 
     AdalAccessTokenResponse(final AccessToken accessToken,
@@ -79,7 +80,9 @@ class AdalAccessTokenResponse extends OIDCAccessTokenResponse {
         final AccessToken accessToken = AccessToken.parse(jsonObject);
         final RefreshToken refreshToken = RefreshToken.parse(jsonObject);
 
-        String idTokenValue = null;
+        // In same cases such as client credentials there isn't an id token. Instead of a null value
+        // use an empty string in order to avoid an IllegalArgumentException from OIDCTokens.
+        String idTokenValue = "";
         if (jsonObject.containsKey("id_token")) {
             idTokenValue = JSONObjectUtils.getString(jsonObject, "id_token");
         }
