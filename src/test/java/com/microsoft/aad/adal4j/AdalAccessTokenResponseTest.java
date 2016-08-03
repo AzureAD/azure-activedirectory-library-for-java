@@ -33,7 +33,7 @@ import org.testng.annotations.Test;
 @Test(groups = { "checkin" })
 public class AdalAccessTokenResponseTest extends AbstractAdalTests {
 
-    private final String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik5HVEZ2ZEstZnl0aEV1THdqcHdBSk9NOW4tQSJ9."
+    private final String idToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik5HVEZ2ZEstZnl0aEV1THdqcHdBSk9NOW4tQSJ9."
             + "eyJhdWQiOiIyMTZlZjgxZC1mM2IyLTQ3ZDQtYWQyMS1hNGRmNDliNTZkZWUiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5l"
             + "dC9kM2VhYjEzMi1iM2Y3LTRkNzktOTM5Yy0zMDIyN2FlYjhjMjYvIiwiaWF0IjoxMzkzNDk2MDM3LCJuYmYiOjEzOTM0OTYwMzcsI"
             + "mV4cCI6MTM5MzQ5OTkzNywidmVyIjoiMS4wIiwidGlkIjoiZDNlYWIxMzItYjNmNy00ZDc5LTkzOWMtMzAyMjdhZWI4YzI2Iiwib2l"
@@ -50,7 +50,7 @@ public class AdalAccessTokenResponseTest extends AbstractAdalTests {
     public void testConstructor() throws ParseException {
         final AdalAccessTokenResponse response = new AdalAccessTokenResponse(
                 new BearerAccessToken("access_token"), new RefreshToken(
-                        "refresh_token"), token);
+                        "refresh_token"), idToken);
         Assert.assertNotNull(response);
         OIDCTokens tokens = response.getOIDCTokens();
         Assert.assertNotNull(tokens);
@@ -75,7 +75,7 @@ public class AdalAccessTokenResponseTest extends AbstractAdalTests {
     @Test
     public void testEmptyIdToken() throws ParseException {
         final AdalAccessTokenResponse response = new AdalAccessTokenResponse(
-                new BearerAccessToken(token), new RefreshToken(
+                new BearerAccessToken(idToken), new RefreshToken(
                         "refresh_token"), "");
 
         Assert.assertNotNull(response);
