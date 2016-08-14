@@ -255,6 +255,63 @@ public class AuthenticationContext {
     }
 
     /**
+     * Acquires a security token from the authority using a Refresh Token
+     * previously received.
+     *
+     * @param resource
+     *            Identifier of the target resource that is the recipient of the
+     *            requested token. If null, token is requested for the same
+     *            resource refresh token was originally issued for. If passed,
+     *            resource should match the original resource used to acquire
+     *            refresh token unless token service supports refresh token for
+     *            multiple resources.
+     * @param clientId
+     *            Name or ID of the client requesting the token.
+     * @param clientSecret
+     *            Secret of the client requesting the token.
+     * @param username
+     *            Username of the managed or federated user.
+     * @param password
+     *            Password of the managed or federated user.
+     * @param callback
+     *            optional callback object for non-blocking execution.
+     * @return A {@link Future} object representing the
+     *         {@link AuthenticationResult} of the call. It contains Access
+     *         Token, Refresh Token and the Access Token's expiration time.
+     */
+    public Future<AuthenticationResult> acquireToken(final String resource,
+                                                     final String clientId, final String clientSecret,
+                                                     final String username, final String password,
+                                                     final AuthenticationCallback callback) {
+        if (StringHelper.isBlank(resource)) {
+            throw new IllegalArgumentException("resource is null or empty");
+        }
+
+        if (StringHelper.isBlank(clientId)) {
+            throw new IllegalArgumentException("clientId is null or empty");
+        }
+
+        if (StringHelper.isBlank(clientSecret)) {
+            throw new IllegalArgumentException("clientSecret is null or empty");
+        }
+
+        if (StringHelper.isBlank(username)) {
+            throw new IllegalArgumentException("username is null or empty");
+        }
+
+        if (StringHelper.isBlank(password)) {
+            throw new IllegalArgumentException("password is null or empty");
+        }
+
+        return this.acquireToken(new AdalAuthorizatonGrant(
+                        new ResourceOwnerPasswordCredentialsGrant(username, new Secret(
+                                password)), resource), new ClientAuthenticationPost(
+                        ClientAuthenticationMethod.NONE, new ClientID(clientId), clientSecret),
+                callback);
+    }
+
+
+    /**
      * Acquires security token from the authority.
      *
      * @param resource

@@ -34,9 +34,17 @@ import com.nimbusds.oauth2.sdk.util.URLUtils;
 
 class ClientAuthenticationPost extends ClientAuthentication {
 
+    String clientSecret;
+
     protected ClientAuthenticationPost(ClientAuthenticationMethod method,
             ClientID clientID) {
         super(method, clientID);
+    }
+
+    protected ClientAuthenticationPost(ClientAuthenticationMethod method,
+                                       ClientID clientID, String clientSecret) {
+        super(method, clientID);
+        this.clientSecret = clientSecret;
     }
 
     Map<String, String> toParameters() {
@@ -44,6 +52,7 @@ class ClientAuthenticationPost extends ClientAuthentication {
         Map<String, String> params = new HashMap<String, String>();
 
         params.put("client_id", getClientID().getValue());
+        if (clientSecret!=null) params.put("client_secret", clientSecret);
 
         return params;
     }
