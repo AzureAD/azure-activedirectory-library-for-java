@@ -70,7 +70,7 @@ public final class AsymmetricKeyCredential {
         this.clientId = clientId;
         this.key = key;
 
-        if (((RSAPrivateKey) key).getModulus().bitLength() < MIN_KEYSIZE_IN_BITS) {
+        if (key instanceof  RSAPrivateKey && ((RSAPrivateKey) key).getModulus().bitLength() < MIN_KEYSIZE_IN_BITS) {
             throw new IllegalArgumentException(
                     "certificate key size must be at least "
                             + MIN_KEYSIZE_IN_BITS);
