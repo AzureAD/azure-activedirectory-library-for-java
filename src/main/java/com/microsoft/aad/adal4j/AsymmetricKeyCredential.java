@@ -21,7 +21,6 @@ package com.microsoft.aad.adal4j;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
@@ -36,6 +35,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.util.Enumeration;
 
 import org.apache.commons.codec.binary.Base64;
+import sun.security.util.Length;
 
 /**
  * Credential type containing X509 public certificate and RSA private key.
@@ -70,11 +70,24 @@ public final class AsymmetricKeyCredential {
         this.clientId = clientId;
         this.key = key;
 
-        if (((RSAPrivateKey) key).getModulus().bitLength() < MIN_KEYSIZE_IN_BITS) {
-            throw new IllegalArgumentException(
-                    "certificate key size must be at least "
-                            + MIN_KEYSIZE_IN_BITS);
+        if (key instanceof RSAPrivateKey) {
+            if(((RSAPrivateKey) key).getModulus().bitLength() < MIN_KEYSIZE_IN_BITS) {
+                throw new IllegalArgumentException(
+                        "certificate key size must be at least " + MIN_KEYSIZE_IN_BITS);
+            }
         }
+        else if("sun.security.mscapi.RSAPrivateKey".equals(key.getClass().getName())){
+            if(((Length)key).length() < MIN_KEYSIZE_IN_BITS ){
+                throw new IllegalArgumentException(
+                        "certificate key size must be at least " + MIN_KEYSIZE_IN_BITS);
+            }
+        }
+        else{
+            throw new IllegalArgumentException(
+                    "certificate key must be an instance of java.security.interfaces.RSAPrivateKey or" +
+                            " sun.security.mscapi.RSAPrivateKey");
+        }
+
         this.publicCertificate = publicCertificate;
     }
 
@@ -117,7 +130,7 @@ public final class AsymmetricKeyCredential {
      * 
      * @return private key.
      */
-    public Key getKey() {
+    public PrivateKey getKey() {
         return key;
     }
 
