@@ -19,7 +19,6 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
-import java.security.interfaces.RSAPrivateKey;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -72,8 +71,7 @@ final class JwtHelper {
             builder.x509CertThumbprint(new Base64URL(credential
                     .getPublicCertificateHash()));
             jwt = new SignedJWT(builder.build(), claimsSet);
-            final RSASSASigner signer = new RSASSASigner(
-                    (RSAPrivateKey) credential.getKey());
+            final RSASSASigner signer = new RSASSASigner(credential.getKey());
 
             jwt.sign(signer);
         }
