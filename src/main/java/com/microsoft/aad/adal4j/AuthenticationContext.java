@@ -801,8 +801,7 @@ public class AuthenticationContext {
      *         {@link AuthenticationResult} of the call. It contains Access
      *         Token, Refresh Token and the Access Token's expiration time.
      * @throws AuthenticationException
-     *             thrown if {@link AsymmetricKeyCredential} fails to sign the
-     *             JWT token.
+     *             thrown if the access token is not refreshed successfully
      */
     public Future<AuthenticationResult> acquireTokenByRefreshToken(
             final String refreshToken, final String clientId,
@@ -833,8 +832,7 @@ public class AuthenticationContext {
      *         {@link AuthenticationResult} of the call. It contains Access
      *         Token, Refresh Token and the Access Token's expiration time.
      * @throws AuthenticationException
-     *             thrown if {@link AsymmetricKeyCredential} fails to sign the
-     *             JWT token.
+     *             thrown if the access token is not refreshed successfully
      */
     public Future<AuthenticationResult> acquireTokenByRefreshToken(
             final String refreshToken, final String clientId,
