@@ -1,3 +1,8 @@
+Version 1.1.4
+=============
+- adding support for RSA keys produced by SunMSCAPI provider
+- log  details about non 200 http responses
+
 Version 1.1.3
 =============
 - Fixed XXE security bugs.
