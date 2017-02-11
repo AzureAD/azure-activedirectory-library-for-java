@@ -39,7 +39,7 @@ class AdalAuthorizatonGrant {
      */
     AdalAuthorizatonGrant(final AuthorizationGrant grant, final String resource) {
         this.grant = grant;
-        params = new LinkedHashMap<String, String>();
+        params = new LinkedHashMap<>();
         if (!StringHelper.isBlank(resource)) {
             params.put("resource", resource);
         }

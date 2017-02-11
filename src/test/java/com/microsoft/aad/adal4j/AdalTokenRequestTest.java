@@ -25,14 +25,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import net.minidev.json.JSONObject;
-
-import org.easymock.EasyMock;
-import org.powermock.api.easymock.PowerMock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
 import com.nimbusds.oauth2.sdk.AuthorizationGrant;
@@ -45,6 +37,12 @@ import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
+import net.minidev.json.JSONObject;
+import org.easymock.EasyMock;
+import org.powermock.api.easymock.PowerMock;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 @Test(groups = { "checkin" })
 @PrepareForTest(TokenErrorResponse.class)

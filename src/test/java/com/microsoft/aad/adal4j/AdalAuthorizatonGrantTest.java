@@ -24,11 +24,10 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 /**
  *

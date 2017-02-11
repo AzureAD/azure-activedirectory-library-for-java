@@ -19,18 +19,14 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
+import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
 import java.util.Map;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSocketFactory;
 
 import org.slf4j.Logger;
 
@@ -66,34 +62,39 @@ class HttpHelper {
         return executePostRequest(log, postData, headers, conn);
     }
 
+    static String inputStreamToString(java.io.InputStream is) {
+        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+        return s.hasNext() ? s.next() : "";
+    }
+
     static String readResponseFromConnection(final HttpsURLConnection conn)
-            throws IOException {
-        final Reader inReader = new InputStreamReader(conn.getInputStream());
-        final BufferedReader reader = new BufferedReader(inReader);
-        final char[] buffer = new char[256];
-        final StringBuilder out = new StringBuilder();
+            throws AuthenticationException, IOException {
+        InputStream is = null;
         try {
-            if (conn.getResponseCode() != 200) {
-                throw new IOException("Failed: HTTP error code "
-                        + conn.getResponseCode());
+            if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                String msg = "Server returned HTTP response code: " + conn.getResponseCode() + " for URL : " +
+                        conn.getURL();
+                is = conn.getErrorStream();
+                if (is != null) {
+                    msg = msg + ", Error details : " + inputStreamToString(is);
+                }
+                throw new AuthenticationException(msg);
             }
 
-            int rsz = -1;
-            while ((rsz = reader.read(buffer, 0, buffer.length)) > -1) {
-                out.append(buffer, 0, rsz);
-            }
+            is = conn.getInputStream();
+            return inputStreamToString(is);
         }
         finally {
-            reader.close();
+            if(is != null){
+                is.close();
+            }
         }
-
-        return out.toString();
     }
 
     static HttpsURLConnection openConnection(final URL finalURL,
             final Proxy proxy, final SSLSocketFactory sslSocketFactory)
             throws IOException {
-        HttpsURLConnection connection = null;
+        HttpsURLConnection connection;
         if (proxy != null) {
             connection = (HttpsURLConnection) finalURL.openConnection(proxy);
         }

@@ -19,10 +19,6 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
-import java.io.ByteArrayInputStream;
-import java.io.StringWriter;
-import java.nio.charset.Charset;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -33,6 +29,9 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
+import java.io.ByteArrayInputStream;
+import java.io.StringWriter;
+import java.nio.charset.Charset;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

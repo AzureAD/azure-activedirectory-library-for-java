@@ -19,6 +19,7 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
+import javax.net.ssl.SSLSocketFactory;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.Proxy;
@@ -31,12 +32,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-
-import javax.net.ssl.SSLSocketFactory;
-
-import org.apache.commons.codec.binary.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.SignedJWT;
@@ -57,6 +52,9 @@ import com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
+import org.apache.commons.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The main class representing the authority issuing tokens for resources. It
@@ -142,7 +140,7 @@ public class AuthenticationContext {
     /**
      * Sets SSLSocketFactory object to be used by the context.
      * 
-     * @param sslSocketFactory
+     * @param sslSocketFactory The SSL factory object to set
      */
     public void setSslSocketFactory(SSLSocketFactory sslSocketFactory) {
         this.sslSocketFactory = sslSocketFactory;
@@ -307,7 +305,7 @@ public class AuthenticationContext {
      *         {@link AuthenticationResult} of the call. It contains Access
      *         Token and the Access Token's expiration time. Refresh Token
      *         property will be null for this overload.
-     * @throws AuthenticationException
+     * @throws AuthenticationException {@link AuthenticationException}
      */
     public Future<AuthenticationResult> acquireToken(final String resource,
             final ClientAssertion assertion, final ClientCredential credential,
@@ -373,7 +371,7 @@ public class AuthenticationContext {
      *         {@link AuthenticationResult} of the call. It contains Access
      *         Token and the Access Token's expiration time. Refresh Token
      *         property will be null for this overload.
-     * @throws AuthenticationException
+     * @throws AuthenticationException {@link AuthenticationException}
      */
     public Future<AuthenticationResult> acquireToken(final String resource,
             final AsymmetricKeyCredential credential,

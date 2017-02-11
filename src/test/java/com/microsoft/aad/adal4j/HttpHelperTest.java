@@ -19,11 +19,13 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
+import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
+import java.net.URL;
 
-import javax.net.ssl.HttpsURLConnection;
-
+import org.apache.tools.ant.util.ReaderInputStream;
 import org.easymock.EasyMock;
 import org.powermock.api.easymock.PowerMock;
 import org.testng.annotations.Test;
@@ -35,17 +37,23 @@ import org.testng.annotations.Test;
 @Test(groups = { "checkin" })
 public class HttpHelperTest extends AbstractAdalTests {
 
-    @Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = "Failed: HTTP error code 403")
+    @Test(expectedExceptions = AuthenticationException.class,
+            expectedExceptionsMessageRegExp = "Server returned HTTP response code: 403 for URL : https://some.url, Error details : error info")
     public void testReadResponseFromConnection_ResponseCodeNot200()
             throws Exception {
         final HttpsURLConnection connection = PowerMock
                 .createMock(HttpsURLConnection.class);
         EasyMock.expect(connection.getResponseCode()).andReturn(403).times(2);
-        final InputStream is = PowerMock.createMock(InputStream.class);
-        is.close();
-        EasyMock.expectLastCall();
-        EasyMock.expect(connection.getInputStream()).andReturn(is);
-        PowerMock.replayAll(connection, is);
+        EasyMock.expect(connection.getURL()).andReturn(new URL("https://some.url"));
+
+        String testInput = "error info";
+        StringReader reader = new StringReader(testInput);
+        InputStream is = new ReaderInputStream(reader);
+
+        EasyMock.expect(connection.getErrorStream()).andReturn(is).times(1);
+
+        PowerMock.replayAll(connection);
+
         HttpHelper.readResponseFromConnection(connection);
     }
 }

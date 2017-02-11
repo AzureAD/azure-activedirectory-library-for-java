@@ -19,12 +19,11 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
+import javax.net.ssl.SSLSocketFactory;
 import java.net.Proxy;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Map;
-
-import javax.net.ssl.SSLSocketFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

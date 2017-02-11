@@ -27,6 +27,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import com.nimbusds.oauth2.sdk.http.HTTPRequest.Method;
+import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import org.apache.tools.ant.filters.StringInputStream;
 import org.easymock.EasyMock;
 import org.powermock.api.easymock.PowerMock;
@@ -34,9 +36,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.reflect.Whitebox;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import com.nimbusds.oauth2.sdk.http.HTTPRequest.Method;
-import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 
 @Test(groups = { "checkin" })
 @PrepareForTest({ AdalOAuthRequest.class })
@@ -125,7 +124,7 @@ public class AdalOAuthRequestTest extends AbstractAdalTests {
         Assert.assertEquals(response.getWWWAuthenticate(), "www-a");
         Assert.assertEquals(response.getLocation().getAuthority(),
                 "location.pl");
-        Assert.assertEquals(response.getLocation().getProtocol(), "https");
+        Assert.assertEquals(response.getLocation().getScheme(), "https");
         Assert.assertNull(response.getContent());
     }
     
