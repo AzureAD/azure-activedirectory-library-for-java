@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/AzureAD/azure-activedirectory-library-for-java.png?label=ready&title=Ready)](https://waffle.io/AzureAD/azure-activedirectory-library-for-java)
 #Microsoft Azure Active Directory Authentication Library (ADAL) for Java
 =====================================
 
@@ -8,6 +9,11 @@
 ## Versions
 Current version - 1.1.4
 Minimum recommended version - 1.1.4
+You can find the changes for each version in the [change log](https://github.com/AzureAD/azure-activedirectory-library-for-java/blob/master/changelog.txt).
+
+## Versions
+Current version - 1.1.3  
+Minimum recommended version - 1.1.3  
 You can find the changes for each version in the [change log](https://github.com/AzureAD/azure-activedirectory-library-for-java/blob/master/changelog.txt).
 
 ## Community Help and Support
