@@ -1,4 +1,4 @@
-Version 1.1.4
+Version 1.2.0
 =============
 - adding support for RSA keys produced by SunMSCAPI provider
 - log  details about non 200 http responses
