@@ -252,6 +252,16 @@ public class AuthenticationContext {
                 callback);
     }
 
+    public Future<AuthenticationResult> acquireToken(final String resource, final String clientId, final URI redirectUri, final PromptBehavior promptBehavior, final UserIdentifier userId, final String extraQueryParameters, final AuthenticationCallback callback) {
+        // TODO: construct an authorization endpoint URI from the parameters
+
+        // TODO: obtain an instance of UserAgentImpl (from the constructor, from parameter or create here)
+        // TODO: create an instance of InteractiveAuthorizationGrant
+        // TODO: call private acquireToken() helper method
+
+        throw new IllegalStateException("Not yet implemented");
+    }
+
     /**
      * Acquires security token from the authority.
      *
@@ -825,36 +835,42 @@ public class AuthenticationContext {
     private AdalAuthorizatonGrant processPasswordGrant(
             AdalAuthorizatonGrant authGrant) throws Exception {
 
-        if (!(authGrant.getAuthorizationGrant() instanceof ResourceOwnerPasswordCredentialsGrant)) {
-            return authGrant;
+        if ((authGrant.getAuthorizationGrant() instanceof ResourceOwnerPasswordCredentialsGrant)) {
+
+            ResourceOwnerPasswordCredentialsGrant grant = (ResourceOwnerPasswordCredentialsGrant) authGrant
+                    .getAuthorizationGrant();
+
+            UserDiscoveryResponse discoveryResponse = UserDiscoveryRequest.execute(
+                    this.authenticationAuthority.getUserRealmEndpoint(grant
+                            .getUsername()), this.proxy, this.sslSocketFactory);
+            if (discoveryResponse.isAccountFederated()) {
+                WSTrustResponse response = WSTrustRequest.execute(
+                        discoveryResponse.getFederationMetadataUrl(),
+                        grant.getUsername(), grant.getPassword().getValue(),
+                        this.proxy, this.sslSocketFactory);
+
+                AuthorizationGrant updatedGrant = null;
+                if (response.isTokenSaml2()) {
+                    updatedGrant = new SAML2BearerGrant(new Base64URL(
+                            Base64.encodeBase64String(response.getToken().getBytes(
+                                    "UTF-8"))));
+                }
+                else {
+                    updatedGrant = new SAML11BearerGrant(new Base64URL(
+                            Base64.encodeBase64String(response.getToken()
+                                    .getBytes())));
+                }
+
+                authGrant = new AdalAuthorizatonGrant(updatedGrant,
+                        authGrant.getCustomParameters());
+            }
         }
+        else if (authGrant.getAuthorizationGrant() instanceof InteractiveAuthorizationGrant) {
+            InteractiveAuthorizationGrant grant = (InteractiveAuthorizationGrant) authGrant.getAuthorizationGrant();
 
-        ResourceOwnerPasswordCredentialsGrant grant = (ResourceOwnerPasswordCredentialsGrant) authGrant
-                .getAuthorizationGrant();
-
-        UserDiscoveryResponse discoveryResponse = UserDiscoveryRequest.execute(
-                this.authenticationAuthority.getUserRealmEndpoint(grant
-                        .getUsername()), this.proxy, this.sslSocketFactory);
-        if (discoveryResponse.isAccountFederated()) {
-            WSTrustResponse response = WSTrustRequest.execute(
-                    discoveryResponse.getFederationMetadataUrl(),
-                    grant.getUsername(), grant.getPassword().getValue(),
-                    this.proxy, this.sslSocketFactory);
-
-            AuthorizationGrant updatedGrant = null;
-            if (response.isTokenSaml2()) {
-                updatedGrant = new SAML2BearerGrant(new Base64URL(
-                        Base64.encodeBase64String(response.getToken().getBytes(
-                                "UTF-8"))));
-            }
-            else {
-                updatedGrant = new SAML11BearerGrant(new Base64URL(
-                        Base64.encodeBase64String(response.getToken()
-                                .getBytes())));
-            }
-
-            authGrant = new AdalAuthorizatonGrant(updatedGrant,
-                    authGrant.getCustomParameters());
+            // TODO: code = UserAgent#requestAuthorizationCode().getCode()
+            // TODO: authCodeGrant = new AuthorizationCodeGrant(code)
+            // TODO: authGrant = new AdalAuthorizationGrant(authCodeGrant, resource)
         }
 
         return authGrant;
