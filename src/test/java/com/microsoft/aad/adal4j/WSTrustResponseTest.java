@@ -43,15 +43,21 @@ public class WSTrustResponseTest {
     @Test
     public void testWSTrustResponseParseSuccess() throws Exception {
         StringBuilder sb = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(new FileReader((this
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new FileReader((this
                 .getClass().getResource(
-                        TestConfiguration.AAD_TOKEN_SUCCESS_FILE).getFile())))) {
+                    TestConfiguration.AAD_TOKEN_SUCCESS_FILE).getFile())));
             String line = br.readLine();
 
             while (line != null) {
                 sb.append(line);
-                sb.append(System.lineSeparator());
+                sb.append(System.getProperty("line.separator"));
                 line = br.readLine();
+            }
+        } finally {
+            if (br != null) {
+                br.close();
             }
         }
         WSTrustResponse response = WSTrustResponse.parse(sb.toString(), WSTrustVersion.WSTRUST13);
@@ -62,15 +68,20 @@ public class WSTrustResponseTest {
     public void testWSTrustResponseParseError() throws Exception {
 
         StringBuilder sb = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(new FileReader(
-                (this.getClass().getResource(
-                        TestConfiguration.AAD_TOKEN_ERROR_FILE).getFile())))) {
+        BufferedReader br = new BufferedReader(new FileReader(
+            (this.getClass().getResource(
+                TestConfiguration.AAD_TOKEN_ERROR_FILE).getFile())));
+        try {
             String line = br.readLine();
 
             while (line != null) {
                 sb.append(line);
-                sb.append(System.lineSeparator());
+                sb.append(System.getProperty("line.separator"));
                 line = br.readLine();
+            }
+        } finally {
+            if (br != null) {
+                br.close();
             }
         }
         WSTrustResponse response = WSTrustResponse.parse(sb.toString(), WSTrustVersion.WSTRUST13);
