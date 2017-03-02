@@ -104,8 +104,8 @@ public final class AsymmetricKeyCredential {
      * Base64 encoded hash of the the public certificate.
      * 
      * @return base64 encoded string
-     * @throws CertificateEncodingException
-     * @throws NoSuchAlgorithmException
+     * @throws CertificateEncodingException If the public certificate couldn't be encoded.
+     * @throws NoSuchAlgorithmException  If the algorithm used for encoding is not available.
      */
     public String getPublicCertificateHash()
             throws CertificateEncodingException, NoSuchAlgorithmException {
@@ -117,8 +117,8 @@ public final class AsymmetricKeyCredential {
      * Base64 encoded public certificate.
      * 
      * @return base64 encoded string
-     * @throws CertificateEncodingException
-     * @throws NoSuchAlgorithmException
+     * @throws CertificateEncodingException If the public certificate couldn't be encoded.
+     * @throws NoSuchAlgorithmException If the algorithm used for encoding is not available.
      */
     public String getPublicCertificate() throws CertificateEncodingException,
             NoSuchAlgorithmException {
