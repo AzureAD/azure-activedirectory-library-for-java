@@ -43,17 +43,17 @@ class AdalTokenRequest {
 
     private final URL uri;
     private final ClientAuthentication clientAuth;
-    private final AdalAuthorizatonGrant authzGrant;
+    private final AdalGrant grant;
     private final Map<String, String> headerMap;
     private final Proxy proxy;
     private final SSLSocketFactory sslSocketFactory;
 
     AdalTokenRequest(final URL uri, final ClientAuthentication clientAuth,
-            final AdalAuthorizatonGrant authzGrant,
+            final AdalGrant authzGrant,
             final Map<String, String> headerMap, final Proxy proxy,
             final SSLSocketFactory sslSocketFactory) {
         this.clientAuth = clientAuth;
-        this.authzGrant = authzGrant;
+        this.grant = authzGrant;
         this.uri = uri;
         this.headerMap = headerMap;
         this.proxy = proxy;
@@ -126,7 +126,7 @@ class AdalTokenRequest {
                 HTTPRequest.Method.POST, this.uri, headerMap, this.proxy,
                 this.sslSocketFactory);
         httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
-        final Map<String, String> params = this.authzGrant.toParameters();
+        final Map<String, String> params = this.grant.toParameters();
         httpRequest.setQuery(URLUtils.serializeParameters(params));
         if (this.clientAuth != null) {
             this.clientAuth.applyTo(httpRequest);
