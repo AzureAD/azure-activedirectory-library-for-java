@@ -154,13 +154,13 @@ public class AuthenticationContext {
     }
 
     private Future<AuthenticationResult> acquireToken(
-            final AdalAuthorizatonGrant authGrant,
+            final AdalGrant authGrant,
             final ClientAuthentication clientAuth,
             final AuthenticationCallback callback) {
 
         return service.submit(new Callable<AuthenticationResult>() {
 
-            private AdalAuthorizatonGrant authGrant;
+            private AdalGrant authGrant;
             private ClientAuthentication clientAuth;
             private ClientDataHttpHeaders headers;
 
@@ -168,7 +168,9 @@ public class AuthenticationContext {
             public AuthenticationResult call() throws Exception {
                 AuthenticationResult result = null;
                 try {
-                    this.authGrant = processPasswordGrant(this.authGrant);
+                    if (this.authGrant instanceof AdalAuthorizatonGrant) {
+                        this.authGrant = processPasswordGrant((AdalAuthorizatonGrant)this.authGrant);
+                    }
                     result = acquireTokenCommon(this.authGrant,
                             this.clientAuth, this.headers);
                     logResult(result, headers);
@@ -191,7 +193,7 @@ public class AuthenticationContext {
             }
 
             private Callable<AuthenticationResult> init(
-                    final AdalAuthorizatonGrant authGrant,
+                    final AdalGrant authGrant,
                     final ClientAuthentication clientAuth,
                     final ClientDataHttpHeaders headers) {
                 this.authGrant = authGrant;
@@ -800,7 +802,7 @@ public class AuthenticationContext {
     }
 
     private AuthenticationResult acquireTokenCommon(
-            final AdalAuthorizatonGrant authGrant,
+            final AdalGrant authGrant,
             final ClientAuthentication clientAuth,
             final ClientDataHttpHeaders headers) throws Exception {
         log.debug(LogHelper.createMessage(
