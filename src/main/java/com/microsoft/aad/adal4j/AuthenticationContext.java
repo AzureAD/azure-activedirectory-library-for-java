@@ -612,6 +612,43 @@ public class AuthenticationContext {
     }
 
     /**
+     * Acquires security token from the authority using an device code
+     * previously received.
+     *
+     * @param deviceCode
+     *            The device code received from service device code
+     *            endpoint.
+     * @param clientId
+     *            The client ID use for token acquisition.
+     * @param resource
+     *            Identifier of the target resource that is the recipient of the
+     *            requested token.
+     * @param callback
+     *            optional callback object for non-blocking execution.
+     * @return A {@link Future} object representing the
+     *         {@link AuthenticationResult} of the call. It contains Access
+     *         Token, Refresh Token and the Access Token's expiration time.
+     *
+     * @throws AuthenticationException
+     *             thrown if authorization is pending or another error occurred.
+     *             If the caused of the exception is a {@link DeviceCodeException} with
+     *             {@link DeviceCodeException.ErrorCode} AUTHORIZATION_PENDING, the
+     *             call needs to be retied until the AccessToken is returned.
+     */
+    public Future<AuthenticationResult> acquireTokenByDeviceCode(
+            final String deviceCode, final String clientId,
+            final String resource, final AuthenticationCallback callback)
+            throws AuthenticationException {
+
+        final ClientAuthentication clientAuth = new ClientAuthenticationPost(
+                ClientAuthenticationMethod.NONE, new ClientID(clientId));
+        this.validateDeivceCodeRequestInput(deviceCode, clientAuth, resource);
+        final AdalDeviceCodeGrant deviceCodeGrant = new AdalDeviceCodeGrant(
+                new DeviceCode(deviceCode), resource);
+        return this.acquireToken(deviceCodeGrant, clientAuth, callback);
+    }
+
+    /**
      * Acquires a security token from the authority using a Refresh Token
      * previously received.
      *
@@ -963,5 +1000,15 @@ public class AuthenticationContext {
         }
 
         this.validateInput(resource, credential, false);
+    }
+
+    private void validateDeivceCodeRequestInput(final String deviceCode,
+                                                final Object credential,
+                                                final String resource) {
+        if (StringHelper.isBlank(deviceCode)) {
+            throw new IllegalArgumentException(
+                    "device code is null or empty");
+        }
+        this.validateInput(resource, credential, true);
     }
 }

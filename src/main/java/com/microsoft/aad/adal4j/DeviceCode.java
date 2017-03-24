@@ -111,6 +111,20 @@ public final class DeviceCode implements JSONAware {
     }
 
     /**
+     * Creates a new Device Code.
+     *
+     * @param deviceCode The Device Code as string
+     */
+    public DeviceCode(final String deviceCode) {
+        this.deviceCode = deviceCode;
+        this.userCode = null;
+        this.verificationUrl = null;
+        this.expiresIn = 0;
+        this.interval = 0;
+        this.message = null;
+    }
+
+    /**
      * Returns the user code.
      *
      * @return The user code.

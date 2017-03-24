@@ -25,6 +25,7 @@ import java.net.Proxy;
 import java.net.URL;
 import java.util.Map;
 
+import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.SerializeException;
 import com.nimbusds.oauth2.sdk.TokenErrorResponse;
@@ -79,6 +80,15 @@ class AdalTokenRequest {
         httpResponse = adalOAuthHttpRequest.send();
 
         if (httpResponse.getStatusCode() == HTTPResponse.SC_OK) {
+
+            DeviceCodeTokenErrorResponse errorResponse = DeviceCodeTokenErrorResponse.parse(httpResponse);
+            if (errorResponse != null && errorResponse.isDeviceCodeError()) {
+                ErrorObject errorObject = errorResponse.getErrorObject();
+                DeviceCodeException deviceCodeException =
+                        new DeviceCodeException(errorObject.getCode(), errorObject.getDescription());
+                throw new AuthenticationException("Device Code Error", deviceCodeException);
+            }
+
             final AdalAccessTokenResponse response = AdalAccessTokenResponse
                     .parseHttpResponse(httpResponse);
 
@@ -100,8 +110,7 @@ class AdalTokenRequest {
                     tokens.getAccessToken().getLifetime(),
                     tokens.getIDTokenString(), info,
                     !StringHelper.isBlank(response.getResource()));
-        }
-        else {
+        } else {
             final TokenErrorResponse errorResponse = TokenErrorResponse
                     .parse(httpResponse);
             throw new AuthenticationException(errorResponse.toJSONObject()

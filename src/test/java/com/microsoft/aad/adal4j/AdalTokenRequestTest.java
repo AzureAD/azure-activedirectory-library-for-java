@@ -144,12 +144,12 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
                 .andReturn(adalOAuthHttpRequest).times(1);
         EasyMock.expect(adalOAuthHttpRequest.send()).andReturn(httpResponse)
                 .times(1);
-        EasyMock.expect(httpResponse.getStatusCode()).andReturn(200).times(1);
+        EasyMock.expect(httpResponse.getStatusCode()).andReturn(200).times(2);
         EasyMock.expect(httpResponse.getContentAsJSONObject())
                 .andReturn(
                         JSONObjectUtils
                                 .parseJSONObject(TestConfiguration.HTTP_RESPONSE_FROM_AUTH_CODE))
-                .times(1);
+                .times(2);
         httpResponse.ensureStatusCode(200);
         EasyMock.expectLastCall();
 
