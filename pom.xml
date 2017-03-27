@@ -218,6 +218,7 @@
 					<threshold>Low</threshold>
 					<includeTests>false</includeTests>
 					<failOnError>true</failOnError>
+					<excludeFilterFile>${project.basedir}/findbugs/findbugs-exclude.xml</excludeFilterFile>
 					<plugins>
 						<plugin>
 							<groupId>com.h3xstream.findsecbugs</groupId>
