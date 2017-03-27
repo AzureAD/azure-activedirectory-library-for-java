@@ -293,8 +293,12 @@ class MexParser {
             log.debug("found matching policy id: " + policyId);
         }
         else {
+            String nodeValue = "none";
+            if (id != null) {
+                nodeValue = id.getNodeValue();
+            }
             log.debug("potential policy did not match required transport binding: "
-                    + id.getNodeValue());
+                    + nodeValue);
         }
         return policyId;
     }
