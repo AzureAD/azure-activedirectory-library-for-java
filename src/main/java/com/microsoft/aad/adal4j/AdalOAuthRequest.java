@@ -140,11 +140,11 @@ class AdalOAuthRequest extends HTTPRequest {
                 CommonContentTypes.APPLICATION_URLENCODED.toString());
 
         if (this.getQuery() != null) {
-            final OutputStreamWriter writer = new OutputStreamWriter(
-                    conn.getOutputStream());
-            writer.write(getQuery());
-            writer.flush();
-            writer.close();
+            try(final OutputStreamWriter writer = new OutputStreamWriter(
+                        conn.getOutputStream())) {
+                writer.write(getQuery());
+                writer.flush();
+            }
         }
     }
 
