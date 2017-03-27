@@ -6,4 +6,7 @@
     <Match>
         <Bug pattern="DM_CONVERT_CASE"/>
     </Match>
+    <Match>
+        <Bug pattern="REC_CATCH_EXCEPTION"/>
+    </Match>
 </FindBugsFilter>
