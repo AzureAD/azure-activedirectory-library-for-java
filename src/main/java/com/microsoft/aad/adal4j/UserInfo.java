@@ -88,7 +88,11 @@ public class UserInfo implements Serializable {
     }
 
     public Date getPasswordExpiresOn() {
-        return passwordExpiresOn;
+        if (passwordExpiresOn != null) {
+            return (Date)passwordExpiresOn.clone();
+        } else {
+            return null;
+        }
     }
 
     static UserInfo createFromIdTokenClaims(final JWTClaimsSet claims)
