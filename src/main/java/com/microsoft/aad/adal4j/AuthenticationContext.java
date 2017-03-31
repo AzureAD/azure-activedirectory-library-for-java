@@ -844,13 +844,13 @@ public class AuthenticationContext {
             AuthorizationGrant updatedGrant = null;
             if (response.isTokenSaml2()) {
                 updatedGrant = new SAML2BearerGrant(new Base64URL(
-                        Base64.encodeBase64String(response.getToken().getBytes(
-                                "UTF-8"))));
+                        new String(Base64.encodeBase64(response.getToken().getBytes(
+                                "UTF-8")))));
             }
             else {
                 updatedGrant = new SAML11BearerGrant(new Base64URL(
-                        Base64.encodeBase64String(response.getToken()
-                                .getBytes())));
+                        new String(Base64.encodeBase64(response.getToken()
+                                .getBytes()))));
             }
 
             authGrant = new AdalAuthorizatonGrant(updatedGrant,
@@ -889,7 +889,7 @@ public class AuthenticationContext {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         digest.update(input.getBytes("UTF-8"));
         byte[] hash = digest.digest();
-        return Base64.encodeBase64URLSafeString(hash);
+        return new String(Base64.encodeBase64((hash))).replace('+','-').replace('/','_');
     }
 
     private ClientAuthentication createClientAuthFromClientAssertion(
