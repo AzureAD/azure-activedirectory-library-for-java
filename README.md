@@ -1,5 +1,5 @@
 [![Stories in Ready](https://badge.waffle.io/AzureAD/azure-activedirectory-library-for-java.png?label=ready&title=Ready)](https://waffle.io/AzureAD/azure-activedirectory-library-for-java)
-#Microsoft Azure Active Directory Authentication Library (ADAL) for Java
+# Microsoft Azure Active Directory Authentication Library (ADAL) for Java
 =====================================
 
 ## Samples and Documentation
