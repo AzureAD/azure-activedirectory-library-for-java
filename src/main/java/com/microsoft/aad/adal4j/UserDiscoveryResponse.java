@@ -38,6 +38,9 @@ class UserDiscoveryResponse {
     @SerializedName("federation_active_auth_url")
     private String federationActiveAuthUrl;
 
+    @SerializedName("cloud_audience_urn")
+    private String cloudAudienceUrn;
+
     float getVersion() {
         return version;
     }
@@ -57,5 +60,9 @@ class UserDiscoveryResponse {
 
     String getFederationActiveAuthUrl() {
         return federationActiveAuthUrl;
+    }
+
+    String getCloudAudienceUrn() {
+        return cloudAudienceUrn;
     }
 }
