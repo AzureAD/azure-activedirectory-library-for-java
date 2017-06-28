@@ -258,8 +258,8 @@ public class AuthenticationContext {
      * @param resource
      *            Identifier of the target resource that is the recipient of the
      *            requested token.
-     * @param credential
-     *            The client assertion to use for token acquisition.
+     * @param clientAssertion
+     *            The client assertion to use for client authentication.
      * @param callback
      *            optional callback object for non-blocking execution.
      * @return A {@link Future} object representing the
@@ -268,11 +268,11 @@ public class AuthenticationContext {
      *         property will be null for this overload.
      */
     public Future<AuthenticationResult> acquireToken(final String resource,
-            final ClientAssertion credential,
+            final ClientAssertion clientAssertion,
             final AuthenticationCallback callback) {
 
-        this.validateInput(resource, credential, true);
-        final ClientAuthentication clientAuth = createClientAuthFromClientAssertion(credential);
+        this.validateInput(resource, clientAssertion, true);
+        final ClientAuthentication clientAuth = createClientAuthFromClientAssertion(clientAssertion);
         final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
                 new ClientCredentialsGrant(), resource);
         return this.acquireToken(authGrant, clientAuth, callback);
@@ -295,8 +295,8 @@ public class AuthenticationContext {
      * @param resource
      *            Identifier of the target resource that is the recipient of the
      *            requested token.
-     * @param assertion
-     *            The access token to use for token acquisition.
+     * @param userAssertion
+     *            userAssertion to use as Authorization grant
      * @param credential
      *            The client credential to use for token acquisition.
      * @param callback
@@ -308,7 +308,7 @@ public class AuthenticationContext {
      * @throws AuthenticationException {@link AuthenticationException}
      */
     public Future<AuthenticationResult> acquireToken(final String resource,
-            final ClientAssertion assertion, final ClientCredential credential,
+            final UserAssertion userAssertion, final ClientCredential credential,
             final AuthenticationCallback callback) {
 
         this.validateInput(resource, credential, true);
@@ -318,7 +318,7 @@ public class AuthenticationContext {
         try {
             AdalAuthorizatonGrant grant = new AdalAuthorizatonGrant(
                     new JWTBearerGrant(
-                            SignedJWT.parse(assertion.getAssertion())), params);
+                            SignedJWT.parse(userAssertion.getAssertion())), params);
 
             final ClientAuthentication clientAuth = new ClientSecretPost(
                     new ClientID(credential.getClientId()), new Secret(
@@ -426,8 +426,8 @@ public class AuthenticationContext {
      *            endpoint.
      * @param redirectUri
      *            The redirect address used for obtaining authorization code.
-     * @param credential
-     *            The client assertion to use for token acquisition.
+     * @param clientAssertion
+     *            The client assertion to use for client authentication.
      * @param callback
      *            optional callback object for non-blocking execution.
      * @return A {@link Future} object representing the
@@ -436,10 +436,10 @@ public class AuthenticationContext {
      */
     public Future<AuthenticationResult> acquireTokenByAuthorizationCode(
             final String authorizationCode, final URI redirectUri,
-            final ClientAssertion credential,
+            final ClientAssertion clientAssertion,
             final AuthenticationCallback callback) {
         return acquireTokenByAuthorizationCode(authorizationCode, redirectUri,
-                credential, (String) null, callback);
+                clientAssertion, (String) null, callback);
     }
 
     /**
@@ -451,8 +451,8 @@ public class AuthenticationContext {
      *            endpoint.
      * @param redirectUri
      *            The redirect address used for obtaining authorization code.
-     * @param credential
-     *            The client assertion to use for token acquisition.
+     * @param clientAssertion
+     *            The client assertion to use for client authentication.
      * @param resource
      *            Identifier of the target resource that is the recipient of the
      *            requested token. It can be null if provided earlier to acquire
@@ -465,12 +465,12 @@ public class AuthenticationContext {
      */
     public Future<AuthenticationResult> acquireTokenByAuthorizationCode(
             final String authorizationCode, final URI redirectUri,
-            final ClientAssertion credential, final String resource,
+            final ClientAssertion clientAssertion, final String resource,
             final AuthenticationCallback callback) {
 
         this.validateAuthCodeRequestInput(authorizationCode, redirectUri,
-                credential, resource);
-        final ClientAuthentication clientAuth = createClientAuthFromClientAssertion(credential);
+                clientAssertion, resource);
+        final ClientAuthentication clientAuth = createClientAuthFromClientAssertion(clientAssertion);
         final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
                 new AuthorizationCodeGrant(new AuthorizationCode(
                         authorizationCode), redirectUri), resource);
@@ -617,8 +617,8 @@ public class AuthenticationContext {
      *            Refresh Token to use in the refresh flow.
      * @param clientId
      *            Name or ID of the client requesting the token.
-     * @param credential
-     *            The client assertion used for token acquisition.
+     * @param clientAssertion
+     *            The client assertion to use for client authentication.
      * @param callback
      *            optional callback object for non-blocking execution.
      * @return A {@link Future} object representing the
@@ -627,9 +627,9 @@ public class AuthenticationContext {
      */
     public Future<AuthenticationResult> acquireTokenByRefreshToken(
             final String refreshToken, final String clientId,
-            final ClientAssertion credential,
+            final ClientAssertion clientAssertion,
             final AuthenticationCallback callback) {
-        return acquireTokenByRefreshToken(refreshToken, clientId, credential,
+        return acquireTokenByRefreshToken(refreshToken, clientId, clientAssertion,
                 null, callback);
     }
 
@@ -641,8 +641,8 @@ public class AuthenticationContext {
      *            Refresh Token to use in the refresh flow.
      * @param clientId
      *            Name or ID of the client requesting the token.
-     * @param credential
-     *            The client assertion used for token acquisition.
+     * @param clientAssertion
+     *            The client assertion to use for client authentication.
      * @param resource
      *            Identifier of the target resource that is the recipient of the
      *            requested token. If null, token is requested for the same
@@ -658,11 +658,11 @@ public class AuthenticationContext {
      */
     public Future<AuthenticationResult> acquireTokenByRefreshToken(
             final String refreshToken, final String clientId,
-            final ClientAssertion credential, final String resource,
+            final ClientAssertion clientAssertion, final String resource,
             final AuthenticationCallback callback) {
         this.validateRefreshTokenRequestInput(refreshToken, clientId,
-                credential);
-        final ClientAuthentication clientAuth = createClientAuthFromClientAssertion(credential);
+                clientAssertion);
+        final ClientAuthentication clientAuth = createClientAuthFromClientAssertion(clientAssertion);
         final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
                 new RefreshTokenGrant(new RefreshToken(refreshToken)), resource);
         return this.acquireToken(authGrant, clientAuth, callback);
@@ -952,13 +952,12 @@ public class AuthenticationContext {
     }
 
     private ClientAuthentication createClientAuthFromClientAssertion(
-            final ClientAssertion credential) {
+            final ClientAssertion clientAssertion) {
 
         try {
             final Map<String, String> map = new HashMap<String, String>();
-            map.put("client_assertion_type",
-                    JWTAuthentication.CLIENT_ASSERTION_TYPE);
-            map.put("client_assertion", credential.getAssertion());
+            map.put("client_assertion_type", clientAssertion.getAssertionType());
+            map.put("client_assertion", clientAssertion.getAssertion());
             return PrivateKeyJWT.parse(map);
         }
         catch (final ParseException e) {
@@ -1008,7 +1007,7 @@ public class AuthenticationContext {
     }
 
     private void validateAuthCodeRequestInput(final String authorizationCode,
-            final URI redirectUri, final Object credential,
+            final URI redirectUri, final Object clientCredential,
             final String resource) {
         if (StringHelper.isBlank(authorizationCode)) {
             throw new IllegalArgumentException(
@@ -1019,6 +1018,6 @@ public class AuthenticationContext {
             throw new IllegalArgumentException("redirect uri is null");
         }
 
-        this.validateInput(resource, credential, false);
+        this.validateInput(resource, clientCredential, false);
     }
 }

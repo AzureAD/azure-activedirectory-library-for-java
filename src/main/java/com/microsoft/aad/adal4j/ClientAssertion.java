@@ -19,6 +19,8 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
+import com.nimbusds.oauth2.sdk.auth.JWTAuthentication;
+
 /***
  * Credential type containing an assertion of type
  * "urn:ietf:params:oauth:token-type:jwt".
@@ -27,6 +29,8 @@ public final class ClientAssertion {
 
     private final String assertion;
 
+    private final String assertionType = JWTAuthentication.CLIENT_ASSERTION_TYPE;
+
     /**
      * Constructor to create credential with a jwt token encoded as a base64 url
      * encoded string.
@@ -34,7 +38,7 @@ public final class ClientAssertion {
      * @param assertion
      *            The jwt used as credential.
      */
-    public ClientAssertion(final String assertion) {
+    public ClientAssertion(String assertion) {
         if (StringHelper.isBlank(assertion)) {
             throw new NullPointerException("assertion");
         }
@@ -42,12 +46,11 @@ public final class ClientAssertion {
         this.assertion = assertion;
     }
 
-    /**
-     * Gets the assertion.
-     * 
-     * @return string value
-     */
     public String getAssertion() {
         return assertion;
+    }
+
+    public String getAssertionType() {
+        return assertionType;
     }
 }
