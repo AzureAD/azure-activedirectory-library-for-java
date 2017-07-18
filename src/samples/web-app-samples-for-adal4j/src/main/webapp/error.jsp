@@ -1,11 +1,9 @@
 <html>
 <body>
 	<h2>ERROR PAGE!</h2>
-	<p>
-		Exception -
-		<%=request.getAttribute("error")%></p>
+	<p>${error}</p>
 	<ul>
-		<li><a href="<%=request.getContextPath()%>/index.jsp">Go Home</a></li>
+		<li><a href="<%=request.getContextPath()%>/index.jsp">Home Page</a></li>
 	</ul>
 </body>
 </html>
