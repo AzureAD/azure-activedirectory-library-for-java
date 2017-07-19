@@ -59,7 +59,6 @@ public class OAuthRequestValidationTest extends PowerMockTestCase {
     public OAuthRequestValidationTest() throws MalformedURLException {
     }
 
-    //@Before
     @BeforeMethod
     public void init() {
         replace(method(com.microsoft.aad.adal4j.AdalOAuthRequest.class, "send")).
@@ -72,7 +71,6 @@ public class OAuthRequestValidationTest extends PowerMockTestCase {
                 });
     }
 
-    //@AfterClass
     @AfterClass
     public static void clean() {
         service.shutdown();
