@@ -37,7 +37,7 @@ class AuthenticationAuthority {
 
     private final static String[] TRUSTED_HOST_LIST = { "login.windows.net",
             "login.chinacloudapi.cn", "login-us.microsoftonline.com", "login.microsoftonline.de",
-            "login.microsoftonline.com" };
+            "login.microsoftonline.com", "login.microsoftonline.us" };
     private final static String TENANTLESS_TENANT_NAME = "common";
     private final static String AUTHORIZE_ENDPOINT_TEMPLATE = "https://{host}/{tenant}/oauth2/authorize";
     private final static String DISCOVERY_ENDPOINT = "common/discovery/instance";
