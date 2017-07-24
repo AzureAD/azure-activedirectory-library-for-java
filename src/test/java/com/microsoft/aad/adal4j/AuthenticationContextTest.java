@@ -160,6 +160,39 @@ public class AuthenticationContextTest extends AbstractAdalTests {
 	}
 
 	@Test
+	public void testAcquireToken_WithClientSecret_Username_Password() throws Exception {
+		ctx = PowerMock.createPartialMock(AuthenticationContext.class,
+				new String[] { "acquireTokenCommon" },
+				TestConfiguration.AAD_TENANT_ENDPOINT, true, service);
+		PowerMock.expectPrivate(ctx, "acquireTokenCommon",
+				EasyMock.isA(AdalAuthorizatonGrant.class),
+				EasyMock.isA(ClientAuthentication.class),
+				EasyMock.isA(ClientDataHttpHeaders.class))
+				.andReturn(
+						new AuthenticationResult("bearer", "accessToken",
+								"refreshToken", new Date().getTime(), null,
+								null, false));
+
+		UserDiscoveryResponse response = EasyMock
+				.createMock(UserDiscoveryResponse.class);
+		EasyMock.expect(response.isAccountFederated()).andReturn(false);
+
+		PowerMock.mockStatic(UserDiscoveryRequest.class);
+		EasyMock.expect(
+				UserDiscoveryRequest.execute(EasyMock.isA(String.class), EasyMock.isNull(Proxy.class),
+						EasyMock.isNull(SSLSocketFactory.class))).andReturn(response);
+
+		PowerMock.replay(ctx, response, UserDiscoveryRequest.class);
+		Future<AuthenticationResult> result = ctx.acquireToken("resource",
+				"clientId", "clientSecret", "username", "password", null);
+
+		AuthenticationResult ar = result.get();
+		Assert.assertNotNull(ar);
+		PowerMock.verifyAll();
+		PowerMock.resetAll(ctx);
+	}
+
+	@Test
 	public void testAcquireTokenAuthCode_KeyCredential() throws Exception {
 		ctx = PowerMock.createPartialMock(AuthenticationContext.class,
 				new String[] { "acquireTokenCommon" },
