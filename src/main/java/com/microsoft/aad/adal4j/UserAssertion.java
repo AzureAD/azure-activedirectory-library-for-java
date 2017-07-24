@@ -19,6 +19,9 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
+/***
+ * Credential type containing an assertion representing user credential.
+ */
 public class UserAssertion {
 
     private final String assertion;
