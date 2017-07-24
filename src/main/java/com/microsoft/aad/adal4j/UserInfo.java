@@ -88,7 +88,11 @@ public class UserInfo implements Serializable {
     }
 
     public Date getPasswordExpiresOn() {
-        return passwordExpiresOn;
+        if (passwordExpiresOn != null) {
+            return (Date)passwordExpiresOn.clone();
+        } else {
+            return null;
+        }
     }
 
     static UserInfo createFromIdTokenClaims(final JWTClaimsSet claims)
@@ -142,9 +146,8 @@ public class UserInfo implements Serializable {
 
         if (claims
                 .getClaim(AuthenticationConstants.ID_TOKEN_PASSWORD_EXPIRES_ON) != null) {
-            int claimExpiry = Integer
-                    .valueOf((String) claims
-                            .getClaim(AuthenticationConstants.ID_TOKEN_PASSWORD_EXPIRES_ON));
+            int claimExpiry = Integer.parseInt(
+                    (String)claims.getClaim(AuthenticationConstants.ID_TOKEN_PASSWORD_EXPIRES_ON));
             // pwd_exp returns seconds to expiration time
             // it returns in seconds. Date accepts milliseconds.
             if (claimExpiry > 0) {

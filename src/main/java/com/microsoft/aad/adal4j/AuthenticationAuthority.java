@@ -191,7 +191,7 @@ class AuthenticationAuthority {
         }
 
         final String firstPath = path.substring(0, path.indexOf("/"));
-        final AuthorityType authorityType = IsAdfsAuthority(firstPath) ? AuthorityType.ADFS
+        final AuthorityType authorityType = isAdfsAuthority(firstPath) ? AuthorityType.ADFS
                 : AuthorityType.AAD;
 
         return authorityType;
@@ -229,7 +229,7 @@ class AuthenticationAuthority {
                 .replace("{tenant}", tenant);
     }
 
-    static boolean IsAdfsAuthority(final String firstPath) {
+    static boolean isAdfsAuthority(final String firstPath) {
         return firstPath.compareToIgnoreCase("adfs") == 0;
     }
 }

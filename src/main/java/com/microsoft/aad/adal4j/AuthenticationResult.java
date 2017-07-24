@@ -79,7 +79,11 @@ public final class AuthenticationResult implements Serializable {
     }
 
     public Date getExpiresOnDate() {
-        return expiresOn;
+        if (expiresOn != null) {
+            return (Date)expiresOn.clone();
+        } else {
+            return null;
+        }
     }
 
     public String getIdToken() {
