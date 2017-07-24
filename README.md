@@ -1,4 +1,6 @@
 [![Stories in Ready](https://badge.waffle.io/AzureAD/azure-activedirectory-library-for-java.png?label=ready&title=Ready)](https://waffle.io/AzureAD/azure-activedirectory-library-for-java)
+[![Javadocs](http://javadoc.io/badge/com.microsoft.azure/adal4j.svg)](http://javadoc.io/doc/com.microsoft.azure/adal4j)
+</br>
 # Microsoft Azure Active Directory Authentication Library (ADAL) for Java
 =====================================
 
@@ -28,3 +30,4 @@ All code is licensed under the Apache 2.0 license and we triage actively on GitH
 ## We Value and Adhere to the Microsoft Open Source Code of Conduct
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
