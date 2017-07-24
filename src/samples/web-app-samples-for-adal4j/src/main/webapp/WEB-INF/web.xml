@@ -11,38 +11,38 @@
 	</context-param>
 	<context-param>
 		<param-name>tenant</param-name>
-		<param-value>XXX.onmicrosoft.com</param-value>
+		<param-value>tenant</param-value>
 	</context-param>
 
 	<context-param>
 		<param-name>client_id</param-name>
-		<param-value>XXX</param-value>
+		<param-value>client_id</param-value>
 	</context-param>
 	<context-param>
 		<param-name>secret_key</param-name>
-		<param-value>XXX</param-value>
+		<param-value>secret_key</param-value>
 	</context-param>
 	<context-param>
 		<param-name>redirect_uri</param-name>
-		<param-value>XXX</param-value>
+		<param-value>redirect_uri</param-value>
 	</context-param>
 
 	<context-param>
 		<param-name>obo_client_id</param-name>
-		<param-value>XXX</param-value>
+		<param-value>obo_client_id</param-value>
 	</context-param>
 	<context-param>
 		<param-name>obo_secret_key</param-name>
-		<param-value>XXX</param-value>
+		<param-value>obo_secret_key</param-value>
 	</context-param>
 	<context-param>
 		<param-name>obo_application_id_uri</param-name>
-		<param-value>XXX</param-value>
+		<param-value>obo_application_id_uri</param-value>
 	</context-param>
 
 	<context-param>
 		<param-name>mfa_protected_api_id_uri</param-name>
-		<param-value>XXX</param-value>
+		<param-value>mfa_protected_api_id_uri</param-value>
 	</context-param>
 
 	<welcome-file-list>

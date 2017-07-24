@@ -123,9 +123,9 @@ class AdalTokenRequest {
     private String getClaims(String httpResponseContentStr) {
         JsonElement root = new JsonParser().parse(httpResponseContentStr);
 
-        String claims = root.getAsJsonObject().get("claims").getAsString();
+        JsonElement claims = root.getAsJsonObject().get("claims");
 
-        return claims;
+        return claims != null ? claims.getAsString() : null;
     }
 
     /**
