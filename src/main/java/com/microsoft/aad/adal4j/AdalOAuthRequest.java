@@ -140,11 +140,11 @@ class AdalOAuthRequest extends HTTPRequest {
                 CommonContentTypes.APPLICATION_URLENCODED.toString());
 
         if (this.getQuery() != null) {
-            final OutputStreamWriter writer = new OutputStreamWriter(
-                    conn.getOutputStream());
-            writer.write(getQuery());
-            writer.flush();
-            writer.close();
+            try(final OutputStreamWriter writer = new OutputStreamWriter(
+                        conn.getOutputStream())) {
+                writer.write(getQuery());
+                writer.flush();
+            }
         }
     }
 
@@ -158,6 +158,10 @@ class AdalOAuthRequest extends HTTPRequest {
         else {
             InputStream stream = conn.getErrorStream();
             if (stream == null && responseCode == 404) {
+                stream = conn.getInputStream();
+            }
+
+            if (stream == null) {
                 stream = conn.getInputStream();
             }
 

@@ -117,10 +117,10 @@ class HttpHelper {
 
     static HttpsURLConnection configureAdditionalHeaders(
             final HttpsURLConnection conn, final Map<String, String> headers)
-            throws MalformedURLException, IOException {
+            throws IOException {
         if (headers != null) {
-            for (final String key : headers.keySet()) {
-                conn.setRequestProperty(key, headers.get(key));
+            for (final Map.Entry<String, String> entry : headers.entrySet()) {
+                conn.setRequestProperty(entry.getKey(), entry.getValue());
             }
         }
         return conn;
