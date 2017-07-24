@@ -25,12 +25,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import com.nimbusds.oauth2.sdk.AuthorizationCode;
-import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
-import com.nimbusds.oauth2.sdk.AuthorizationGrant;
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.SerializeException;
-import com.nimbusds.oauth2.sdk.TokenErrorResponse;
+import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretPost;
 import com.nimbusds.oauth2.sdk.auth.Secret;
@@ -243,6 +238,11 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
 
         final TokenErrorResponse errorResponse = PowerMock
                 .createMock(TokenErrorResponse.class);
+
+        final ErrorObject errorObject = PowerMock
+                .createMock(ErrorObject.class);
+        EasyMock.expect(errorResponse.getErrorObject())
+                .andReturn(errorObject).times(1);
 
         PowerMock.mockStaticPartial(TokenErrorResponse.class, "parse");
         PowerMock.createPartialMock(TokenErrorResponse.class, "parse");
