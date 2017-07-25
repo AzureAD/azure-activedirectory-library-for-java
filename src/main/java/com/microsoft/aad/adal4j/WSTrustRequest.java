@@ -31,6 +31,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +41,7 @@ class WSTrustRequest {
             .getLogger(WSTrustRequest.class);
 
     private final static int MAX_EXPECTED_MESSAGE_SIZE = 1024;
+    final static String DEFAULT_APPLIES_TO = "urn:federation:MicrosoftOnline";
     
     static WSTrustResponse execute(String url, String username,
             String password, String cloudAudienceUrn, Proxy proxy, SSLSocketFactory sslSocketFactory)
@@ -71,7 +73,7 @@ class WSTrustRequest {
         return WSTrustResponse.parse(response, policy.getVersion());
     }
 
-    private static StringBuilder buildMessage(String address, String username,
+    static StringBuilder buildMessage(String address, String username,
             String password, WSTrustVersion addressVersion, String cloudAudienceUrn) {
 
         StringBuilder securityHeaderBuilder = new StringBuilder(
@@ -156,7 +158,9 @@ class WSTrustRequest {
                                 + "</s:Envelope>", schemaLocation, soapAction,
                                 guid, address,
                                 securityHeaderBuilder.toString(),
-                                rstTrustNamespace, cloudAudienceUrn, keyType,
+                                rstTrustNamespace,
+                                StringUtils.isNotEmpty(cloudAudienceUrn) ? cloudAudienceUrn : DEFAULT_APPLIES_TO,
+                                keyType,
                                 requestType));
 
         return messageBuilder;
