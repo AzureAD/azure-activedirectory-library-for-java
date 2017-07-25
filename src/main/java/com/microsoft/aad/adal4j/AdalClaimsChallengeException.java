@@ -20,17 +20,30 @@
 
 package com.microsoft.aad.adal4j;
 
+/**
+ * The exception type thrown when a claims challenge error occurs during token acquisition.
+ */
 public class AdalClaimsChallengeException extends AuthenticationException {
-    public String getClaims() {
-        return claims;
-    }
 
-    private final String claims;
-
-
+    /**
+     * Constructor
+     *
+     * @param message
+     * @param claims
+     */
     public AdalClaimsChallengeException(String message, String claims) {
         super(message);
 
         this.claims = claims;
+    }
+
+    private final String claims;
+
+    /**
+     *
+     * @return claims challenge value
+     */
+    public String getClaims() {
+        return claims;
     }
 }
