@@ -891,13 +891,13 @@ public class AuthenticationContext {
         ResourceOwnerPasswordCredentialsGrant grant = (ResourceOwnerPasswordCredentialsGrant) authGrant
                 .getAuthorizationGrant();
 
-        UserDiscoveryResponse discoveryResponse = UserDiscoveryRequest.execute(
+        UserDiscoveryResponse userDiscoveryResponse = UserDiscoveryRequest.execute(
                 this.authenticationAuthority.getUserRealmEndpoint(grant
                         .getUsername()), this.proxy, this.sslSocketFactory);
-        if (discoveryResponse.isAccountFederated()) {
+        if (userDiscoveryResponse.isAccountFederated()) {
             WSTrustResponse response = WSTrustRequest.execute(
-                    discoveryResponse.getFederationMetadataUrl(),
-                    grant.getUsername(), grant.getPassword().getValue(),
+                    userDiscoveryResponse.getFederationMetadataUrl(),
+                    grant.getUsername(), grant.getPassword().getValue(), userDiscoveryResponse.getCloudAudienceUrn(),
                     this.proxy, this.sslSocketFactory);
 
             AuthorizationGrant updatedGrant = null;
