@@ -25,15 +25,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import com.nimbusds.oauth2.sdk.AuthorizationCode;
-import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
-import com.nimbusds.oauth2.sdk.AuthorizationGrant;
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.SerializeException;
-import com.nimbusds.oauth2.sdk.TokenErrorResponse;
+import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretPost;
 import com.nimbusds.oauth2.sdk.auth.Secret;
+import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
@@ -47,6 +43,51 @@ import org.testng.annotations.Test;
 @Test(groups = { "checkin" })
 @PrepareForTest(TokenErrorResponse.class)
 public class AdalTokenRequestTest extends AbstractAdalTests {
+
+    @Test
+    public void executeOAuthRequest_SCBadRequestErrorInteractionRequired_AdalClaimsChallengeExceptionThrown()
+            throws SerializeException,
+            ParseException, AuthenticationException, IOException,
+            java.text.ParseException, URISyntaxException {
+
+        AuthorizationGrant ag = new AuthorizationCodeGrant(
+                new AuthorizationCode("code"),
+                new URI("http://my.redirect.com"));
+        AdalAuthorizatonGrant grant = new AdalAuthorizatonGrant(ag, (String) null);
+
+        AdalTokenRequest request = PowerMock.createPartialMock(
+                AdalTokenRequest.class, new String[]{"toOAuthRequest"},
+                new URL("http://login.windows.net"), null, grant, null, null, null);
+        AdalOAuthRequest adalOAuthHttpRequest = PowerMock
+                .createMock(AdalOAuthRequest.class);
+
+        HTTPResponse httpResponse = new HTTPResponse(HTTPResponse.SC_BAD_REQUEST);
+
+        String claims = "{\\\"access_token\\\":{\\\"polids\\\":{\\\"essential\\\":true,\\\"values\\\":[\\\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\\\"]}}}";
+
+        String content = "{\"error\":\"interaction_required\"," +
+                "\"error_description\":\"AADSTS50076: description\\r\\nCorrelation ID: 3a...5a\\r\\nTimestamp:2017-07-15 02:35:05Z\"," +
+                "\"error_codes\":[50076]," +
+                "\"timestamp\":\"2017-07-15 02:35:05Z\"," +
+                "\"trace_id\":\"0788...000\"," +
+                "\"correlation_id\":\"3a...95a\"," +
+                "\"claims\":\"" + claims + "\"}";
+        httpResponse.setContent(content);
+        httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
+
+        EasyMock.expect(request.toOAuthRequest()).andReturn(adalOAuthHttpRequest).times(1);
+        EasyMock.expect(adalOAuthHttpRequest.send()).andReturn(httpResponse).times(1);
+
+        PowerMock.replay(request, adalOAuthHttpRequest);
+
+        try {
+            request.executeOAuthRequestAndProcessResponse();
+            Assert.fail("Expected AdalClaimsChallengeException was not thrown");
+        } catch (AdalClaimsChallengeException ex) {
+            Assert.assertEquals(claims.replace("\\", ""), ex.getClaims());
+        }
+        PowerMock.verifyAll();
+    }
 
     @Test(expectedExceptions = SerializeException.class, expectedExceptionsMessageRegExp = "The endpoint URI is not specified")
     public void testNullUri() throws SerializeException, ParseException,
@@ -197,6 +238,11 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
 
         final TokenErrorResponse errorResponse = PowerMock
                 .createMock(TokenErrorResponse.class);
+
+        final ErrorObject errorObject = PowerMock
+                .createMock(ErrorObject.class);
+        EasyMock.expect(errorResponse.getErrorObject())
+                .andReturn(errorObject).times(1);
 
         PowerMock.mockStaticPartial(TokenErrorResponse.class, "parse");
         PowerMock.createPartialMock(TokenErrorResponse.class, "parse");

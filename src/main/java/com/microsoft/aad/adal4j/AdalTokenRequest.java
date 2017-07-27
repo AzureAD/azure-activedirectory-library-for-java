@@ -25,6 +25,8 @@ import java.net.Proxy;
 import java.net.URL;
 import java.util.Map;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.SerializeException;
 import com.nimbusds.oauth2.sdk.TokenErrorResponse;
@@ -104,11 +106,26 @@ class AdalTokenRequest {
         else {
             final TokenErrorResponse errorResponse = TokenErrorResponse
                     .parse(httpResponse);
-            throw new AuthenticationException(errorResponse.toJSONObject()
-                    .toJSONString());
+            if(HTTPResponse.SC_BAD_REQUEST == errorResponse.getErrorObject().getHTTPStatusCode() &&
+                    "interaction_required".equals(errorResponse.getErrorObject().getCode())){
+                throw new AdalClaimsChallengeException(errorResponse.toJSONObject()
+                        .toJSONString(), getClaims(httpResponse.getContent()));
+            }
+            else {
+                throw new AuthenticationException(errorResponse.toJSONObject()
+                        .toJSONString());
+            }
         }
 
         return result;
+    }
+
+    private String getClaims(String httpResponseContentStr) {
+        JsonElement root = new JsonParser().parse(httpResponseContentStr);
+
+        JsonElement claims = root.getAsJsonObject().get("claims");
+
+        return claims != null ? claims.getAsString() : null;
     }
 
     /**

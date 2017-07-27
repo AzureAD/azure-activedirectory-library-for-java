@@ -39,6 +39,10 @@ public final class AuthHelper {
         return request.getSession().getAttribute(PRINCIPAL_SESSION_NAME) != null;
     }
 
+    public static void invalidateAuth(HttpServletRequest request) {
+        request.getSession().setAttribute(PRINCIPAL_SESSION_NAME, null);
+    }
+
     public static AuthenticationResult getAuthSessionObject(
             HttpServletRequest request) {
         return (AuthenticationResult) request.getSession().getAttribute(
