@@ -20,6 +20,7 @@
 package com.microsoft.aad.adal4j;
 
 import com.nimbusds.oauth2.sdk.auth.JWTAuthentication;
+import java.util.Objects;
 
 /***
  * Credential type containing an assertion of type
@@ -53,4 +54,29 @@ public final class ClientAssertion {
     public String getAssertionType() {
         return assertionType;
     }
+    
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 97 * hash + Objects.hashCode(this.assertion);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ClientAssertion other = (ClientAssertion) obj;
+        if (!Objects.equals(this.assertion, other.assertion)) {
+            return false;
+        }
+        return true;
+    }    
 }
