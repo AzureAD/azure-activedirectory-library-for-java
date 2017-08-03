@@ -25,7 +25,7 @@ If you find a security issue with our libraries or services please report it to 
 
 ## Contributing
 
-All code is licensed under the Apache 2.0 license and we triage actively on GitHub. We enthusiastically welcome contributions and feedback. You can clone the repo and start contributing now.
+All code is licensed under the MIT License and we triage actively on GitHub. We enthusiastically welcome contributions and feedback. You can clone the repo and start contributing now.
 
 ## We Value and Adhere to the Microsoft Open Source Code of Conduct
 
