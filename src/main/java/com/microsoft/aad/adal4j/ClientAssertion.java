@@ -33,7 +33,7 @@ public final class ClientAssertion {
 
     private final String assertion;
 
-    private final String assertionType = JWTAuthentication.CLIENT_ASSERTION_TYPE;
+    private static final String assertionType = JWTAuthentication.CLIENT_ASSERTION_TYPE;
 
     /**
      * Constructor to create credential with a jwt token encoded as a base64 url
