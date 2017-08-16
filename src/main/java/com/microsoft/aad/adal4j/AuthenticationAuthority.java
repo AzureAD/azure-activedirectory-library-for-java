@@ -136,7 +136,7 @@ class AuthenticationAuthority {
                             AuthenticationErrorMessage.AUTHORITY_NOT_IN_VALID_LIST);
                 }
             }
-            log.fine(LogHelper.createMessage(
+            log.trace(LogHelper.createMessage(
                     "Instance discovery was successful",
                     headers.get(ClientDataHttpHeaders.CORRELATION_ID_HEADER_NAME)));
             instanceDiscoveryCompleted = true;
