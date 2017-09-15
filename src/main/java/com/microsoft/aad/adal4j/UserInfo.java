@@ -29,6 +29,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 import com.nimbusds.jwt.JWTClaimsSet;
+import java.util.*;
 
 /**
  * Contains information of a single user.
@@ -164,4 +165,52 @@ public class UserInfo implements Serializable {
         return userInfo;
     }
 
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 37 * hash + Objects.hashCode(this.uniqueId);
+        hash = 37 * hash + Objects.hashCode(this.displayableId);
+        hash = 37 * hash + Objects.hashCode(this.givenName);
+        hash = 37 * hash + Objects.hashCode(this.familyName);
+        hash = 37 * hash + Objects.hashCode(this.identityProvider);
+        hash = 37 * hash + Objects.hashCode(this.passwordChangeUrl);
+        hash = 37 * hash + Objects.hashCode(this.passwordExpiresOn);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final UserInfo other = (UserInfo) obj;
+        if (!Objects.equals(this.uniqueId, other.uniqueId)) {
+            return false;
+        }
+        if (!Objects.equals(this.displayableId, other.displayableId)) {
+            return false;
+        }
+        if (!Objects.equals(this.givenName, other.givenName)) {
+            return false;
+        }
+        if (!Objects.equals(this.familyName, other.familyName)) {
+            return false;
+        }
+        if (!Objects.equals(this.identityProvider, other.identityProvider)) {
+            return false;
+        }
+        if (!Objects.equals(this.passwordChangeUrl, other.passwordChangeUrl)) {
+            return false;
+        }
+        if (!Objects.equals(this.passwordExpiresOn, other.passwordExpiresOn)) {
+            return false;
+        }
+        return true;
+    }
 }

@@ -23,6 +23,8 @@
 
 package com.microsoft.aad.adal4j;
 
+import java.util.Objects;
+
 /**
  * Credential including client id and secret.
  */
@@ -69,4 +71,33 @@ public final class ClientCredential {
     public String getClientSecret() {
         return clientSecret;
     }
+    
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 71 * hash + Objects.hashCode(this.clientId);
+        hash = 71 * hash + Objects.hashCode(this.clientSecret);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ClientCredential other = (ClientCredential) obj;
+        if (!Objects.equals(this.clientId, other.clientId)) {
+            return false;
+        }
+        if (!Objects.equals(this.clientSecret, other.clientSecret)) {
+            return false;
+        }
+        return true;
+    }    
 }
