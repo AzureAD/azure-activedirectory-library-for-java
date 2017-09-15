@@ -95,6 +95,9 @@ public class UserInfoTest extends AbstractAdalTests {
         EasyMock.expect(
                 claimSet.getClaim(AuthenticationConstants.ID_TOKEN_PASSWORD_EXPIRES_ON))
                 .andReturn("5000").times(2);
+        EasyMock.expect(
+                claimSet.getStringClaim(AuthenticationConstants.ID_TOKEN_TENANTID))
+                .andReturn("TenantID").times(1);
 
         EasyMock.replay(claimSet);
         final UserInfo ui = UserInfo.createFromIdTokenClaims(claimSet);
@@ -105,6 +108,8 @@ public class UserInfoTest extends AbstractAdalTests {
         Assert.assertEquals("value", ui.getFamilyName());
         Assert.assertEquals("idp", ui.getIdentityProvider());
         Assert.assertEquals("url", ui.getPasswordChangeUrl());
+        Assert.assertEquals("TenantID", ui.getTenantId());
+
         Assert.assertNotNull(ui.getPasswordExpiresOn());
         PowerMock.verifyAll();
     }
@@ -144,6 +149,9 @@ public class UserInfoTest extends AbstractAdalTests {
         EasyMock.expect(
                 claimSet.getClaim(AuthenticationConstants.ID_TOKEN_PASSWORD_EXPIRES_ON))
                 .andReturn(null).times(1);
+        EasyMock.expect(
+                claimSet.getStringClaim(AuthenticationConstants.ID_TOKEN_TENANTID))
+                .andReturn("TenantID").times(1);
 
         EasyMock.replay(claimSet);
         final UserInfo ui = UserInfo.createFromIdTokenClaims(claimSet);
@@ -155,6 +163,7 @@ public class UserInfoTest extends AbstractAdalTests {
         Assert.assertEquals("idp", ui.getIdentityProvider());
         Assert.assertNull(ui.getPasswordChangeUrl());
         Assert.assertNull(ui.getPasswordExpiresOn());
+        Assert.assertEquals("TenantID", ui.getTenantId());
         PowerMock.verifyAll();
     }
 }

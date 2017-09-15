@@ -43,6 +43,7 @@ public class UserInfo implements Serializable {
     String identityProvider;
     String passwordChangeUrl;
     Date passwordExpiresOn;
+    String tenantId;
 
     private UserInfo() {
     }
@@ -99,6 +100,15 @@ public class UserInfo implements Serializable {
         }
     }
 
+    /**
+     * Get tenant id
+     *
+     * @return String value
+     */
+    public String getTenantId() {
+        return tenantId;
+    }
+
     static UserInfo createFromIdTokenClaims(final JWTClaimsSet claims)
             throws java.text.ParseException {
 
@@ -140,6 +150,8 @@ public class UserInfo implements Serializable {
                 .getStringClaim(AuthenticationConstants.ID_TOKEN_GIVEN_NAME);
         userInfo.identityProvider = claims
                 .getStringClaim(AuthenticationConstants.ID_TOKEN_IDENTITY_PROVIDER);
+        userInfo.tenantId = claims
+                .getStringClaim(AuthenticationConstants.ID_TOKEN_TENANTID);
 
         if (!StringHelper
                 .isBlank(claims
