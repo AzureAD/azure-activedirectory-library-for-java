@@ -325,13 +325,11 @@ public class AuthenticationContext {
 				WSTrustResponse wsTrustResponse = WSTrustRequest.execute(mexURL, cloudAudienceUrn, this.proxy,
 						this.sslSocketFactory);
 
-				// TODO : need to parse the response to get the SAML assertion token
-				// We need to parse the document to get the SAML assertion token
-				System.out.println("SAML version of Token, wsTrustResponse.getTokenType(): " + wsTrustResponse.getTokenType());
-				System.out.println("wsTrustResponse.getToken(): " + wsTrustResponse.getToken());
+				System.out.println("SAML version of Token: " + wsTrustResponse.getTokenType());
+				System.out.println("SAML Assertion token: " + wsTrustResponse.getToken());
 				
 				
-				
+				//Make the OAuth2 call to get the access Token.
 				AuthorizationGrant updatedGrant = null;
 				
 				if (wsTrustResponse.isTokenSaml2()) {

@@ -84,7 +84,7 @@ class WSTrustRequest {
         headers.put("Content-Type", "application/soap+xml");
         headers.put("return-client-request-id", "true");
         
-        
+        // Discover the policy for authentication using the Metadata Exchange Url. 
         String mexResponse = HttpHelper.executeHttpGet(log, url,
                 proxy, sslSocketFactory);
         
@@ -130,12 +130,9 @@ class WSTrustRequest {
         System.out.println("headers: " + headers);
         System.out.println("body: " + body);
         
-        
+        //Get the WSTrust Token (Web Service Trust Token)
         String response = HttpHelper.executeHttpPost(log, policy.getUrl(),
                 body, headers, proxy, sslSocketFactory);
-        
-        System.out.println("response: " + response);
-        
         return WSTrustResponse.parse(response, policy.getVersion());
     }
     
