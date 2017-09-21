@@ -57,6 +57,8 @@ import com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
+import com.sun.security.auth.module.NTSystem;
+
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -292,6 +294,12 @@ public class AuthenticationContext {
 	public Future<AuthenticationResult> acquireTokenIntegrated(AuthenticationContext context, final String resource, final String clientId,
 			final AuthenticationCallback callback) {
 		try {
+			
+			
+			NTSystem system = new NTSystem();
+			System.out.println("system.getDomain(): " + system.getDomain());
+			System.out.println("system.getName(): " + system.getName());
+			
 			// User Realm Information Endpoint
 			String userRealmEndpoint = context.authenticationAuthority.getUserRealmEndpoint(URLEncoder.encode("testodbc@microsoft.com", "UTF-8"));
 			
@@ -309,19 +317,41 @@ public class AuthenticationContext {
 
 				System.out.println("mexURL: " + mexURL);
 				System.out.println("cloudAudienceUrn: " + cloudAudienceUrn);
-				System.out.println("ActiveAuthUrl: " + userRealmResponse.getFederationActiveAuthUrl());
+//				System.out.println("ActiveAuthUrl: " + userRealmResponse.getFederationActiveAuthUrl());
 				
 				
 				// Discover the policy for authentication using the Metadata Exchange Url.
 				// Get the WSTrust Token (Web Service Trust Token)
-				WSTrustResponse response = WSTrustRequest.execute(mexURL, cloudAudienceUrn, this.proxy,
+				WSTrustResponse wsTrustResponse = WSTrustRequest.execute(mexURL, cloudAudienceUrn, this.proxy,
 						this.sslSocketFactory);
 
 				// TODO : need to parse the response to get the SAML assertion token
 				// We need to parse the document to get the SAML assertion token
-				System.out.println("SAML version of Token: " + response.getTokenType());
-				System.out.println("the SAML Assertion token ???: " + response.getToken());
-				System.out.println(response.SAML1_ASSERTION);
+				System.out.println("SAML version of Token, wsTrustResponse.getTokenType(): " + wsTrustResponse.getTokenType());
+				System.out.println("wsTrustResponse.getToken(): " + wsTrustResponse.getToken());
+				
+				
+				
+				AuthorizationGrant updatedGrant = null;
+				
+				if (wsTrustResponse.isTokenSaml2()) {
+	                updatedGrant = new SAML2BearerGrant(new Base64URL(
+	                        Base64.encodeBase64String(wsTrustResponse.getToken().getBytes(
+	                                "UTF-8"))));
+	            }
+	            else {
+	            	System.out.println("SAML 1");
+	                updatedGrant = new SAML11BearerGrant(new Base64URL(
+	                        Base64.encodeBase64String(wsTrustResponse.getToken()
+	                                .getBytes())));
+	            }
+
+				AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(updatedGrant, resource);
+				
+				ClientAuthenticationPost  clientAuth = new ClientAuthenticationPost(
+		                ClientAuthenticationMethod.NONE, new ClientID(clientId));
+				
+				return this.acquireToken(authGrant, clientAuth, callback);
 			}
 
 		} catch (Exception e) {
