@@ -29,6 +29,7 @@ import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -281,6 +282,62 @@ public class AuthenticationContext {
                 new ClientCredentialsGrant(), resource);
         return this.acquireToken(authGrant, clientAuth, callback);
     }
+    
+    
+    
+    
+    
+    
+    
+	public Future<AuthenticationResult> acquireTokenIntegrated(AuthenticationContext context, final String resource, final String clientId,
+			final AuthenticationCallback callback) {
+		try {
+			// User Realm Information Endpoint
+			String userRealmEndpoint = context.authenticationAuthority.getUserRealmEndpoint(URLEncoder.encode("testodbc@microsoft.com", "UTF-8"));
+			
+			// Get the realm information
+			UserDiscoveryResponse userRealmResponse = UserDiscoveryRequest.execute(userRealmEndpoint, this.proxy,
+					this.sslSocketFactory);
+
+			if (userRealmResponse.isAccountFederated()
+					&& "WSTrust".equalsIgnoreCase(userRealmResponse.getFederationProtocol())) {
+				
+				System.out.println("isAccountFederated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+				
+				String mexURL = userRealmResponse.getFederationMetadataUrl();
+				String cloudAudienceUrn = userRealmResponse.getCloudAudienceUrn();
+
+				System.out.println("mexURL: " + mexURL);
+				System.out.println("cloudAudienceUrn: " + cloudAudienceUrn);
+				System.out.println("ActiveAuthUrl: " + userRealmResponse.getFederationActiveAuthUrl());
+				
+				
+				// Discover the policy for authentication using the Metadata Exchange Url.
+				// Get the WSTrust Token (Web Service Trust Token)
+				WSTrustResponse response = WSTrustRequest.execute(mexURL, cloudAudienceUrn, this.proxy,
+						this.sslSocketFactory);
+
+				// TODO : need to parse the response to get the SAML assertion token
+				// We need to parse the document to get the SAML assertion token
+				System.out.println("SAML version of Token: " + response.getTokenType());
+				System.out.println("the SAML Assertion token ???: " + response.getToken());
+				System.out.println(response.SAML1_ASSERTION);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		
+
+		return null;
+	}
+    
+    
+    
+    
+    
+    
 
     private void validateInput(final String resource, final Object credential,
             final boolean validateResource) {
