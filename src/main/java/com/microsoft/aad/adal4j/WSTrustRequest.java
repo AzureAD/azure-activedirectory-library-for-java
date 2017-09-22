@@ -91,23 +91,7 @@ class WSTrustRequest {
         System.out.println("mexResponse: " + mexResponse);
         
         
-        BindingPolicy tempPolicy = MexParser.getWsTrustEndpointFromMexResponse(mexResponse);
-        System.out.println("!!!!!!!!!!!!!tempPolicy.getUrl(): " + tempPolicy.getUrl());
-        System.out.println("!!!!!!!!!!!!!tempPolicy.getVersion(): " + tempPolicy.getVersion());
-        System.out.println("!!!!!!!!!!!!!tempPolicy.getValue(): " + tempPolicy.getValue());
-        
-        
-        
-        
-        String policyURL = "https://msft.sts.microsoft.com/adfs/services/trust/13/usernamemixed";
-        if(mexResponse.contains("https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport")) {
-        	policyURL = "https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport";
-        }
-
-        //TODO : need to parse mexResponse to get the  following URL and version
-        //Parsing details for the metadata XML
-        BindingPolicy policy = new BindingPolicy(policyURL, WSTrustVersion.WSTRUST13);
-        
+        BindingPolicy policy = MexParser.getPolicyFromMexResponseForIntegrated(mexResponse);
         System.out.println("policy.getVersion(): " + policy.getVersion());
         System.out.println("policy.getUrl(): " + policy.getUrl());
         
