@@ -77,7 +77,7 @@ class WSTrustRequest {
         return WSTrustResponse.parse(response, policy.getVersion());
     }
     
-    static WSTrustResponse execute(String url, String cloudAudienceUrn, Proxy proxy, SSLSocketFactory sslSocketFactory)
+    static WSTrustResponse execute(String mexURL, String cloudAudienceUrn, Proxy proxy, SSLSocketFactory sslSocketFactory)
             throws Exception {
 
         Map<String, String> headers = new HashMap<String, String>();
@@ -85,10 +85,19 @@ class WSTrustRequest {
         headers.put("return-client-request-id", "true");
         
         // Discover the policy for authentication using the Metadata Exchange Url. 
-        String mexResponse = HttpHelper.executeHttpGet(log, url,
+        String mexResponse = HttpHelper.executeHttpGet(log, mexURL,
                 proxy, sslSocketFactory);
         
         System.out.println("mexResponse: " + mexResponse);
+        
+        
+        BindingPolicy tempPolicy = MexParser.getWsTrustEndpointFromMexResponse(mexResponse);
+        System.out.println("!!!!!!!!!!!!!tempPolicy.getUrl(): " + tempPolicy.getUrl());
+        System.out.println("!!!!!!!!!!!!!tempPolicy.getVersion(): " + tempPolicy.getVersion());
+        System.out.println("!!!!!!!!!!!!!tempPolicy.getValue(): " + tempPolicy.getValue());
+        
+        
+        
         
         String policyURL = "https://msft.sts.microsoft.com/adfs/services/trust/13/usernamemixed";
         if(mexResponse.contains("https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport")) {
