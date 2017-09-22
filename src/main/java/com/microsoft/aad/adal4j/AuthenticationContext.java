@@ -25,6 +25,7 @@ package com.microsoft.aad.adal4j;
 
 import javax.net.ssl.SSLSocketFactory;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URI;
@@ -294,14 +295,23 @@ public class AuthenticationContext {
 	public Future<AuthenticationResult> acquireTokenIntegrated(AuthenticationContext context, final String resource, final String clientId,
 			final AuthenticationCallback callback) {
 		try {
-			
-			
-			NTSystem system = new NTSystem();
-			System.out.println("system.getDomain(): " + system.getDomain());
-			System.out.println("system.getName(): " + system.getName());
-			
+			//testodbc
+			String username = System.getenv("USERNAME");
+	        System.out.println("username: " + username);
+
+	        //DESKTOP-V15F5F6.redmond.corp.microsoft.com
+	        String hostname = InetAddress.getLocalHost().getCanonicalHostName();
+	        System.out.println("Hostname: " + hostname);
+	        
+	        if(null == username || null == hostname || !hostname.contains(".")) {
+	        	return null;
+	        }
+	        
+	        String userDomainName = username + hostname.substring(hostname.indexOf("."));
+	        System.out.println("userDomainName: " + userDomainName);
+
 			// User Realm Information Endpoint
-			String userRealmEndpoint = context.authenticationAuthority.getUserRealmEndpoint(URLEncoder.encode("testodbc@microsoft.com", "UTF-8"));
+			String userRealmEndpoint = context.authenticationAuthority.getUserRealmEndpoint(URLEncoder.encode(userDomainName, "UTF-8"));
 			
 			// Get the realm information
 			UserDiscoveryResponse userRealmResponse = UserDiscoveryRequest.execute(userRealmEndpoint, this.proxy,
