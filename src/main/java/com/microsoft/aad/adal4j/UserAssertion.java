@@ -23,42 +23,34 @@
 
 package com.microsoft.aad.adal4j;
 
-class BindingPolicy {
+/***
+ * Credential type containing an assertion representing user credential.
+ */
+public class UserAssertion {
 
-    private String value;
-    private String url;
-    private WSTrustVersion version;
+    private final String assertion;
 
-    public BindingPolicy(String value) {
-        this.value = value;
+    /**
+     * Constructor to create credential with a jwt token encoded as a base64 url
+     * encoded string.
+     *
+     * @param assertion
+     *            The jwt used as credential.
+     */
+    public UserAssertion(final String assertion) {
+        if (StringHelper.isBlank(assertion)) {
+            throw new NullPointerException("assertion");
+        }
+
+        this.assertion = assertion;
     }
 
-    public BindingPolicy(String url, WSTrustVersion version) {
-        this.url = url;
-        this.version = version;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public void setVersion(WSTrustVersion version) {
-        this.version = version;
-    }
-
-    public WSTrustVersion getVersion() {
-        return this.version;
+    /**
+     * Gets the assertion.
+     *
+     * @return string value
+     */
+    public String getAssertion() {
+        return assertion;
     }
 }

@@ -1,3 +1,26 @@
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.concurrent.ExecutorService;
@@ -11,8 +34,9 @@ import com.microsoft.aad.adal4j.AuthenticationResult;
 
 public class PublicClient {
 
-    private final static String AUTHORITY = "https://login.windows.net/common";
-    private final static String CLIENT_ID = "9ba1a5c7-f17a-4de9-a1f1-6178c8d51223";
+    private final static String AUTHORITY = "https://login.microsoftonline.com/common";
+    private final static String CLIENT_ID = "YOUR_PUBLIC_CLIENT_ID";
+    private final static String RESOURCE = "https://graph.windows.net";
 
     public static void main(String args[]) throws Exception {
 
@@ -40,8 +64,7 @@ public class PublicClient {
             service = Executors.newFixedThreadPool(1);
             context = new AuthenticationContext(AUTHORITY, false, service);
             Future<AuthenticationResult> future = context.acquireToken(
-                    "https://graph.windows.net", CLIENT_ID, username, password,
-                    null);
+                    RESOURCE, CLIENT_ID, username, password, null);
             result = future.get();
         } finally {
             service.shutdown();

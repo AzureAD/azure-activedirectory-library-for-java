@@ -1,8 +1,10 @@
 <html>
 <body>
-	<h2>Hello World!</h2>
-	<ul>
-	<li><a href="secure/aad">Secure Page</a></li>
-	</ul>
+	<h3>Home Page</h3>
+
+	<form action="secure/aad">
+		<input type="submit" value="Show users in the tenant">
+	</form>
+
 </body>
 </html>

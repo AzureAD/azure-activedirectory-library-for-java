@@ -23,50 +23,33 @@
 
 package com.microsoft.aad.adal4j;
 
-import com.google.gson.annotations.SerializedName;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
-class UserDiscoveryResponse {
+@Test(groups = { "checkin" })
+public class WSTrustRequestTest {
 
-    @SerializedName("ver")
-    private float version;
+    @Test
+    public void buildMessage_cloudAudienceUrnNotNull() throws Exception {
+        String msg = WSTrustRequest.buildMessage("address", "username",
+                "password", WSTrustVersion.WSTRUST2005, "cloudAudienceUrn").toString();
 
-    @SerializedName("account_type")
-    private String accountType;
-
-    @SerializedName("federation_metadata_url")
-    private String federationMetadataUrl;
-
-    @SerializedName("federation_protocol")
-    private String federationProtocol;
-
-    @SerializedName("federation_active_auth_url")
-    private String federationActiveAuthUrl;
-
-    @SerializedName("cloud_audience_urn")
-    private String cloudAudienceUrn;
-
-    float getVersion() {
-        return version;
+        Assert.assertTrue(msg.contains("<a:EndpointReference><a:Address>cloudAudienceUrn</a:Address></a:EndpointReference>"));
     }
 
-    boolean isAccountFederated() {
-        return !StringHelper.isBlank(this.accountType)
-                && this.accountType.equalsIgnoreCase("Federated");
+    @Test
+    public void buildMessage_cloudAudienceUrnNull() throws Exception {
+        String msg = WSTrustRequest.buildMessage("address", "username",
+                "password", WSTrustVersion.WSTRUST2005, null).toString();
+
+        Assert.assertTrue(msg.contains("<a:EndpointReference><a:Address>" + WSTrustRequest.DEFAULT_APPLIES_TO + "</a:Address></a:EndpointReference>"));
     }
 
-    String getFederationProtocol() {
-        return federationProtocol;
-    }
+    @Test
+    public void buildMessage_cloudAudienceUrnEmpty() throws Exception {
+        String msg = WSTrustRequest.buildMessage("address", "username",
+                "password", WSTrustVersion.WSTRUST2005, "").toString();
 
-    String getFederationMetadataUrl() {
-        return federationMetadataUrl;
-    }
-
-    String getFederationActiveAuthUrl() {
-        return federationActiveAuthUrl;
-    }
-
-    String getCloudAudienceUrn() {
-        return cloudAudienceUrn;
+        Assert.assertTrue(msg.contains("<a:EndpointReference><a:Address>" + WSTrustRequest.DEFAULT_APPLIES_TO + "</a:Address></a:EndpointReference>"));
     }
 }
