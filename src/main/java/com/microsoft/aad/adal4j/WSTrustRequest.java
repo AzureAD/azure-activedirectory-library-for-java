@@ -123,9 +123,14 @@ class WSTrustRequest {
         System.out.println("headers: " + headers);
         System.out.println("body: " + body);
         
+        System.out.println("before WSTrust Token response");
+        
         //Get the WSTrust Token (Web Service Trust Token)
         String response = HttpHelper.executeHttpPost(log, policy.getUrl(),
                 body, headers, proxy, sslSocketFactory);
+        
+        System.out.println("after WSTrust Token response");
+        
         return WSTrustResponse.parse(response, policy.getVersion());
     }
     
