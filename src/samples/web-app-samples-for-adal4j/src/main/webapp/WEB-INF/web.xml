@@ -7,7 +7,7 @@
 
 	<context-param>
 		<param-name>authority</param-name>
-		<param-value>https://login.windows.net/</param-value>
+		<param-value>https://login.microsoftonline.com/</param-value>
 	</context-param>
 	<context-param>
 		<param-name>tenant</param-name>
@@ -41,8 +41,8 @@
 	</context-param>
 
 	<context-param>
-		<param-name>mfa_protected_api_id_uri</param-name>
-		<param-value>mfa_protected_api_id_uri</param-value>
+		<param-name>ca_protected_api_id_uri</param-name>
+		<param-value>ca_protected_api_id_uri</param-value>
 	</context-param>
 
 	<welcome-file-list>
