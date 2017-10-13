@@ -36,11 +36,11 @@
 	<br>
 
 
-	<form action="GetAtForMfaApiByRT">
+	<form action="GetAtForCaApiByRT">
 		<input type="submit" value="Get AT for Mfa protected api using RT">
 	</form>
 	<br>
-	<form action="GetAtForMfaApiUsingOboService">
+	<form action="GetAtForCaApiUsingOboService">
 		<input type="submit" value="Get AT for Mfa protected Api using Obo service">
 	</form>
 
