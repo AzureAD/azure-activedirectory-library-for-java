@@ -106,8 +106,8 @@ public class AadController {
         return builder.toString();
     }
 
-    @RequestMapping(value = "/secure/GetAtForMfaApiByRT", method = RequestMethod.GET)
-    public String getATForMfaProtectedApiUsingRT(ModelMap model, HttpServletRequest httpRequest) throws MalformedURLException, InterruptedException {
+    @RequestMapping(value = "/secure/GetAtForCaApiByRT", method = RequestMethod.GET)
+    public String getATForCaProtectedApiUsingRT(ModelMap model, HttpServletRequest httpRequest) throws MalformedURLException, InterruptedException {
         HttpSession session = httpRequest.getSession();
         AuthenticationResult result = (AuthenticationResult) session.getAttribute(AuthHelper.PRINCIPAL_SESSION_NAME);
         if (result == null) {
@@ -124,7 +124,7 @@ public class AadController {
             String authority = servletContext.getInitParameter("authority");
             String tenant = servletContext.getInitParameter("tenant");
             String clientSecret = servletContext.getInitParameter("secret_key");
-            String mfaProtectedApiIdUri = servletContext.getInitParameter("mfa_protected_api_id_uri");
+            String caProtectedApiIdUri = servletContext.getInitParameter("ca_protected_api_id_uri");
 
             try{
                 ClientCredential credential = new ClientCredential(clientId, clientSecret);
@@ -133,7 +133,7 @@ public class AadController {
                 context = new AuthenticationContext(authority + tenant + "/", true,
                         service);
                 Future<AuthenticationResult> future = context.acquireTokenByRefreshToken(result.getRefreshToken(), credential,
-                        mfaProtectedApiIdUri, null);
+                        caProtectedApiIdUri, null);
 
                 result = future.get();
 
@@ -155,8 +155,8 @@ public class AadController {
         return "secure/aad";
     }
 
-    @RequestMapping(value = "/secure/GetAtForMfaApiUsingOboService", method = RequestMethod.GET)
-    public String getATForMfaProtectedApiUsingOboService(ModelMap model, HttpServletRequest httpRequest) throws MalformedURLException, InterruptedException {
+    @RequestMapping(value = "/secure/GetAtForCaApiUsingOboService", method = RequestMethod.GET)
+    public String getATForCaProtectedApiUsingOboService(ModelMap model, HttpServletRequest httpRequest) throws MalformedURLException, InterruptedException {
         HttpSession session = httpRequest.getSession();
         AuthenticationResult result = (AuthenticationResult) session.getAttribute(AuthHelper.PRINCIPAL_SESSION_NAME);
         if (result == null) {
@@ -175,7 +175,7 @@ public class AadController {
             String tenant = servletContext.getInitParameter("tenant");
             String clientSecret = servletContext.getInitParameter("secret_key");
             String oboApplicationIdUri = servletContext.getInitParameter("obo_application_id_uri");
-            String mfaProtectedApiIdUri = servletContext.getInitParameter("mfa_protected_api_id_uri");
+            String caProtectedApiIdUri = servletContext.getInitParameter("ca_protected_api_id_uri");
 
             try{
                 ClientCredential credential = new ClientCredential(clientId, clientSecret);
@@ -198,7 +198,7 @@ public class AadController {
 
                 ClientCredential oboCredential = new ClientCredential(oboClientId, oboClientSecret);
 
-                future = context.acquireToken(mfaProtectedApiIdUri,
+                future = context.acquireToken(caProtectedApiIdUri,
                         new ClientAssertion(result.getAccessToken()), oboCredential, null);
 
                 result = future.get();
