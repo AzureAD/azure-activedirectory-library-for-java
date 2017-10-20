@@ -11,7 +11,11 @@
 ## Versions
 Current version - 1.3.0
 Minimum recommended version - 1.3.0
+
+Version 1.3.0 has support for handling Conditional Access claims challenge. You can read about CA [here](https://go.microsoft.com/fwlink/?linkid=855860) and refer this [sample](https://github.com/AzureAD/azure-activedirectory-library-for-java/tree/dev/src/samples/web-app-samples-for-adal4j) to handle it. 
+
 You can find the changes for each version in the [change log](https://github.com/AzureAD/azure-activedirectory-library-for-java/blob/master/changelog.txt).
+
 
 ## Community Help and Support
 
