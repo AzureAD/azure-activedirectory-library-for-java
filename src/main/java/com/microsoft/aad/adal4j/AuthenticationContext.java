@@ -285,11 +285,7 @@ public class AuthenticationContext {
                 new ClientCredentialsGrant(), resource);
         return this.acquireToken(authGrant, clientAuth, callback);
     }
-    
-    
-    
-    
-    
+
     private Future<AuthenticationResult> acquireTokenIntegrated(String userName,
             final String resource,
             final ClientAuthentication clientAuth,
@@ -304,11 +300,6 @@ public class AuthenticationContext {
 
             @Override
             public AuthenticationResult call() throws Exception {
-
-               
-
-                System.out.println("acquireTokenIntegrated call()!!!!!!!!!!!!!!!!!");
-
                 AuthenticationResult result = null;
                 try {
                     AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(getAuthorizationGrantIntegrated(this.userName), this.resource);
@@ -334,9 +325,6 @@ public class AuthenticationContext {
                     final String resource,
                     final ClientAuthentication clientAuth,
                     final ClientDataHttpHeaders headers) {
-
-                System.out.println("acquireTokenIntegrated init()!!!!!!!!!!!!!!!!!");
-
                 this.userName = userName;
                 this.resource = resource;
                 this.clientAuth = clientAuth;
@@ -352,35 +340,22 @@ public class AuthenticationContext {
 
         String userRealmEndpoint = authenticationAuthority.getUserRealmEndpoint(URLEncoder.encode(userName, "UTF-8"));
 
-        System.out.println("userRealmEndpoint: " + userRealmEndpoint);
-
         // Get the realm information
         UserDiscoveryResponse userRealmResponse = UserDiscoveryRequest.execute(userRealmEndpoint, proxy, sslSocketFactory);
 
         if (userRealmResponse.isAccountFederated() && "WSTrust".equalsIgnoreCase(userRealmResponse.getFederationProtocol())) {
-
-            System.out.println("isAccountFederated!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-
             String mexURL = userRealmResponse.getFederationMetadataUrl();
             String cloudAudienceUrn = userRealmResponse.getCloudAudienceUrn();
-
-            System.out.println("mexURL: " + mexURL);
-            System.out.println("cloudAudienceUrn: " + cloudAudienceUrn);
-            // System.out.println("ActiveAuthUrl: " + userRealmResponse.getFederationActiveAuthUrl());
 
             // Discover the policy for authentication using the Metadata Exchange Url.
             // Get the WSTrust Token (Web Service Trust Token)
             WSTrustResponse wsTrustResponse = WSTrustRequest.execute(mexURL, cloudAudienceUrn, proxy, sslSocketFactory);
-
-            System.out.println("SAML version of Token: " + wsTrustResponse.getTokenType());
-            System.out.println("SAML Assertion token: " + wsTrustResponse.getToken());
 
             // Make the OAuth2 call to get the access Token.
             if (wsTrustResponse.isTokenSaml2()) {
                 updatedGrant = new SAML2BearerGrant(new Base64URL(Base64.encodeBase64String(wsTrustResponse.getToken().getBytes("UTF-8"))));
             }
             else {
-                System.out.println("SAML 1");
                 updatedGrant = new SAML11BearerGrant(new Base64URL(Base64.encodeBase64String(wsTrustResponse.getToken().getBytes())));
             }
         }
@@ -392,18 +367,10 @@ public class AuthenticationContext {
             final String resource,
             final String clientId,
             final AuthenticationCallback callback) {
-
-        System.out.println("resource: " + resource);
-
         ClientAuthenticationPost clientAuth = new ClientAuthenticationPost(ClientAuthenticationMethod.NONE, new ClientID(clientId));
 
         return this.acquireTokenIntegrated(userName, resource, clientAuth, callback);
     }
-    
-    
-    
-    
-    
 
     private void validateInput(final String resource, final Object credential,
             final boolean validateResource) {
