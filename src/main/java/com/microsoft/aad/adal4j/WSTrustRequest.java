@@ -76,7 +76,7 @@ class WSTrustRequest {
                 body, headers, proxy, sslSocketFactory);
         return WSTrustResponse.parse(response, policy.getVersion());
     }
-    
+
     static WSTrustResponse execute(String mexURL,
             String cloudAudienceUrn,
             Proxy proxy,
@@ -122,7 +122,7 @@ class WSTrustRequest {
         if (!integrated) {
             buildSecurityHeader(securityHeaderBuilder, username, password, addressVersion);
         }
-        
+
         String guid = UUID.randomUUID().toString();
         StringBuilder messageBuilder = new StringBuilder(
                 MAX_EXPECTED_MESSAGE_SIZE);

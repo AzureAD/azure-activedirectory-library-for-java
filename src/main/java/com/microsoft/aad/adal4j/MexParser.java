@@ -26,13 +26,11 @@ package com.microsoft.aad.adal4j;
 import javax.net.ssl.SSLSocketFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.net.Proxy;
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -45,7 +43,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 class MexParser {
 
@@ -60,56 +57,38 @@ class MexParser {
     private final static String RST_SOAP_ACTION_2005 = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue";
     private final static String SOAP_TRANSPORT_XPATH = "soap12:binding/@transport";
     private final static String SOAP_HTTP_TRANSPORT_VALUE = "http://schemas.xmlsoap.org/soap/http";
-    
-    
-    
-    
-    
-    
-    static BindingPolicy getPolicyFromMexResponseForIntegrated(String mexResponse) throws Exception {    	
+
+    static BindingPolicy getPolicyFromMexResponseForIntegrated(String mexResponse) throws Exception {
         DocumentBuilderFactory builderFactory = SafeDocumentBuilderFactory.createInstance();
         builderFactory.setNamespaceAware(true);
         DocumentBuilder builder = builderFactory.newDocumentBuilder();
-        Document xmlDocument = builder.parse(new ByteArrayInputStream(
-                mexResponse.getBytes(Charset.forName("UTF-8"))));
+        Document xmlDocument = builder.parse(new ByteArrayInputStream(mexResponse.getBytes(Charset.forName("UTF-8"))));
 
         XPath xPath = XPathFactory.newInstance().newXPath();
         NamespaceContextImpl nameSpace = new NamespaceContextImpl();
         xPath.setNamespaceContext(nameSpace);
-        
-        
-        String xpathExpression = "//wsdl:definitions/wsp:Policy/wsp:ExactlyOne/wsp:All/http:NegotiateAuthentication";
-        
-        
-        Map<String, BindingPolicy> policies = selectIntegratedPoliciesWithExpression(
-                xmlDocument, xPath, xpathExpression);
-        
 
+        String xpathExpression = "//wsdl:definitions/wsp:Policy/wsp:ExactlyOne/wsp:All/http:NegotiateAuthentication";
+
+        Map<String, BindingPolicy> policies = selectIntegratedPoliciesWithExpression(xmlDocument, xPath, xpathExpression);
 
         if (policies.isEmpty()) {
             log.debug("No matching policies");
             return null;
         }
         else {
-            Map<String, BindingPolicy> bindings = getMatchingBindings(
-                    xmlDocument, xPath, policies);
+            Map<String, BindingPolicy> bindings = getMatchingBindings(xmlDocument, xPath, policies);
 
             if (bindings.isEmpty()) {
                 log.debug("No matching bindings");
                 return null;
             }
             else {
-                getPortsForPolicyBindings(xmlDocument, xPath, bindings,
-                        policies);
+                getPortsForPolicyBindings(xmlDocument, xPath, bindings, policies);
                 return selectSingleMatchingPolicy(policies);
             }
         }
     }
-    
-    
-    
-    
-    
 
     static BindingPolicy getWsTrustEndpointFromMexResponse(String mexResponse)
             throws Exception {
@@ -331,17 +310,16 @@ class MexParser {
         }
         return policies;
     }
-    
-    private static Map<String, BindingPolicy> selectIntegratedPoliciesWithExpression(
-            Document xmlDocument, XPath xPath, String xpathExpression)
-            throws XPathExpressionException {
+
+    private static Map<String, BindingPolicy> selectIntegratedPoliciesWithExpression(Document xmlDocument,
+            XPath xPath,
+            String xpathExpression) throws XPathExpressionException {
 
         Map<String, BindingPolicy> policies = new HashMap<String, BindingPolicy>();
 
-        NodeList nodeList = (NodeList) xPath.compile(xpathExpression).evaluate(
-                xmlDocument, XPathConstants.NODESET);
+        NodeList nodeList = (NodeList) xPath.compile(xpathExpression).evaluate(xmlDocument, XPathConstants.NODESET);
         for (int i = 0; i < nodeList.getLength(); i++) {
-        	//get back to //wsdl:definitions/wsp:Policy
+            // get back to //wsdl:definitions/wsp:Policy
             String policy = checkPolicyIntegrated(xPath, nodeList.item(i).getParentNode().getParentNode().getParentNode());
             policies.put("#" + policy, new BindingPolicy("#" + policy));
         }
@@ -375,9 +353,9 @@ class MexParser {
         }
         return policyId;
     }
-    
-    private static String checkPolicyIntegrated(XPath xPath, Node node)
-            throws XPathExpressionException {
+
+    private static String checkPolicyIntegrated(XPath xPath,
+            Node node) throws XPathExpressionException {
         Node id = node.getAttributes().getNamedItem("wsu:Id");
         String policyId = id.getNodeValue();
         return policyId;
