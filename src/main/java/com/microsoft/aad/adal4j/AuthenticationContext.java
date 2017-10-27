@@ -300,6 +300,8 @@ public class AuthenticationContext {
                 AuthenticationResult result = null;
                 try {
                     AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(getAuthorizationGrantIntegrated(this.userName), this.resource);
+
+                    // Make the OAuth2 call to get the access Token.
                     result = acquireTokenCommon(authGrant, this.clientAuth, this.headers);
                     logResult(result, headers);
                     if (callback != null) {
@@ -348,7 +350,6 @@ public class AuthenticationContext {
             // Get the WSTrust Token (Web Service Trust Token)
             WSTrustResponse wsTrustResponse = WSTrustRequest.execute(mexURL, cloudAudienceUrn, proxy, sslSocketFactory);
 
-            // Make the OAuth2 call to get the access Token.
             if (wsTrustResponse.isTokenSaml2()) {
                 updatedGrant = new SAML2BearerGrant(new Base64URL(Base64.encodeBase64String(wsTrustResponse.getToken().getBytes("UTF-8"))));
             }
