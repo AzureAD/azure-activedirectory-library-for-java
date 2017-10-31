@@ -52,4 +52,13 @@ public class WSTrustRequestTest {
 
         Assert.assertTrue(msg.contains("<a:EndpointReference><a:Address>" + WSTrustRequest.DEFAULT_APPLIES_TO + "</a:Address></a:EndpointReference>"));
     }
+    
+    @Test
+    public void buildMessage_integrated() throws Exception {
+        String msg = WSTrustRequest.buildMessage("address", null,
+                null, WSTrustVersion.WSTRUST13, "cloudAudienceUrn").toString();
+
+        Assert.assertTrue(msg.contains("<a:EndpointReference><a:Address>cloudAudienceUrn</a:Address></a:EndpointReference>"));
+        Assert.assertTrue(!msg.contains("<o:Security s:mustUnderstand"));
+    }
 }
