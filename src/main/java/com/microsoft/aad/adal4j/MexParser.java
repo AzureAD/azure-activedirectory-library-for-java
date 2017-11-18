@@ -33,9 +33,7 @@ import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
 import java.net.Proxy;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import org.slf4j.Logger;
@@ -47,6 +45,7 @@ import org.w3c.dom.NodeList;
 class MexParser {
 
     private final static Logger log = LoggerFactory.getLogger(MexParser.class);
+    private final static Logger piiLog = LoggerFactory.getLogger(LogHelper.PII_LOGGER_PREFIX + MexParser.class);
 
     private final static String TRANSPORT_BINDING_XPATH = "wsp:ExactlyOne/wsp:All/sp:TransportBinding";
     private final static String TRANSPORT_BINDING_2005_XPATH = "wsp:ExactlyOne/wsp:All/sp2005:TransportBinding";
@@ -83,7 +82,10 @@ class MexParser {
                 xmlDocument, xPath, xpathExpression));
 
         if (policies.isEmpty()) {
-            log.debug("No matching policies");
+            String msg = "No matching policies";
+            log.debug(msg);
+            piiLog.debug(msg);
+
             return null;
         }
         else {
@@ -91,7 +93,10 @@ class MexParser {
                     xmlDocument, xPath, policies);
 
             if (bindings.isEmpty()) {
-                log.debug("No matching bindings");
+                String msg = "No matching bindings";
+                log.debug(msg);
+                piiLog.debug(msg);
+
                 return null;
             }
             else {
@@ -105,7 +110,7 @@ class MexParser {
     static BindingPolicy getWsTrustEndpointFromMexEndpoint(
             String metadataEndpoint, Proxy proxy,
             SSLSocketFactory sslSocketFactory) throws Exception {
-        String mexResponse = HttpHelper.executeHttpGet(log, metadataEndpoint,
+        String mexResponse = HttpHelper.executeHttpGet(log, piiLog, metadataEndpoint,
                 proxy, sslSocketFactory);
         return getWsTrustEndpointFromMexResponse(mexResponse);
     }
@@ -131,7 +136,10 @@ class MexParser {
         }
 
         if (wstrust13 == null && wstrust2005 == null) {
-            log.warn("no policies found with the url");
+            String msg = "no policies found with the url";
+            log.warn(msg);
+            piiLog.warn(msg);
+
             return null;
         }
 
@@ -146,7 +154,9 @@ class MexParser {
                 xmlDocument, XPathConstants.NODESET);
 
         if (portNodes.getLength() == 0) {
-            log.warn("no ports found");
+            String msg = "no ports found";
+            log.warn(msg);
+            piiLog.warn(msg);
         }
         else {
             for (int i = 0; i < portNodes.getLength(); i++) {
@@ -174,8 +184,9 @@ class MexParser {
                                 bindingPolicy.setUrl(address.trim());
                             }
                             else {
-                                log.warn("skipping insecure endpoint: "
-                                        + address);
+                                String msg = "skipping insecure endpoint";
+                                log.warn(msg);
+                                piiLog.warn(msg + ": " + address);
                             }
                         }
                         else {
@@ -237,13 +248,17 @@ class MexParser {
                             .equalsIgnoreCase(SOAP_HTTP_TRANSPORT_VALUE)) {
 
                 if (soapAction.equalsIgnoreCase(RST_SOAP_ACTION)) {
-                    log.debug("Found binding matching Action and Transport: "
+                    log.debug("Found binding matching Action and Transport");
+                    piiLog.debug("Found binding matching Action and Transport: "
                             + bindingName);
+
                     return WSTrustVersion.WSTRUST13;
                 }
                 else if (soapAction.equalsIgnoreCase(RST_SOAP_ACTION_2005)) {
-                    log.debug("Binding node did not match soap Action or Transport: "
+                    log.debug("Binding node did not match soap Action or Transport");
+                    piiLog.debug("Binding node did not match soap Action or Transport: "
                             + bindingName);
+
                     return WSTrustVersion.WSTRUST2005;
                 }
             }
@@ -294,14 +309,17 @@ class MexParser {
 
         if (transportBindingNodes.getLength() > 0 && id != null) {
             policyId = id.getNodeValue();
-            log.debug("found matching policy id: " + policyId);
+
+            log.debug("found matching policy");
+            piiLog.debug("found matching policy id: " + policyId);
         }
         else {
             String nodeValue = "none";
             if (id != null) {
                 nodeValue = id.getNodeValue();
             }
-            log.debug("potential policy did not match required transport binding: "
+            log.debug("potential policy did not match required transport binding");
+            piiLog.debug("potential policy did not match required transport binding: "
                     + nodeValue);
         }
         return policyId;

@@ -39,6 +39,9 @@ class AuthenticationAuthority {
     private final Logger log = LoggerFactory
             .getLogger(AuthenticationAuthority.class);
 
+    private final Logger piiLog = LoggerFactory
+            .getLogger(LogHelper.PII_LOGGER_PREFIX + this.getClass());
+
     private final static String[] TRUSTED_HOST_LIST = { "login.windows.net",
             "login.chinacloudapi.cn", "login-us.microsoftonline.com", "login.microsoftonline.de",
             "login.microsoftonline.com", "login.microsoftonline.us" };
@@ -136,9 +139,12 @@ class AuthenticationAuthority {
                             AuthenticationErrorMessage.AUTHORITY_NOT_IN_VALID_LIST);
                 }
             }
-            log.info(LogHelper.createMessage(
+            String msg = LogHelper.createMessage(
                     "Instance discovery was successful",
-                    headers.get(ClientDataHttpHeaders.CORRELATION_ID_HEADER_NAME)));
+                    headers.get(ClientDataHttpHeaders.CORRELATION_ID_HEADER_NAME));
+            log.info(msg);
+            piiLog.info(msg);
+
             instanceDiscoveryCompleted = true;
         }
     }
@@ -146,7 +152,7 @@ class AuthenticationAuthority {
     boolean doDynamicInstanceDiscovery(final Map<String, String> headers,
             final Proxy proxy, final SSLSocketFactory sslSocketFactory)
             throws Exception {
-        final String json = HttpHelper.executeHttpGet(log,
+        final String json = HttpHelper.executeHttpGet(log, piiLog,
                 instanceDiscoveryEndpoint, headers, proxy, sslSocketFactory);
         final InstanceDiscoveryResponse discoveryResponse = JsonHelper
                 .convertJsonToObject(json, InstanceDiscoveryResponse.class);
