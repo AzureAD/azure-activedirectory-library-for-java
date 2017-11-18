@@ -47,6 +47,8 @@ class WSTrustResponse {
 
     private final static Logger log = LoggerFactory
             .getLogger(WSTrustResponse.class);
+    private final static Logger piiLog = LoggerFactory
+            .getLogger(LogHelper.PII_LOGGER_PREFIX + WSTrustResponse.class);
 
     public final static String SAML1_ASSERTION = "urn:oasis:names:tc:SAML:1.0:assertion";
     private String faultMessage;
@@ -122,19 +124,26 @@ class WSTrustResponse {
                 version.getResponseTokenTypePath()).evaluate(xmlDocument,
                 XPathConstants.NODESET);
         if (tokenTypeNodes.getLength() == 0) {
-            log.warn("No TokenType elements found in RSTR");
+            String msg = "No TokenType elements found in RSTR";
+            log.warn(msg);
+            piiLog.warn(msg);
         }
 
         for (int i = 0; i < tokenTypeNodes.getLength(); i++) {
             if (!StringHelper.isBlank(responseValue.token)) {
-                log.warn("Found more than one returned token.  Using the first.");
+                String msg = "Found more than one returned token.  Using the first.";
+                log.warn(msg);
+                piiLog.warn(msg);
+
                 break;
             }
 
             Node tokenTypeNode = tokenTypeNodes.item(i);
             responseValue.tokenType = tokenTypeNode.getTextContent();
             if (StringHelper.isBlank(responseValue.tokenType)) {
-                log.warn("Could not find token type in RSTR token");
+                String msg = "Could not find token type in RSTR token";
+                log.warn(msg);
+                piiLog.warn(msg);
             }
 
             NodeList requestedTokenNodes = (NodeList) xPath.compile(
@@ -146,18 +155,26 @@ class WSTrustResponse {
                                 + responseValue.tokenType);
             }
             if (requestedTokenNodes.getLength() == 0) {
-                log.warn("Unable to find RequestsSecurityToken element associated with TokenType element: "
-                        + responseValue.tokenType);
+                String msg = "Unable to find RequestsSecurityToken element associated with TokenType element: "
+                        + responseValue.tokenType;
+                log.warn(msg);
+                piiLog.warn(msg);
                 continue;
             }
 
             responseValue.token = innerXml(requestedTokenNodes.item(0));
             if (StringHelper.isBlank(responseValue.token)) {
-                log.warn("Unable to find token associated with TokenType element: "
-                        + responseValue.tokenType);
+                String msg = "Unable to find token associated with TokenType element: "
+                        + responseValue.tokenType;
+                log.warn(msg);
+                piiLog.warn(msg);
+
                 continue;
             }
-            log.info("Found token of type: " + responseValue.tokenType);
+
+            String msg = "Found token of type: " + responseValue.tokenType;
+            log.info(msg);
+            piiLog.info(msg);
         }
 
         if (StringHelper.isBlank(responseValue.token)) {
