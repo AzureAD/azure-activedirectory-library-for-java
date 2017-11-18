@@ -29,6 +29,7 @@ import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -51,11 +52,11 @@ import com.nimbusds.oauth2.sdk.SAML2BearerGrant;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretPost;
-import com.nimbusds.oauth2.sdk.auth.JWTAuthentication;
 import com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
+
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,6 +70,8 @@ public class AuthenticationContext {
 
     private final Logger log = LoggerFactory
             .getLogger(AuthenticationContext.class);
+    private final Logger piiLog = LoggerFactory
+            .getLogger(LogHelper.PII_LOGGER_PREFIX + AuthenticationContext.class);
 
     private final AuthenticationAuthority authenticationAuthority;
     private String correlationId;
@@ -181,9 +184,12 @@ public class AuthenticationContext {
                     }
                 }
                 catch (final Exception ex) {
-                    log.error(LogHelper.createMessage(
+                    String msg = LogHelper.createMessage(
                             "Request to acquire token failed.",
-                            this.headers.getHeaderCorrelationIdValue()), ex);
+                            this.headers.getHeaderCorrelationIdValue());
+                    log.error(msg + System.getProperty("line.separator") + LogHelper.getPiiScrubbedDetails(ex));
+                    piiLog.error(msg, ex);
+
                     if (callback != null) {
                         callback.onFailure(ex);
                     }
@@ -280,6 +286,96 @@ public class AuthenticationContext {
         final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
                 new ClientCredentialsGrant(), resource);
         return this.acquireToken(authGrant, clientAuth, callback);
+    }
+
+    private Future<AuthenticationResult> acquireTokenIntegrated(String userName,
+            final String resource,
+            final ClientAuthentication clientAuth,
+            final AuthenticationCallback callback) {
+
+        return service.submit(new Callable<AuthenticationResult>() {
+
+            private String userName;
+            private String resource;
+            private ClientAuthentication clientAuth;
+            private ClientDataHttpHeaders headers;
+
+            @Override
+            public AuthenticationResult call() throws Exception {
+                AuthenticationResult result = null;
+                try {
+                    AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(getAuthorizationGrantIntegrated(this.userName), this.resource);
+
+                    // Make the OAuth2 call to get the access Token.
+                    result = acquireTokenCommon(authGrant, this.clientAuth, this.headers);
+                    logResult(result, headers);
+                    if (callback != null) {
+                        callback.onSuccess(result);
+                    }
+                }
+                catch (final Exception ex) {
+                    String msg = LogHelper.createMessage("Request to acquire token failed.", this.headers.getHeaderCorrelationIdValue());
+                    log.error(msg + System.getProperty("line.separator") + LogHelper.getPiiScrubbedDetails(ex));
+                    piiLog.error(msg, ex);
+
+                    if (callback != null) {
+                        callback.onFailure(ex);
+                    }
+                    else {
+                        throw ex;
+                    }
+                }
+                return result;
+            }
+
+            private Callable<AuthenticationResult> init(String userName,
+                    final String resource,
+                    final ClientAuthentication clientAuth,
+                    final ClientDataHttpHeaders headers) {
+                this.userName = userName;
+                this.resource = resource;
+                this.clientAuth = clientAuth;
+                this.headers = headers;
+                return this;
+            }
+
+        }.init(userName, resource, clientAuth, new ClientDataHttpHeaders(this.getCorrelationId())));
+    }
+
+    AuthorizationGrant getAuthorizationGrantIntegrated(String userName) throws Exception {
+        AuthorizationGrant updatedGrant = null;
+
+        String userRealmEndpoint = authenticationAuthority.getUserRealmEndpoint(URLEncoder.encode(userName, "UTF-8"));
+
+        // Get the realm information
+        UserDiscoveryResponse userRealmResponse = UserDiscoveryRequest.execute(userRealmEndpoint, proxy, sslSocketFactory);
+
+        if (userRealmResponse.isAccountFederated() && "WSTrust".equalsIgnoreCase(userRealmResponse.getFederationProtocol())) {
+            String mexURL = userRealmResponse.getFederationMetadataUrl();
+            String cloudAudienceUrn = userRealmResponse.getCloudAudienceUrn();
+
+            // Discover the policy for authentication using the Metadata Exchange Url.
+            // Get the WSTrust Token (Web Service Trust Token)
+            WSTrustResponse wsTrustResponse = WSTrustRequest.execute(mexURL, cloudAudienceUrn, proxy, sslSocketFactory);
+
+            if (wsTrustResponse.isTokenSaml2()) {
+                updatedGrant = new SAML2BearerGrant(new Base64URL(Base64.encodeBase64String(wsTrustResponse.getToken().getBytes("UTF-8"))));
+            }
+            else {
+                updatedGrant = new SAML11BearerGrant(new Base64URL(Base64.encodeBase64String(wsTrustResponse.getToken().getBytes())));
+            }
+        }
+
+        return updatedGrant;
+    }
+
+    public Future<AuthenticationResult> acquireTokenIntegrated(String userName,
+            final String resource,
+            final String clientId,
+            final AuthenticationCallback callback) {
+        ClientAuthenticationPost clientAuth = new ClientAuthenticationPost(ClientAuthenticationMethod.NONE, new ClientID(clientId));
+
+        return this.acquireTokenIntegrated(userName, resource, clientAuth, callback);
     }
 
     private void validateInput(final String resource, final Object credential,
@@ -866,9 +962,11 @@ public class AuthenticationContext {
             final AdalAuthorizatonGrant authGrant,
             final ClientAuthentication clientAuth,
             final ClientDataHttpHeaders headers) throws Exception {
-        log.debug(LogHelper.createMessage(
+        String msg = LogHelper.createMessage(
                 String.format("Using Client Http Headers: %s", headers),
-                headers.getHeaderCorrelationIdValue()));
+                headers.getHeaderCorrelationIdValue());
+        piiLog.debug(msg);
+
         this.authenticationAuthority.doInstanceDiscovery(
                 headers.getReadonlyHeaderMap(), this.proxy,
                 this.sslSocketFactory);
@@ -928,21 +1026,27 @@ public class AuthenticationContext {
             UnsupportedEncodingException {
         if (!StringHelper.isBlank(result.getAccessToken())) {
             String logMessage = "";
+            String piiLogMessage = "";
             String accessTokenHash = this.computeSha256Hash(result
                     .getAccessToken());
             if (!StringHelper.isBlank(result.getRefreshToken())) {
                 String refreshTokenHash = this.computeSha256Hash(result
                         .getRefreshToken());
-                logMessage = String
+                logMessage = "Access Token and Refresh Token were returned";
+                piiLogMessage = String
                         .format("Access Token with hash '%s' and Refresh Token with hash '%s' returned",
                                 accessTokenHash, refreshTokenHash);
             }
             else {
-                logMessage = String
+                logMessage = "Access Token was returned";
+                piiLogMessage = String
                         .format("Access Token with hash '%s' returned",
                                 accessTokenHash);
             }
             log.debug(LogHelper.createMessage(logMessage,
+                    headers.getHeaderCorrelationIdValue()));
+
+            piiLog.debug(LogHelper.createMessage(piiLogMessage,
                     headers.getHeaderCorrelationIdValue()));
         }
     }
