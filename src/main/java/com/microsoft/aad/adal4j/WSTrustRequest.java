@@ -43,6 +43,8 @@ class WSTrustRequest {
 
     private final static Logger log = LoggerFactory
             .getLogger(WSTrustRequest.class);
+    private final static Logger piiLog = LoggerFactory
+            .getLogger(LogHelper.PII_LOGGER_PREFIX + WSTrustRequest.class);
 
     private final static int MAX_EXPECTED_MESSAGE_SIZE = 1024;
     final static String DEFAULT_APPLIES_TO = "urn:federation:MicrosoftOnline";
@@ -72,7 +74,7 @@ class WSTrustRequest {
         headers.put("SOAPAction", soapAction);
         String body = buildMessage(policy.getUrl(), username, password,
                 policy.getVersion(), cloudAudienceUrn).toString();
-        String response = HttpHelper.executeHttpPost(log, policy.getUrl(),
+        String response = HttpHelper.executeHttpPost(log, piiLog, policy.getUrl(),
                 body, headers, proxy, sslSocketFactory);
         return WSTrustResponse.parse(response, policy.getVersion());
     }
@@ -87,7 +89,7 @@ class WSTrustRequest {
         headers.put("return-client-request-id", "true");
 
         // Discover the policy for authentication using the Metadata Exchange Url.
-        String mexResponse = HttpHelper.executeHttpGet(log, mexURL, proxy, sslSocketFactory);
+        String mexResponse = HttpHelper.executeHttpGet(log, piiLog, mexURL, proxy, sslSocketFactory);
 
         BindingPolicy policy = MexParser.getPolicyFromMexResponseForIntegrated(mexResponse);
 
@@ -106,17 +108,17 @@ class WSTrustRequest {
 
         headers.put("SOAPAction", soapAction);
 
-        String body = buildMessage(policy.getUrl(), null, null, policy.getVersion(), cloudAudienceUrn).toString();
+        String body = buildMessage(policy.getUrl(), "pesomka@microsoft.com", null, policy.getVersion(), cloudAudienceUrn).toString();
 
         // Get the WSTrust Token (Web Service Trust Token)
-        String response = HttpHelper.executeHttpPost(log, policy.getUrl(), body, headers, proxy, sslSocketFactory);
+        String response = HttpHelper.executeHttpPost(log, piiLog, policy.getUrl(), body, headers, proxy, sslSocketFactory);
 
         return WSTrustResponse.parse(response, policy.getVersion());
     }
 
     static StringBuilder buildMessage(String address, String username,
             String password, WSTrustVersion addressVersion, String cloudAudienceUrn) {
-        boolean integrated = (username == null) & (password == null);
+        boolean integrated = (password == null);
 
         StringBuilder securityHeaderBuilder = new StringBuilder(MAX_EXPECTED_MESSAGE_SIZE);
         if (!integrated) {
