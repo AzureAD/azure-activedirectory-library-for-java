@@ -286,7 +286,7 @@ public class AuthenticationContext {
                 new ClientCredentialsGrant(), resource);
         return this.acquireToken(authGrant, clientAuth, callback);
     }
-    
+
     private void validateInput(final String resource, final Object credential,
             final boolean validateResource) {
         if (validateResource && StringHelper.isBlank(resource)) {

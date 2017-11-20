@@ -23,7 +23,6 @@
 
 package com.microsoft.aad.adal4j;
 
-
 final class LogHelper {
     static final String PII_LOGGER_PREFIX = "pii.";
 
