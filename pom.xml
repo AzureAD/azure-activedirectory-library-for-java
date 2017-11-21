@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.microsoft.azure</groupId>
 	<artifactId>adal4j</artifactId>
-	<version>1.2.0</version>
+	<version>1.3.0</version>
 	<packaging>jar</packaging>
 	<name>adal4j</name>
 	<description>
@@ -22,7 +22,7 @@
 	</developers>
 	<licenses>
 		<license>
-			<name>Apache License, Version 2.0</name>
+			<name>MIT License</name>
 		</license>
 	</licenses>
 	<inceptionYear>2013</inceptionYear>
@@ -218,7 +218,7 @@
 					<threshold>Low</threshold>
 					<includeTests>false</includeTests>
 					<failOnError>true</failOnError>
-					<excludeFilterFile>${project.basedir}/findbugs/findbugs-exclude.xml</excludeFilterFile>
+					<excludeFilterFile>${project.basedir}/build/findbugs-exclude.xml</excludeFilterFile>
 					<plugins>
 						<plugin>
 							<groupId>com.h3xstream.findsecbugs</groupId>
