@@ -28,6 +28,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.nimbusds.jwt.JWTClaimsSet;
+import java.lang.reflect.Field;
+import java.util.*;
+import net.minidev.json.JSONObject;
 import org.easymock.EasyMock;
 import org.powermock.api.easymock.PowerMock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -165,5 +168,84 @@ public class UserInfoTest extends AbstractAdalTests {
         Assert.assertNull(ui.getPasswordExpiresOn());
         Assert.assertEquals("TenantID", ui.getTenantId());
         PowerMock.verifyAll();
+    }
+    
+    /***
+     * This unit test tests that the equals/hashCode methods check against every
+     * field in a UserInfo unless marked as an unused Constant.
+     * @throws ParseException 
+     */
+    @Test
+    public void testCreateFromIdTokenClaims_EqualsHashCode()
+            throws ParseException {
+        
+        //Skip these unused tokens
+        Set<String> unusedConstants = new HashSet<>(Arrays.asList(new String[]{
+            AuthenticationConstants.ID_TOKEN_UNIQUE_NAME,
+        }));
+        
+        //These constants will have Integer values
+        Set<String> integerConstants = new HashSet<>(Arrays.asList(new String[]{
+            AuthenticationConstants.ID_TOKEN_PASSWORD_EXPIRES_ON,
+        }));        
+        
+        //Create an empty object to test against
+        Map<String, Object> mapEmpty = new HashMap<>();
+        JSONObject jsonEmpty = new JSONObject(mapEmpty);
+        jsonEmpty.put("", "");
+        JWTClaimsSet claimsEmpty = JWTClaimsSet.parse(jsonEmpty);
+        UserInfo uiEmpty = UserInfo.createFromIdTokenClaims(claimsEmpty);        
+        
+        //Test for each AuthenticationConstants
+        for(Field field : AuthenticationConstants.class.getDeclaredFields()) {
+            if(field.getName().startsWith("ID_")) {
+                try {
+                    //Allow the unit test access
+                    field.setAccessible(true);
+                    String fieldName = (String) field.get(null);
+                    
+                    //Skip unused
+                    if(unusedConstants.contains(fieldName))
+                        continue;                    
+                    
+                    //What value should we set for that?
+                    Object value = fieldName;
+                    if(integerConstants.contains(fieldName))
+                        value = "1";
+                    
+                    //Create a claims object from a json map
+                    Map<String, Object> map = new HashMap<>();
+                    JSONObject json = new JSONObject(map);
+                    json.put(fieldName, value);
+                    JWTClaimsSet claims1 = JWTClaimsSet.parse(json);
+                    JWTClaimsSet claims2 = JWTClaimsSet.parse(json);
+                    
+                    //Create 2 UserInfos
+                    final UserInfo ui1 = UserInfo.createFromIdTokenClaims(claims1);
+                    final UserInfo ui2 = UserInfo.createFromIdTokenClaims(claims2);
+                    
+                    //Test Equals
+                    try {
+                        Assert.assertEquals(ui1, ui2);
+                        Assert.assertNotEquals(ui1, uiEmpty);
+                    }
+                    catch(AssertionError e) {
+                        Assert.fail("boolean UserInfo#equals(Object o) failed to compare field: "+field.getName());
+                    }
+                    
+                    //Test Hashcode
+                    try {
+                        Assert.assertEquals(ui1.hashCode(), ui2.hashCode());
+                        Assert.assertNotEquals(ui1.hashCode(), uiEmpty.hashCode());
+                    }
+                    catch(AssertionError e) {
+                        Assert.fail("int UserInfo#hashCode() failed to compare field: "+field.getName());
+                    }
+                }
+                catch (IllegalArgumentException | IllegalAccessException ex) {
+                    Assert.fail(ex.toString());
+                }
+            }
+        }
     }
 }

@@ -187,6 +187,7 @@ public class UserInfo implements Serializable {
         hash = 37 * hash + Objects.hashCode(this.identityProvider);
         hash = 37 * hash + Objects.hashCode(this.passwordChangeUrl);
         hash = 37 * hash + Objects.hashCode(this.passwordExpiresOn);
+        hash = 37 * hash + Objects.hashCode(this.tenantId);
         return hash;
     }
 
@@ -223,6 +224,9 @@ public class UserInfo implements Serializable {
         if (!Objects.equals(this.passwordExpiresOn, other.passwordExpiresOn)) {
             return false;
         }
+        if (!Objects.equals(this.tenantId, other.tenantId)) {
+            return false;
+        }        
         return true;
     }
 }
