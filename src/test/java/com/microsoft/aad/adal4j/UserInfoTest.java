@@ -29,7 +29,9 @@ import java.util.Map;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.HashSet;
 import net.minidev.json.JSONObject;
 import org.easymock.EasyMock;
 import org.powermock.api.easymock.PowerMock;
