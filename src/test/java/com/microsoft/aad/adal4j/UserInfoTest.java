@@ -181,15 +181,11 @@ public class UserInfoTest extends AbstractAdalTests {
     public void testCreateFromIdTokenClaims_EqualsHashCode()
             throws ParseException {
         
-        //Skip these unused tokens
-        Set<String> unusedConstants = new HashSet<>(Arrays.asList(new String[]{
-            AuthenticationConstants.ID_TOKEN_UNIQUE_NAME,
-        }));
-        
-        //These constants will have Integer values
-        Set<String> integerConstants = new HashSet<>(Arrays.asList(new String[]{
-            AuthenticationConstants.ID_TOKEN_PASSWORD_EXPIRES_ON,
-        }));        
+        //Skip these tokens
+        Set<String> skippedConstants = new HashSet<>(Arrays.asList(new String[]{
+            AuthenticationConstants.ID_TOKEN_UNIQUE_NAME, //Unused
+            AuthenticationConstants.ID_TOKEN_PASSWORD_EXPIRES_ON, //Uses new GregorianCalendar() and can't get an accurate time.
+        }));       
         
         //Create an empty object to test against
         Map<String, Object> mapEmpty = new HashMap<>();
@@ -207,13 +203,11 @@ public class UserInfoTest extends AbstractAdalTests {
                     String fieldName = (String) field.get(null);
                     
                     //Skip unused
-                    if(unusedConstants.contains(fieldName))
+                    if(skippedConstants.contains(fieldName))
                         continue;                    
                     
                     //What value should we set for that?
                     Object value = fieldName;
-                    if(integerConstants.contains(fieldName))
-                        value = "1";
                     
                     //Create a claims object from a json map
                     Map<String, Object> map = new HashMap<>();
