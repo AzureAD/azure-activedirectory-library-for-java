@@ -47,34 +47,18 @@ class WSTrustRequest {
     private final static int MAX_EXPECTED_MESSAGE_SIZE = 1024;
     final static String DEFAULT_APPLIES_TO = "urn:federation:MicrosoftOnline";
     
-    static WSTrustResponse execute(String url, String username,
-            String password, String cloudAudienceUrn, Proxy proxy, SSLSocketFactory sslSocketFactory)
-            throws Exception {
+    static WSTrustResponse execute(String url,
+            String username,
+            String password,
+            String cloudAudienceUrn,
+            Proxy proxy,
+            SSLSocketFactory sslSocketFactory) throws Exception {
 
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Content-Type", "application/soap+xml; charset=utf-8");
 
-        BindingPolicy policy = MexParser.getWsTrustEndpointFromMexEndpoint(url,
-                proxy, sslSocketFactory);
-        String soapAction = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue"; // default
-                                                                                          // value
-                                                                                          // (WSTrust
-                                                                                          // 1.3)
-
-        // only change it if version is wsTrust2005, otherwise default to
-        // wsTrust13
-        if (policy.getVersion() == WSTrustVersion.WSTRUST2005) {
-            soapAction = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue"; // wsTrust2005
-                                                                                  // soap
-                                                                                  // value
-        }
-
-        headers.put("SOAPAction", soapAction);
-        String body = buildMessage(policy.getUrl(), username, password,
-                policy.getVersion(), cloudAudienceUrn).toString();
-        String response = HttpHelper.executeHttpPost(log, policy.getUrl(),
-                body, headers, proxy, sslSocketFactory);
-        return WSTrustResponse.parse(response, policy.getVersion());
+        BindingPolicy policy = MexParser.getWsTrustEndpointFromMexEndpoint(url, proxy, sslSocketFactory);
+        return getAndParseWSTrustResponse(cloudAudienceUrn, proxy, sslSocketFactory, headers, policy, username, password);
     }
 
     static WSTrustResponse execute(String mexURL,
@@ -88,9 +72,17 @@ class WSTrustRequest {
 
         // Discover the policy for authentication using the Metadata Exchange Url.
         String mexResponse = HttpHelper.executeHttpGet(log, mexURL, proxy, sslSocketFactory);
-
         BindingPolicy policy = MexParser.getPolicyFromMexResponseForIntegrated(mexResponse);
+        return getAndParseWSTrustResponse(cloudAudienceUrn, proxy, sslSocketFactory, headers, policy, null, null);
+    }
 
+    private static WSTrustResponse getAndParseWSTrustResponse(String cloudAudienceUrn,
+            Proxy proxy,
+            SSLSocketFactory sslSocketFactory,
+            Map<String, String> headers,
+            BindingPolicy policy,
+            String username,
+            String password) throws Exception {
         String soapAction = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue"; // default
                                                                                           // value
                                                                                           // (WSTrust
@@ -106,9 +98,7 @@ class WSTrustRequest {
 
         headers.put("SOAPAction", soapAction);
 
-        String body = buildMessage(policy.getUrl(), null, null, policy.getVersion(), cloudAudienceUrn).toString();
-
-        // Get the WSTrust Token (Web Service Trust Token)
+        String body = buildMessage(policy.getUrl(), username, password, policy.getVersion(), cloudAudienceUrn).toString();
         String response = HttpHelper.executeHttpPost(log, policy.getUrl(), body, headers, proxy, sslSocketFactory);
 
         return WSTrustResponse.parse(response, policy.getVersion());

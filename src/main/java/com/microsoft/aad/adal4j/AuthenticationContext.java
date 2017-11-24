@@ -246,6 +246,11 @@ public class AuthenticationContext {
             throw new IllegalArgumentException("username is null or empty");
         }
 
+        if (password == null) {
+            ClientAuthenticationPost clientAuth = new ClientAuthenticationPost(ClientAuthenticationMethod.NONE, new ClientID(clientId));
+            return this.acquireTokenIntegrated(username, resource, clientAuth, callback);
+        }
+
         if (StringHelper.isBlank(password)) {
             throw new IllegalArgumentException("password is null or empty");
         }
@@ -359,15 +364,6 @@ public class AuthenticationContext {
         }
 
         return updatedGrant;
-    }
-
-    public Future<AuthenticationResult> acquireTokenIntegrated(String userName,
-            final String resource,
-            final String clientId,
-            final AuthenticationCallback callback) {
-        ClientAuthenticationPost clientAuth = new ClientAuthenticationPost(ClientAuthenticationMethod.NONE, new ClientID(clientId));
-
-        return this.acquireTokenIntegrated(userName, resource, clientAuth, callback);
     }
 
     private void validateInput(final String resource, final Object credential,

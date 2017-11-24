@@ -26,11 +26,13 @@ package com.microsoft.aad.adal4j;
 import javax.net.ssl.SSLSocketFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.net.Proxy;
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -43,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 class MexParser {
 
@@ -59,19 +62,52 @@ class MexParser {
     private final static String SOAP_HTTP_TRANSPORT_VALUE = "http://schemas.xmlsoap.org/soap/http";
 
     static BindingPolicy getPolicyFromMexResponseForIntegrated(String mexResponse) throws Exception {
-        DocumentBuilderFactory builderFactory = SafeDocumentBuilderFactory.createInstance();
-        builderFactory.setNamespaceAware(true);
-        DocumentBuilder builder = builderFactory.newDocumentBuilder();
-        Document xmlDocument = builder.parse(new ByteArrayInputStream(mexResponse.getBytes(Charset.forName("UTF-8"))));
+        Document xmlDocument = createDocument(mexResponse);
 
-        XPath xPath = XPathFactory.newInstance().newXPath();
         NamespaceContextImpl nameSpace = new NamespaceContextImpl();
-        xPath.setNamespaceContext(nameSpace);
+        XPath xPath = createXpath(nameSpace);
 
         String xpathExpression = "//wsdl:definitions/wsp:Policy/wsp:ExactlyOne/wsp:All/http:NegotiateAuthentication";
 
         Map<String, BindingPolicy> policies = selectIntegratedPoliciesWithExpression(xmlDocument, xPath, xpathExpression);
 
+        return processPolicies(policies, xmlDocument, xPath);
+    }
+
+    static BindingPolicy getWsTrustEndpointFromMexResponse(String mexResponse) throws Exception {
+        Document xmlDocument = createDocument(mexResponse);
+
+        NamespaceContextImpl nameSpace = new NamespaceContextImpl();
+        XPath xPath = createXpath(nameSpace);
+
+        String xpathExpression = "//wsdl:definitions/wsp:Policy/wsp:ExactlyOne/wsp:All/"
+                + "sp:SignedEncryptedSupportingTokens/wsp:Policy/sp:UsernameToken/" + "wsp:Policy/sp:WssUsernameToken10";
+        Map<String, BindingPolicy> policies = selectUsernamePasswordPoliciesWithExpression(xmlDocument, xPath, xpathExpression);
+        nameSpace.modifyNameSpace("sp", "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy");
+        xpathExpression = "//wsdl:definitions/wsp:Policy/wsp:ExactlyOne/wsp:All/" + "sp:SignedSupportingTokens/wsp:Policy/sp:UsernameToken/"
+                + "wsp:Policy/sp:WssUsernameToken10";
+        policies.putAll(selectUsernamePasswordPoliciesWithExpression(xmlDocument, xPath, xpathExpression));
+
+        return processPolicies(policies, xmlDocument, xPath);
+    }
+
+    private static Document createDocument(String mexResponse) throws SAXException, IOException, ParserConfigurationException {
+        DocumentBuilderFactory builderFactory = SafeDocumentBuilderFactory.createInstance();
+        builderFactory.setNamespaceAware(true);
+        DocumentBuilder builder = builderFactory.newDocumentBuilder();
+        return builder.parse(new ByteArrayInputStream(mexResponse.getBytes(Charset.forName("UTF-8"))));
+    }
+
+    private static XPath createXpath(NamespaceContextImpl nameSpace) {
+        XPath xPath = XPathFactory.newInstance().newXPath();
+        xPath.setNamespaceContext(nameSpace);
+
+        return xPath;
+    }
+
+    private static BindingPolicy processPolicies(Map<String, BindingPolicy> policies,
+            Document xmlDocument,
+            XPath xPath) throws Exception {
         if (policies.isEmpty()) {
             log.debug("No matching policies");
             return null;
@@ -85,50 +121,6 @@ class MexParser {
             }
             else {
                 getPortsForPolicyBindings(xmlDocument, xPath, bindings, policies);
-                return selectSingleMatchingPolicy(policies);
-            }
-        }
-    }
-
-    static BindingPolicy getWsTrustEndpointFromMexResponse(String mexResponse)
-            throws Exception {
-        DocumentBuilderFactory builderFactory = SafeDocumentBuilderFactory.createInstance();
-        builderFactory.setNamespaceAware(true);
-        DocumentBuilder builder = builderFactory.newDocumentBuilder();
-        Document xmlDocument = builder.parse(new ByteArrayInputStream(
-                mexResponse.getBytes(Charset.forName("UTF-8"))));
-
-        XPath xPath = XPathFactory.newInstance().newXPath();
-        NamespaceContextImpl nameSpace = new NamespaceContextImpl();
-        xPath.setNamespaceContext(nameSpace);
-        String xpathExpression = "//wsdl:definitions/wsp:Policy/wsp:ExactlyOne/wsp:All/"
-                + "sp:SignedEncryptedSupportingTokens/wsp:Policy/sp:UsernameToken/"
-                + "wsp:Policy/sp:WssUsernameToken10";
-        Map<String, BindingPolicy> policies = selectUsernamePasswordPoliciesWithExpression(
-                xmlDocument, xPath, xpathExpression);
-        nameSpace.modifyNameSpace("sp",
-                "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy");
-        xpathExpression = "//wsdl:definitions/wsp:Policy/wsp:ExactlyOne/wsp:All/"
-                + "sp:SignedSupportingTokens/wsp:Policy/sp:UsernameToken/"
-                + "wsp:Policy/sp:WssUsernameToken10";
-        policies.putAll(selectUsernamePasswordPoliciesWithExpression(
-                xmlDocument, xPath, xpathExpression));
-
-        if (policies.isEmpty()) {
-            log.debug("No matching policies");
-            return null;
-        }
-        else {
-            Map<String, BindingPolicy> bindings = getMatchingBindings(
-                    xmlDocument, xPath, policies);
-
-            if (bindings.isEmpty()) {
-                log.debug("No matching bindings");
-                return null;
-            }
-            else {
-                getPortsForPolicyBindings(xmlDocument, xPath, bindings,
-                        policies);
                 return selectSingleMatchingPolicy(policies);
             }
         }
