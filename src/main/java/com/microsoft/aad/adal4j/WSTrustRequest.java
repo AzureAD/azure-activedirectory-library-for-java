@@ -47,15 +47,42 @@ class WSTrustRequest {
     private final static int MAX_EXPECTED_MESSAGE_SIZE = 1024;
     final static String DEFAULT_APPLIES_TO = "urn:federation:MicrosoftOnline";
     
-    static WSTrustResponse execute(String url, String username,
-            String password, String cloudAudienceUrn, Proxy proxy, SSLSocketFactory sslSocketFactory)
-            throws Exception {
+    static WSTrustResponse execute(String url,
+            String username,
+            String password,
+            String cloudAudienceUrn,
+            Proxy proxy,
+            SSLSocketFactory sslSocketFactory) throws Exception {
 
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Content-Type", "application/soap+xml; charset=utf-8");
 
-        BindingPolicy policy = MexParser.getWsTrustEndpointFromMexEndpoint(url,
-                proxy, sslSocketFactory);
+        BindingPolicy policy = MexParser.getWsTrustEndpointFromMexEndpoint(url, proxy, sslSocketFactory);
+        return getAndParseWSTrustResponse(cloudAudienceUrn, proxy, sslSocketFactory, headers, policy, username, password);
+    }
+
+    static WSTrustResponse execute(String mexURL,
+            String cloudAudienceUrn,
+            Proxy proxy,
+            SSLSocketFactory sslSocketFactory) throws Exception {
+
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("Content-Type", "application/soap+xml");
+        headers.put("return-client-request-id", "true");
+
+        // Discover the policy for authentication using the Metadata Exchange Url.
+        String mexResponse = HttpHelper.executeHttpGet(log, mexURL, proxy, sslSocketFactory);
+        BindingPolicy policy = MexParser.getPolicyFromMexResponseForIntegrated(mexResponse);
+        return getAndParseWSTrustResponse(cloudAudienceUrn, proxy, sslSocketFactory, headers, policy, null, null);
+    }
+
+    private static WSTrustResponse getAndParseWSTrustResponse(String cloudAudienceUrn,
+            Proxy proxy,
+            SSLSocketFactory sslSocketFactory,
+            Map<String, String> headers,
+            BindingPolicy policy,
+            String username,
+            String password) throws Exception {
         String soapAction = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue"; // default
                                                                                           // value
                                                                                           // (WSTrust
@@ -70,20 +97,22 @@ class WSTrustRequest {
         }
 
         headers.put("SOAPAction", soapAction);
-        String body = buildMessage(policy.getUrl(), username, password,
-                policy.getVersion(), cloudAudienceUrn).toString();
-        String response = HttpHelper.executeHttpPost(log, policy.getUrl(),
-                body, headers, proxy, sslSocketFactory);
+
+        String body = buildMessage(policy.getUrl(), username, password, policy.getVersion(), cloudAudienceUrn).toString();
+        String response = HttpHelper.executeHttpPost(log, policy.getUrl(), body, headers, proxy, sslSocketFactory);
+
         return WSTrustResponse.parse(response, policy.getVersion());
     }
 
     static StringBuilder buildMessage(String address, String username,
             String password, WSTrustVersion addressVersion, String cloudAudienceUrn) {
+        boolean integrated = (username == null) & (password == null);
 
-        StringBuilder securityHeaderBuilder = new StringBuilder(
-                MAX_EXPECTED_MESSAGE_SIZE);
-        buildSecurityHeader(securityHeaderBuilder, username, password,
-                addressVersion);
+        StringBuilder securityHeaderBuilder = new StringBuilder(MAX_EXPECTED_MESSAGE_SIZE);
+        if (!integrated) {
+            buildSecurityHeader(securityHeaderBuilder, username, password, addressVersion);
+        }
+
         String guid = UUID.randomUUID().toString();
         StringBuilder messageBuilder = new StringBuilder(
                 MAX_EXPECTED_MESSAGE_SIZE);
@@ -161,7 +190,7 @@ class WSTrustRequest {
                                 + "</s:Body>"
                                 + "</s:Envelope>", schemaLocation, soapAction,
                                 guid, address,
-                                securityHeaderBuilder.toString(),
+                                integrated ? "" : securityHeaderBuilder.toString(),
                                 rstTrustNamespace,
                                 StringUtils.isNotEmpty(cloudAudienceUrn) ? cloudAudienceUrn : DEFAULT_APPLIES_TO,
                                 keyType,
