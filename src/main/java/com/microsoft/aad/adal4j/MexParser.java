@@ -61,59 +61,60 @@ class MexParser {
     private final static String SOAP_TRANSPORT_XPATH = "soap12:binding/@transport";
     private final static String SOAP_HTTP_TRANSPORT_VALUE = "http://schemas.xmlsoap.org/soap/http";
 
-    static BindingPolicy getPolicyFromMexResponseForIntegrated(String mexResponse) throws Exception {
-        Document xmlDocument = createDocument(mexResponse);
-
-        NamespaceContextImpl nameSpace = new NamespaceContextImpl();
-        XPath xPath = createXpath(nameSpace);
-
-        String xpathExpression = "//wsdl:definitions/wsp:Policy/wsp:ExactlyOne/wsp:All/http:NegotiateAuthentication";
-
-        Map<String, BindingPolicy> policies = selectIntegratedPoliciesWithExpression(xmlDocument, xPath, xpathExpression);
-
-        return processPolicies(policies, xmlDocument, xPath);
+    private interface PolicySelector {
+        Map<String, BindingPolicy> selectPolicies(Document document, XPath xPath) throws XPathExpressionException;
     }
 
-    static BindingPolicy getWsTrustEndpointFromMexResponse(String mexResponse) throws Exception {
-        Document xmlDocument = createDocument(mexResponse);
+    private static class NegotiateAuthenticationPolicySelector implements PolicySelector {
+        public Map<String, BindingPolicy> selectPolicies(Document xmlDocument, XPath xPath) throws XPathExpressionException {
+            String xpathExpression = "//wsdl:definitions/wsp:Policy/wsp:ExactlyOne/wsp:All/http:NegotiateAuthentication";
 
-        NamespaceContextImpl nameSpace = new NamespaceContextImpl();
-        XPath xPath = createXpath(nameSpace);
-
-        String xpathExpression = "//wsdl:definitions/wsp:Policy/wsp:ExactlyOne/wsp:All/"
-                + "sp:SignedEncryptedSupportingTokens/wsp:Policy/sp:UsernameToken/" + "wsp:Policy/sp:WssUsernameToken10";
-        Map<String, BindingPolicy> policies = selectUsernamePasswordPoliciesWithExpression(xmlDocument, xPath, xpathExpression);
-        nameSpace.modifyNameSpace("sp", "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy");
-        xpathExpression = "//wsdl:definitions/wsp:Policy/wsp:ExactlyOne/wsp:All/" + "sp:SignedSupportingTokens/wsp:Policy/sp:UsernameToken/"
-                + "wsp:Policy/sp:WssUsernameToken10";
-        policies.putAll(selectUsernamePasswordPoliciesWithExpression(xmlDocument, xPath, xpathExpression));
-
-        return processPolicies(policies, xmlDocument, xPath);
+            return selectIntegratedPoliciesWithExpression(xmlDocument, xPath, xpathExpression);
+        }
     }
 
-    private static Document createDocument(String mexResponse) throws SAXException, IOException, ParserConfigurationException {
+    private static class WsTrustEndpointPolicySelector implements PolicySelector {
+        public Map<String, BindingPolicy> selectPolicies(Document xmlDocument, XPath xPath) throws XPathExpressionException {
+            String xpathExpression = "//wsdl:definitions/wsp:Policy/wsp:ExactlyOne/wsp:All/"
+                    + "sp:SignedEncryptedSupportingTokens/wsp:Policy/sp:UsernameToken/"
+                    + "wsp:Policy/sp:WssUsernameToken10";
+            Map<String, BindingPolicy> policies = selectUsernamePasswordPoliciesWithExpression(
+                    xmlDocument, xPath, xpathExpression);
+
+            ((NamespaceContextImpl) xPath.getNamespaceContext()).modifyNameSpace("sp",
+                    "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy");
+
+            xpathExpression = "//wsdl:definitions/wsp:Policy/wsp:ExactlyOne/wsp:All/"
+                    + "sp:SignedSupportingTokens/wsp:Policy/sp:UsernameToken/"
+                    + "wsp:Policy/sp:WssUsernameToken10";
+            policies.putAll(selectUsernamePasswordPoliciesWithExpression(
+                    xmlDocument, xPath, xpathExpression));
+
+            return policies;
+        }
+    }
+
+    static BindingPolicy getPolicy(String mexResponse, PolicySelector policySelector)
+            throws Exception {
         DocumentBuilderFactory builderFactory = SafeDocumentBuilderFactory.createInstance();
         builderFactory.setNamespaceAware(true);
         DocumentBuilder builder = builderFactory.newDocumentBuilder();
-        return builder.parse(new ByteArrayInputStream(mexResponse.getBytes(Charset.forName("UTF-8"))));
-    }
+        Document xmlDocument = builder.parse(new ByteArrayInputStream(
+                mexResponse.getBytes(Charset.forName("UTF-8"))));
 
-    private static XPath createXpath(NamespaceContextImpl nameSpace) {
         XPath xPath = XPathFactory.newInstance().newXPath();
+        NamespaceContextImpl nameSpace = new NamespaceContextImpl();
         xPath.setNamespaceContext(nameSpace);
 
-        return xPath;
-    }
+        Map<String, BindingPolicy> policies = policySelector.selectPolicies(xmlDocument, xPath);
 
-    private static BindingPolicy processPolicies(Map<String, BindingPolicy> policies,
-            Document xmlDocument,
-            XPath xPath) throws Exception {
         if (policies.isEmpty()) {
             log.debug("No matching policies");
             return null;
         }
         else {
-            Map<String, BindingPolicy> bindings = getMatchingBindings(xmlDocument, xPath, policies);
+            Map<String, BindingPolicy> bindings = getMatchingBindings(
+                    xmlDocument, xPath, policies);
 
             if (bindings.isEmpty()) {
                 log.debug("No matching bindings");
@@ -126,12 +127,13 @@ class MexParser {
         }
     }
 
-    static BindingPolicy getWsTrustEndpointFromMexEndpoint(
-            String metadataEndpoint, Proxy proxy,
-            SSLSocketFactory sslSocketFactory) throws Exception {
-        String mexResponse = HttpHelper.executeHttpGet(log, metadataEndpoint,
-                proxy, sslSocketFactory);
-        return getWsTrustEndpointFromMexResponse(mexResponse);
+    static BindingPolicy getPolicyFromMexResponseForIntegrated(String mexResponse) throws Exception {
+        return getPolicy(mexResponse, new NegotiateAuthenticationPolicySelector());
+    }
+
+    static BindingPolicy getWsTrustEndpointFromMexResponse(String mexResponse)
+            throws Exception {
+        return getPolicy(mexResponse, new WsTrustEndpointPolicySelector());
     }
 
     private static BindingPolicy selectSingleMatchingPolicy(

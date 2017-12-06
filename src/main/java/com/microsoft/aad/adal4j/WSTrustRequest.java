@@ -46,62 +46,60 @@ class WSTrustRequest {
 
     private final static int MAX_EXPECTED_MESSAGE_SIZE = 1024;
     final static String DEFAULT_APPLIES_TO = "urn:federation:MicrosoftOnline";
-    
-    static WSTrustResponse execute(String url,
-            String username,
-            String password,
-            String cloudAudienceUrn,
-            Proxy proxy,
-            SSLSocketFactory sslSocketFactory) throws Exception {
+
+    static WSTrustResponse execute(String username, String password, String cloudAudienceUrn, BindingPolicy policy,
+                                   Proxy proxy, SSLSocketFactory sslSocketFactory) throws Exception {
 
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Content-Type", "application/soap+xml; charset=utf-8");
-
-        BindingPolicy policy = MexParser.getWsTrustEndpointFromMexEndpoint(url, proxy, sslSocketFactory);
-        return getAndParseWSTrustResponse(cloudAudienceUrn, proxy, sslSocketFactory, headers, policy, username, password);
-    }
-
-    static WSTrustResponse execute(String mexURL,
-            String cloudAudienceUrn,
-            Proxy proxy,
-            SSLSocketFactory sslSocketFactory) throws Exception {
-
-        Map<String, String> headers = new HashMap<String, String>();
-        headers.put("Content-Type", "application/soap+xml");
         headers.put("return-client-request-id", "true");
 
-        // Discover the policy for authentication using the Metadata Exchange Url.
-        String mexResponse = HttpHelper.executeHttpGet(log, mexURL, proxy, sslSocketFactory);
-        BindingPolicy policy = MexParser.getPolicyFromMexResponseForIntegrated(mexResponse);
-        return getAndParseWSTrustResponse(cloudAudienceUrn, proxy, sslSocketFactory, headers, policy, null, null);
-    }
+        // default value (WSTrust 1.3)
+        String soapAction = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue";
 
-    private static WSTrustResponse getAndParseWSTrustResponse(String cloudAudienceUrn,
-            Proxy proxy,
-            SSLSocketFactory sslSocketFactory,
-            Map<String, String> headers,
-            BindingPolicy policy,
-            String username,
-            String password) throws Exception {
-        String soapAction = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue"; // default
-                                                                                          // value
-                                                                                          // (WSTrust
-                                                                                          // 1.3)
-
-        // only change it if version is wsTrust2005, otherwise default to
-        // wsTrust13
+        // only change it if version is wsTrust2005, otherwise default to wsTrust13
         if (policy.getVersion() == WSTrustVersion.WSTRUST2005) {
-            soapAction = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue"; // wsTrust2005
-                                                                                  // soap
-                                                                                  // value
+            // wsTrust2005 soap value
+            soapAction = "http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue";
         }
 
         headers.put("SOAPAction", soapAction);
 
-        String body = buildMessage(policy.getUrl(), username, password, policy.getVersion(), cloudAudienceUrn).toString();
-        String response = HttpHelper.executeHttpPost(log, policy.getUrl(), body, headers, proxy, sslSocketFactory);
+        String body = buildMessage(policy.getUrl(), username, password,
+                policy.getVersion(), cloudAudienceUrn).toString();
+
+        String response = HttpHelper.executeHttpPost(log, policy.getUrl(),
+                body, headers, proxy, sslSocketFactory);
 
         return WSTrustResponse.parse(response, policy.getVersion());
+    }
+
+    static WSTrustResponse execute(String url, String username, String password, String cloudAudienceUrn,
+                                   Proxy proxy, SSLSocketFactory sslSocketFactory) throws Exception {
+
+        String mexResponse = HttpHelper.executeHttpGet(log, url, proxy, sslSocketFactory);
+
+        BindingPolicy policy = MexParser.getWsTrustEndpointFromMexResponse(mexResponse);
+
+        if(policy == null){
+            throw new AuthenticationException("WsTrust endpoint not found in metadata document");
+        }
+
+        return execute(username, password, cloudAudienceUrn, policy, proxy, sslSocketFactory);
+    }
+
+    static WSTrustResponse execute(String mexURL, String cloudAudienceUrn, Proxy proxy,
+                                   SSLSocketFactory sslSocketFactory) throws Exception {
+
+        String mexResponse = HttpHelper.executeHttpGet(log, mexURL, proxy, sslSocketFactory);
+
+        BindingPolicy policy = MexParser.getPolicyFromMexResponseForIntegrated(mexResponse);
+
+        if(policy == null){
+            throw new AuthenticationException("WsTrust endpoint not found in metadata document");
+        }
+
+        return execute(null, null, cloudAudienceUrn, policy, proxy, sslSocketFactory);
     }
 
     static StringBuilder buildMessage(String address, String username,

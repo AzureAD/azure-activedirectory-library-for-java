@@ -246,20 +246,15 @@ public class AuthenticationContext {
             throw new IllegalArgumentException("username is null or empty");
         }
 
-        if (password == null) {
-            ClientAuthenticationPost clientAuth = new ClientAuthenticationPost(ClientAuthenticationMethod.NONE, new ClientID(clientId));
+        ClientAuthenticationPost clientAuth = new ClientAuthenticationPost(ClientAuthenticationMethod.NONE, new ClientID(clientId));
+
+        if (!StringHelper.isBlank(password)) {
+            return this.acquireToken(new AdalAuthorizatonGrant(
+                    new ResourceOwnerPasswordCredentialsGrant(username, new Secret(
+                            password)), resource), clientAuth, callback);
+        } else {
             return this.acquireTokenIntegrated(username, resource, clientAuth, callback);
         }
-
-        if (StringHelper.isBlank(password)) {
-            throw new IllegalArgumentException("password is null or empty");
-        }
-
-        return this.acquireToken(new AdalAuthorizatonGrant(
-                new ResourceOwnerPasswordCredentialsGrant(username, new Secret(
-                        password)), resource), new ClientAuthenticationPost(
-                ClientAuthenticationMethod.NONE, new ClientID(clientId)),
-                callback);
     }
 
     /**
@@ -340,7 +335,7 @@ public class AuthenticationContext {
     }
 
     AuthorizationGrant getAuthorizationGrantIntegrated(String userName) throws Exception {
-        AuthorizationGrant updatedGrant = null;
+        AuthorizationGrant updatedGrant;
 
         String userRealmEndpoint = authenticationAuthority.getUserRealmEndpoint(URLEncoder.encode(userName, "UTF-8"));
 
@@ -361,6 +356,12 @@ public class AuthenticationContext {
             else {
                 updatedGrant = new SAML11BearerGrant(new Base64URL(Base64.encodeBase64String(wsTrustResponse.getToken().getBytes())));
             }
+        }
+        else if (userRealmResponse.isAccountManaged()) {
+            throw new AuthenticationException("Password is required for managed user");
+        }
+        else{
+            throw new AuthenticationException("Unknown User Type");
         }
 
         return updatedGrant;

@@ -54,6 +54,11 @@ class UserDiscoveryResponse {
                 && this.accountType.equalsIgnoreCase("Federated");
     }
 
+    boolean isAccountManaged() {
+        return !StringHelper.isBlank(this.accountType)
+                && this.accountType.equalsIgnoreCase("Managed");
+    }
+
     String getFederationProtocol() {
         return federationProtocol;
     }
