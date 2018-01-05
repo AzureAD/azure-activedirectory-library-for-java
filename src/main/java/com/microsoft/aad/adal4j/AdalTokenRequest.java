@@ -1,22 +1,26 @@
-/*******************************************************************************
- * Copyright © Microsoft Open Technologies, Inc.
- * 
- * All Rights Reserved
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS
- * OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
- * ANY IMPLIED WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A
- * PARTICULAR PURPOSE, MERCHANTABILITY OR NON-INFRINGEMENT.
- * 
- * See the Apache License, Version 2.0 for the specific language
- * governing permissions and limitations under the License.
- ******************************************************************************/
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
 package com.microsoft.aad.adal4j;
 
 import javax.net.ssl.SSLSocketFactory;
@@ -26,6 +30,8 @@ import java.net.URL;
 import java.util.Map;
 
 import com.nimbusds.oauth2.sdk.ErrorObject;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.SerializeException;
 import com.nimbusds.oauth2.sdk.TokenErrorResponse;
@@ -113,11 +119,26 @@ class AdalTokenRequest {
         } else {
             final TokenErrorResponse errorResponse = TokenErrorResponse
                     .parse(httpResponse);
-            throw new AuthenticationException(errorResponse.toJSONObject()
-                    .toJSONString());
+            if(HTTPResponse.SC_BAD_REQUEST == errorResponse.getErrorObject().getHTTPStatusCode() &&
+                    "interaction_required".equals(errorResponse.getErrorObject().getCode())){
+                throw new AdalClaimsChallengeException(errorResponse.toJSONObject()
+                        .toJSONString(), getClaims(httpResponse.getContent()));
+            }
+            else {
+                throw new AuthenticationException(errorResponse.toJSONObject()
+                        .toJSONString());
+            }
         }
 
         return result;
+    }
+
+    private String getClaims(String httpResponseContentStr) {
+        JsonElement root = new JsonParser().parse(httpResponseContentStr);
+
+        JsonElement claims = root.getAsJsonObject().get("claims");
+
+        return claims != null ? claims.getAsString() : null;
     }
 
     /**

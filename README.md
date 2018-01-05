@@ -1,5 +1,7 @@
 [![Stories in Ready](https://badge.waffle.io/AzureAD/azure-activedirectory-library-for-java.png?label=ready&title=Ready)](https://waffle.io/AzureAD/azure-activedirectory-library-for-java)
-#Microsoft Azure Active Directory Authentication Library (ADAL) for Java
+[![Javadocs](http://javadoc.io/badge/com.microsoft.azure/adal4j.svg)](http://javadoc.io/doc/com.microsoft.azure/adal4j)
+</br>
+# Microsoft Azure Active Directory Authentication Library (ADAL) for Java
 =====================================
 
 ## Samples and Documentation
@@ -7,9 +9,13 @@
 [We provide a full suite of sample applications and documentation on GitHub](https://github.com/Azure-Samples) to help you get started with learning the Azure Identity system. This includes tutorials for native clients such as Windows, Windows Phone, iOS, macOS, Android, and Linux. We also provide full walkthroughs for authentication flows such as OAuth2, OpenID Connect, Graph API, and other awesome features.
 
 ## Versions
-Current version - 1.2.0  
-Minimum recommended version - 1.2.0  
+Current version - 1.3.0
+Minimum recommended version - 1.3.0
+
+Version 1.3.0 has support for handling Conditional Access claims challenge. You can read about CA [here](https://go.microsoft.com/fwlink/?linkid=855860) and refer this [sample](https://github.com/AzureAD/azure-activedirectory-library-for-java/tree/dev/src/samples/web-app-samples-for-adal4j) to handle it. 
+
 You can find the changes for each version in the [change log](https://github.com/AzureAD/azure-activedirectory-library-for-java/blob/master/changelog.txt).
+
 
 ## Community Help and Support
 
@@ -23,8 +29,9 @@ If you find a security issue with our libraries or services please report it to 
 
 ## Contributing
 
-All code is licensed under the Apache 2.0 license and we triage actively on GitHub. We enthusiastically welcome contributions and feedback. You can clone the repo and start contributing now.
+All code is licensed under the MIT License and we triage actively on GitHub. We enthusiastically welcome contributions and feedback. You can clone the repo and start contributing now.
 
 ## We Value and Adhere to the Microsoft Open Source Code of Conduct
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+

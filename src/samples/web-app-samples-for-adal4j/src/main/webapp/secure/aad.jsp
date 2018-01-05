@@ -5,20 +5,47 @@
 <title>AAD Secure Page</title>
 </head>
 <body>
+	<a href="<%=request.getContextPath()%>/index.jsp">Home Page</a>
 
-	<h1>Directory - Users List</h1>
+	<h3>List of users registered in the tenant - ${tenant}</h3>
 	<p>${users}</p>
+	<br>
+	<h3>Current user</h3>
+	<table>
+		<tr>
+			<td>uniqueId:</td>
+			<td>${userInfo.uniqueId}</td>
+		</tr>
+		<tr>
+			<td>displayableId:</td>
+			<td>${userInfo.displayableId}</td>
+		</tr>
+		<tr>
+			<td>givenName:</td>
+			<td>${userInfo.givenName}</td>
+		</tr>
+		<tr>
+			<td>familyName:</td>
+			<td>${userInfo.familyName}</td>
+		</tr>
+		<tr>
+			<td>identityProvider:</td>
+			<td>${userInfo.identityProvider}</td>
+		</tr>
+	</table>
+	<br>
 
-	<ul>
-		<li><a href="<%=request.getContextPath()%>/secure/aad?cc=1">Get
-				new Access Token via Client Credentials</a></li>
-	</ul>
-	<ul>
-		<li><a href="<%=request.getContextPath()%>/secure/aad?refresh=1">Get
-				new Access Token via Refresh Token</a></li>
-	</ul>
-	<ul>
-		<li><a href="<%=request.getContextPath()%>/index.jsp">Go Home</a></li>
-	</ul>
+
+	<form action="GetAtForCaApiByRT">
+		<input type="submit" value="Get AT for Mfa protected api using RT">
+	</form>
+	<br>
+	<form action="GetAtForCaApiUsingOboService">
+		<input type="submit" value="Get AT for Mfa protected Api using Obo service">
+	</form>
+
+	<h3>Token acquisition result:</h3>
+	<p>${acquiredToken}</p>
+
 </body>
 </html>

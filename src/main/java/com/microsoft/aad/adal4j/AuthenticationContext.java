@@ -1,22 +1,26 @@
-/*******************************************************************************
- * Copyright © Microsoft Open Technologies, Inc.
- *
- * All Rights Reserved
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS
- * OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
- * ANY IMPLIED WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A
- * PARTICULAR PURPOSE, MERCHANTABILITY OR NON-INFRINGEMENT.
- *
- * See the Apache License, Version 2.0 for the specific language
- * governing permissions and limitations under the License.
- ******************************************************************************/
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
 package com.microsoft.aad.adal4j;
 
 import javax.net.ssl.SSLSocketFactory;
@@ -260,8 +264,8 @@ public class AuthenticationContext {
      * @param resource
      *            Identifier of the target resource that is the recipient of the
      *            requested token.
-     * @param credential
-     *            The client assertion to use for token acquisition.
+     * @param clientAssertion
+     *            The client assertion to use for client authentication.
      * @param callback
      *            optional callback object for non-blocking execution.
      * @return A {@link Future} object representing the
@@ -270,11 +274,11 @@ public class AuthenticationContext {
      *         property will be null for this overload.
      */
     public Future<AuthenticationResult> acquireToken(final String resource,
-            final ClientAssertion credential,
+            final ClientAssertion clientAssertion,
             final AuthenticationCallback callback) {
 
-        this.validateInput(resource, credential, true);
-        final ClientAuthentication clientAuth = createClientAuthFromClientAssertion(credential);
+        this.validateInput(resource, clientAssertion, true);
+        final ClientAuthentication clientAuth = createClientAuthFromClientAssertion(clientAssertion);
         final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
                 new ClientCredentialsGrant(), resource);
         return this.acquireToken(authGrant, clientAuth, callback);
@@ -297,8 +301,8 @@ public class AuthenticationContext {
      * @param resource
      *            Identifier of the target resource that is the recipient of the
      *            requested token.
-     * @param assertion
-     *            The access token to use for token acquisition.
+     * @param userAssertion
+     *            userAssertion to use as Authorization grant
      * @param credential
      *            The client credential to use for token acquisition.
      * @param callback
@@ -310,7 +314,7 @@ public class AuthenticationContext {
      * @throws AuthenticationException {@link AuthenticationException}
      */
     public Future<AuthenticationResult> acquireToken(final String resource,
-            final ClientAssertion assertion, final ClientCredential credential,
+            final UserAssertion userAssertion, final ClientCredential credential,
             final AuthenticationCallback callback) {
 
         this.validateInput(resource, credential, true);
@@ -320,7 +324,7 @@ public class AuthenticationContext {
         try {
             AdalAuthorizatonGrant grant = new AdalAuthorizatonGrant(
                     new JWTBearerGrant(
-                            SignedJWT.parse(assertion.getAssertion())), params);
+                            SignedJWT.parse(userAssertion.getAssertion())), params);
 
             final ClientAuthentication clientAuth = new ClientSecretPost(
                     new ClientID(credential.getClientId()), new Secret(
@@ -428,8 +432,8 @@ public class AuthenticationContext {
      *            endpoint.
      * @param redirectUri
      *            The redirect address used for obtaining authorization code.
-     * @param credential
-     *            The client assertion to use for token acquisition.
+     * @param clientAssertion
+     *            The client assertion to use for client authentication.
      * @param callback
      *            optional callback object for non-blocking execution.
      * @return A {@link Future} object representing the
@@ -438,10 +442,10 @@ public class AuthenticationContext {
      */
     public Future<AuthenticationResult> acquireTokenByAuthorizationCode(
             final String authorizationCode, final URI redirectUri,
-            final ClientAssertion credential,
+            final ClientAssertion clientAssertion,
             final AuthenticationCallback callback) {
         return acquireTokenByAuthorizationCode(authorizationCode, redirectUri,
-                credential, (String) null, callback);
+                clientAssertion, (String) null, callback);
     }
 
     /**
@@ -453,8 +457,8 @@ public class AuthenticationContext {
      *            endpoint.
      * @param redirectUri
      *            The redirect address used for obtaining authorization code.
-     * @param credential
-     *            The client assertion to use for token acquisition.
+     * @param clientAssertion
+     *            The client assertion to use for client authentication.
      * @param resource
      *            Identifier of the target resource that is the recipient of the
      *            requested token. It can be null if provided earlier to acquire
@@ -467,12 +471,12 @@ public class AuthenticationContext {
      */
     public Future<AuthenticationResult> acquireTokenByAuthorizationCode(
             final String authorizationCode, final URI redirectUri,
-            final ClientAssertion credential, final String resource,
+            final ClientAssertion clientAssertion, final String resource,
             final AuthenticationCallback callback) {
 
         this.validateAuthCodeRequestInput(authorizationCode, redirectUri,
-                credential, resource);
-        final ClientAuthentication clientAuth = createClientAuthFromClientAssertion(credential);
+                clientAssertion, resource);
+        final ClientAuthentication clientAuth = createClientAuthFromClientAssertion(clientAssertion);
         final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
                 new AuthorizationCodeGrant(new AuthorizationCode(
                         authorizationCode), redirectUri), resource);
@@ -656,8 +660,8 @@ public class AuthenticationContext {
      *            Refresh Token to use in the refresh flow.
      * @param clientId
      *            Name or ID of the client requesting the token.
-     * @param credential
-     *            The client assertion used for token acquisition.
+     * @param clientAssertion
+     *            The client assertion to use for client authentication.
      * @param callback
      *            optional callback object for non-blocking execution.
      * @return A {@link Future} object representing the
@@ -666,9 +670,9 @@ public class AuthenticationContext {
      */
     public Future<AuthenticationResult> acquireTokenByRefreshToken(
             final String refreshToken, final String clientId,
-            final ClientAssertion credential,
+            final ClientAssertion clientAssertion,
             final AuthenticationCallback callback) {
-        return acquireTokenByRefreshToken(refreshToken, clientId, credential,
+        return acquireTokenByRefreshToken(refreshToken, clientId, clientAssertion,
                 null, callback);
     }
 
@@ -680,8 +684,8 @@ public class AuthenticationContext {
      *            Refresh Token to use in the refresh flow.
      * @param clientId
      *            Name or ID of the client requesting the token.
-     * @param credential
-     *            The client assertion used for token acquisition.
+     * @param clientAssertion
+     *            The client assertion to use for client authentication.
      * @param resource
      *            Identifier of the target resource that is the recipient of the
      *            requested token. If null, token is requested for the same
@@ -697,11 +701,11 @@ public class AuthenticationContext {
      */
     public Future<AuthenticationResult> acquireTokenByRefreshToken(
             final String refreshToken, final String clientId,
-            final ClientAssertion credential, final String resource,
+            final ClientAssertion clientAssertion, final String resource,
             final AuthenticationCallback callback) {
         this.validateRefreshTokenRequestInput(refreshToken, clientId,
-                credential);
-        final ClientAuthentication clientAuth = createClientAuthFromClientAssertion(credential);
+                clientAssertion);
+        final ClientAuthentication clientAuth = createClientAuthFromClientAssertion(clientAssertion);
         final AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(
                 new RefreshTokenGrant(new RefreshToken(refreshToken)), resource);
         return this.acquireToken(authGrant, clientAuth, callback);
@@ -930,13 +934,13 @@ public class AuthenticationContext {
         ResourceOwnerPasswordCredentialsGrant grant = (ResourceOwnerPasswordCredentialsGrant) authGrant
                 .getAuthorizationGrant();
 
-        UserDiscoveryResponse discoveryResponse = UserDiscoveryRequest.execute(
+        UserDiscoveryResponse userDiscoveryResponse = UserDiscoveryRequest.execute(
                 this.authenticationAuthority.getUserRealmEndpoint(grant
                         .getUsername()), this.proxy, this.sslSocketFactory);
-        if (discoveryResponse.isAccountFederated()) {
+        if (userDiscoveryResponse.isAccountFederated()) {
             WSTrustResponse response = WSTrustRequest.execute(
-                    discoveryResponse.getFederationMetadataUrl(),
-                    grant.getUsername(), grant.getPassword().getValue(),
+                    userDiscoveryResponse.getFederationMetadataUrl(),
+                    grant.getUsername(), grant.getPassword().getValue(), userDiscoveryResponse.getCloudAudienceUrn(),
                     this.proxy, this.sslSocketFactory);
 
             AuthorizationGrant updatedGrant = null;
@@ -991,13 +995,12 @@ public class AuthenticationContext {
     }
 
     private ClientAuthentication createClientAuthFromClientAssertion(
-            final ClientAssertion credential) {
+            final ClientAssertion clientAssertion) {
 
         try {
             final Map<String, String> map = new HashMap<String, String>();
-            map.put("client_assertion_type",
-                    JWTAuthentication.CLIENT_ASSERTION_TYPE);
-            map.put("client_assertion", credential.getAssertion());
+            map.put("client_assertion_type", clientAssertion.getAssertionType());
+            map.put("client_assertion", clientAssertion.getAssertion());
             return PrivateKeyJWT.parse(map);
         }
         catch (final ParseException e) {
@@ -1047,7 +1050,7 @@ public class AuthenticationContext {
     }
 
     private void validateAuthCodeRequestInput(final String authorizationCode,
-            final URI redirectUri, final Object credential,
+            final URI redirectUri, final Object clientCredential,
             final String resource) {
         if (StringHelper.isBlank(authorizationCode)) {
             throw new IllegalArgumentException(
@@ -1058,7 +1061,7 @@ public class AuthenticationContext {
             throw new IllegalArgumentException("redirect uri is null");
         }
 
-        this.validateInput(resource, credential, false);
+        this.validateInput(resource, clientCredential, false);
     }
 
     private void validateDeivceCodeRequestInput(final String deviceCode,

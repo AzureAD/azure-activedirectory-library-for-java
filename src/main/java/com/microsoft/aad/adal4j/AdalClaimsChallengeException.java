@@ -23,42 +23,30 @@
 
 package com.microsoft.aad.adal4j;
 
-class BindingPolicy {
+/**
+ * The exception type thrown when a claims challenge error occurs during token acquisition.
+ */
+public class AdalClaimsChallengeException extends AuthenticationException {
 
-    private String value;
-    private String url;
-    private WSTrustVersion version;
+    /**
+     * Constructor
+     *
+     * @param message
+     * @param claims
+     */
+    public AdalClaimsChallengeException(String message, String claims) {
+        super(message);
 
-    public BindingPolicy(String value) {
-        this.value = value;
+        this.claims = claims;
     }
 
-    public BindingPolicy(String url, WSTrustVersion version) {
-        this.url = url;
-        this.version = version;
-    }
+    private final String claims;
 
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public void setVersion(WSTrustVersion version) {
-        this.version = version;
-    }
-
-    public WSTrustVersion getVersion() {
-        return this.version;
+    /**
+     *
+     * @return claims challenge value
+     */
+    public String getClaims() {
+        return claims;
     }
 }
