@@ -24,7 +24,7 @@
 package com.microsoft.aad.adal4j;
 
 final class LogHelper {
-    static final String PII_LOGGER_PREFIX = "pii.";
+    static final String PII_LOGGER_PREFIX = "adal4jPii.";
 
     static String createMessage(String originalMessage, String correlationId) {
         return String.format("[Correlation ID: %s] " + originalMessage,

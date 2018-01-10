@@ -31,3 +31,13 @@ All code is licensed under the MIT License and we triage actively on GitHub. We 
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
+## Logging
+
+The Library uses The Simple Logging Facade for Java (SLF4J) as a simple facade or abstraction for various logging frameworks.
+
+For regular logs we use class names as logger names.
+For log which might contains Pii(personally identifiable information) class names preceded by prefix "adal4jPii." are used.
+So, for the same class, for instance Foo, we define two loggers:
+
+com.microsoft.aad.adal4j.Foo - no Pii data
+adal4jPii.com.microsoft.aad.adal4j.Foo - might contain Pii data
