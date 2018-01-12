@@ -79,7 +79,7 @@ class WSTrustRequest {
     static WSTrustResponse execute(String url, String username, String password, String cloudAudienceUrn,
                                    Proxy proxy, SSLSocketFactory sslSocketFactory) throws Exception {
 
-        String mexResponse = HttpHelper.executeHttpGet(log, url, proxy, sslSocketFactory);
+        String mexResponse = HttpHelper.executeHttpGet(log, piiLog, url, proxy, sslSocketFactory);
 
         BindingPolicy policy = MexParser.getWsTrustEndpointFromMexResponse(mexResponse);
 
@@ -93,7 +93,7 @@ class WSTrustRequest {
     static WSTrustResponse execute(String mexURL, String cloudAudienceUrn, Proxy proxy,
                                    SSLSocketFactory sslSocketFactory) throws Exception {
 
-        String mexResponse = HttpHelper.executeHttpGet(log, mexURL, proxy, sslSocketFactory);
+        String mexResponse = HttpHelper.executeHttpGet(log, piiLog, mexURL, proxy, sslSocketFactory);
 
         BindingPolicy policy = MexParser.getPolicyFromMexResponseForIntegrated(mexResponse);
 
