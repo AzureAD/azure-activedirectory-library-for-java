@@ -69,6 +69,8 @@ public class AuthenticationContext {
 
     private final Logger log = LoggerFactory
             .getLogger(AuthenticationContext.class);
+    private final Logger piiLog = LoggerFactory
+            .getLogger(LogHelper.PII_LOGGER_PREFIX + AuthenticationContext.class);
 
     private final AuthenticationAuthority authenticationAuthority;
     private String correlationId;
@@ -181,9 +183,12 @@ public class AuthenticationContext {
                     }
                 }
                 catch (final Exception ex) {
-                    log.error(LogHelper.createMessage(
+                    String msg = LogHelper.createMessage(
                             "Request to acquire token failed.",
-                            this.headers.getHeaderCorrelationIdValue()), ex);
+                            this.headers.getHeaderCorrelationIdValue());
+                    log.error(msg + System.getProperty("line.separator") + LogHelper.getPiiScrubbedDetails(ex));
+                    piiLog.error(msg, ex);
+
                     if (callback != null) {
                         callback.onFailure(ex);
                     }
@@ -866,9 +871,11 @@ public class AuthenticationContext {
             final AdalAuthorizatonGrant authGrant,
             final ClientAuthentication clientAuth,
             final ClientDataHttpHeaders headers) throws Exception {
-        log.debug(LogHelper.createMessage(
+        String msg = LogHelper.createMessage(
                 String.format("Using Client Http Headers: %s", headers),
-                headers.getHeaderCorrelationIdValue()));
+                headers.getHeaderCorrelationIdValue());
+        piiLog.debug(msg);
+
         this.authenticationAuthority.doInstanceDiscovery(
                 headers.getReadonlyHeaderMap(), this.proxy,
                 this.sslSocketFactory);
@@ -928,21 +935,27 @@ public class AuthenticationContext {
             UnsupportedEncodingException {
         if (!StringHelper.isBlank(result.getAccessToken())) {
             String logMessage = "";
+            String piiLogMessage = "";
             String accessTokenHash = this.computeSha256Hash(result
                     .getAccessToken());
             if (!StringHelper.isBlank(result.getRefreshToken())) {
                 String refreshTokenHash = this.computeSha256Hash(result
                         .getRefreshToken());
-                logMessage = String
+                logMessage = "Access Token and Refresh Token were returned";
+                piiLogMessage = String
                         .format("Access Token with hash '%s' and Refresh Token with hash '%s' returned",
                                 accessTokenHash, refreshTokenHash);
             }
             else {
-                logMessage = String
+                logMessage = "Access Token was returned";
+                piiLogMessage = String
                         .format("Access Token with hash '%s' returned",
                                 accessTokenHash);
             }
             log.debug(LogHelper.createMessage(logMessage,
+                    headers.getHeaderCorrelationIdValue()));
+
+            piiLog.debug(LogHelper.createMessage(piiLogMessage,
                     headers.getHeaderCorrelationIdValue()));
         }
     }

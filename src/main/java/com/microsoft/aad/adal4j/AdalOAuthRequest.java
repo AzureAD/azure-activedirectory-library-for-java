@@ -54,6 +54,8 @@ class AdalOAuthRequest extends HTTPRequest {
 
     private final Map<String, String> extraHeaderParams;
     private final Logger log = LoggerFactory.getLogger(AdalOAuthRequest.class);
+    private final Logger piiLog = LoggerFactory.getLogger(LogHelper.PII_LOGGER_PREFIX + this.getClass());
+
     private final Proxy proxy;
     private final SSLSocketFactory sslSocketFactory;
 
@@ -85,7 +87,7 @@ class AdalOAuthRequest extends HTTPRequest {
                 this.proxy, this.sslSocketFactory);
         this.configureHeaderAndExecuteOAuthCall(conn);
         final String out = this.processAndReadResponse(conn);
-        HttpHelper.verifyReturnedCorrelationId(log, conn,
+        HttpHelper.verifyReturnedCorrelationId(log, piiLog, conn,
                 this.extraHeaderParams
                         .get(ClientDataHttpHeaders.CORRELATION_ID_HEADER_NAME));
         return createResponse(conn, out);
