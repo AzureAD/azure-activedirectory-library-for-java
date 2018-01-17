@@ -44,4 +44,5 @@ For log which might contains Pii(personally identifiable information) class name
 So, for the same class, for instance Foo, we define two loggers:
 
 com.microsoft.aad.adal4j.Foo - no Pii data
+
 adal4jPii.com.microsoft.aad.adal4j.Foo - might contain Pii data

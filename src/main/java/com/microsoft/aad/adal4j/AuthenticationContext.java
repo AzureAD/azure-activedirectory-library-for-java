@@ -214,22 +214,18 @@ public class AuthenticationContext {
     }
 
     /**
-     * Acquires a security token from the authority using a Refresh Token
-     * previously received.
+     * Acquires a security token from the authority using a username/password flow.
      *
      * @param clientId
      *            Name or ID of the client requesting the token.
      * @param resource
      *            Identifier of the target resource that is the recipient of the
-     *            requested token. If null, token is requested for the same
-     *            resource refresh token was originally issued for. If passed,
-     *            resource should match the original resource used to acquire
-     *            refresh token unless token service supports refresh token for
-     *            multiple resources.
+     *            requested token.
      * @param username
      *            Username of the managed or federated user.
      * @param password
      *            Password of the managed or federated user.
+     *            If null, integrated authentication will be used.
      * @param callback
      *            optional callback object for non-blocking execution.
      * @return A {@link Future} object representing the
@@ -253,7 +249,7 @@ public class AuthenticationContext {
 
         ClientAuthenticationPost clientAuth = new ClientAuthenticationPost(ClientAuthenticationMethod.NONE, new ClientID(clientId));
 
-        if (!StringHelper.isBlank(password)) {
+        if (password != null) {
             return this.acquireToken(new AdalAuthorizatonGrant(
                     new ResourceOwnerPasswordCredentialsGrant(username, new Secret(
                             password)), resource), clientAuth, callback);
