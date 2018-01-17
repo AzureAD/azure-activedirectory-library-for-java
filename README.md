@@ -46,3 +46,4 @@ So, for the same class, for instance Foo, we define two loggers:
 com.microsoft.aad.adal4j.Foo - no Pii data
 
 adal4jPii.com.microsoft.aad.adal4j.Foo - might contain Pii data
+
