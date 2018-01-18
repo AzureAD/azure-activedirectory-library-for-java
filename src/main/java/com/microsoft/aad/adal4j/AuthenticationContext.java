@@ -873,7 +873,7 @@ public class AuthenticationContext {
                 credential.getClientId(),
                 JwtHelper.buildJwt(credential,
                         this.authenticationAuthority.getSelfSignedJwtAudience()),
-                (String) null, callback);
+                resource, callback);
     }
 
     /**
