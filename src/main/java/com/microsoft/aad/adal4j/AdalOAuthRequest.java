@@ -23,7 +23,6 @@
 
 package com.microsoft.aad.adal4j;
 
-import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -83,7 +82,7 @@ class AdalOAuthRequest extends HTTPRequest {
     @Override
     public HTTPResponse send() throws IOException {
 
-        final HttpsURLConnection conn = HttpHelper.openConnection(this.getURL(),
+        final HttpURLConnection conn = HttpHelper.openConnection(this.getURL(),
                 this.proxy, this.sslSocketFactory);
         this.configureHeaderAndExecuteOAuthCall(conn);
         final String out = this.processAndReadResponse(conn);
@@ -122,7 +121,7 @@ class AdalOAuthRequest extends HTTPRequest {
         return response;
     }
 
-    void configureHeaderAndExecuteOAuthCall(final HttpsURLConnection conn)
+    void configureHeaderAndExecuteOAuthCall(final HttpURLConnection conn)
             throws IOException {
 
         if (this.getAuthorization() != null) {

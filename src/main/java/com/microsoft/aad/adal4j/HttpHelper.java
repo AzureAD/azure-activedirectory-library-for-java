@@ -23,14 +23,16 @@
 
 package com.microsoft.aad.adal4j;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSocketFactory;
-import java.io.*;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
 import java.util.Map;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
 
 import org.slf4j.Logger;
 
@@ -45,7 +47,7 @@ class HttpHelper {
     static String executeHttpGet(final Logger log, final Logger piiLog, final String url,
             final Map<String, String> headers, final Proxy proxy,
             final SSLSocketFactory sslSocketFactory) throws Exception {
-        final HttpsURLConnection conn = HttpHelper.openConnection(url, proxy,
+        final HttpURLConnection conn = HttpHelper.openConnection(url, proxy,
                 sslSocketFactory);
         return executeGetRequest(log, piiLog, headers, conn);
     }
@@ -61,17 +63,18 @@ class HttpHelper {
             String postData, final Map<String, String> headers,
             final Proxy proxy, final SSLSocketFactory sslSocketFactory)
             throws Exception {
-        final HttpsURLConnection conn = HttpHelper.openConnection(url, proxy,
+        final HttpURLConnection conn = HttpHelper.openConnection(url, proxy,
                 sslSocketFactory);
         return executePostRequest(log, piiLog, postData, headers, conn);
     }
 
+    @SuppressWarnings("resource")
     static String inputStreamToString(java.io.InputStream is) {
         java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
         return s.hasNext() ? s.next() : "";
     }
 
-    static String readResponseFromConnection(final HttpsURLConnection conn)
+    static String readResponseFromConnection(final HttpURLConnection conn)
             throws AuthenticationException, IOException {
         InputStream is = null;
         try {
@@ -95,32 +98,35 @@ class HttpHelper {
         }
     }
 
-    static HttpsURLConnection openConnection(final URL finalURL,
+    static HttpURLConnection openConnection(final URL finalURL,
             final Proxy proxy, final SSLSocketFactory sslSocketFactory)
             throws IOException {
-        HttpsURLConnection connection;
+        HttpURLConnection connection;
         if (proxy != null) {
-            connection = (HttpsURLConnection) finalURL.openConnection(proxy);
+            connection = (HttpURLConnection) finalURL.openConnection(proxy);
         }
         else {
-            connection = (HttpsURLConnection) finalURL.openConnection();
+            connection = (HttpURLConnection) finalURL.openConnection();
         }
 
         if (sslSocketFactory != null) {
-            connection.setSSLSocketFactory(sslSocketFactory);
+            if (!(connection instanceof HttpsURLConnection)) {
+                throw new UnsupportedOperationException("sslSocketFactory is only supported by HttpsURLConnection");
+            }
+            ((HttpsURLConnection)connection).setSSLSocketFactory(sslSocketFactory);
         }
 
         return connection;
     }
 
-    static HttpsURLConnection openConnection(final String url,
+    static HttpURLConnection openConnection(final String url,
             final Proxy proxy, final SSLSocketFactory sslSocketFactory)
             throws IOException {
         return openConnection(new URL(url), proxy, sslSocketFactory);
     }
 
-    static HttpsURLConnection configureAdditionalHeaders(
-            final HttpsURLConnection conn, final Map<String, String> headers)
+    static HttpURLConnection configureAdditionalHeaders(
+            final HttpURLConnection conn, final Map<String, String> headers)
             throws IOException {
         if (headers != null) {
             for (final Map.Entry<String, String> entry : headers.entrySet()) {
@@ -131,7 +137,7 @@ class HttpHelper {
     }
 
     static void verifyReturnedCorrelationId(Logger log, Logger piilog,
-            HttpsURLConnection conn, String sentCorrelationId) {
+            HttpURLConnection conn, String sentCorrelationId) {
         if (StringHelper
                 .isBlank(conn
                         .getHeaderField(ClientDataHttpHeaders.CORRELATION_ID_HEADER_NAME))
@@ -151,14 +157,14 @@ class HttpHelper {
     }
 
     private static String executeGetRequest(Logger log, Logger piiLog,
-            Map<String, String> headers, HttpsURLConnection conn)
+            Map<String, String> headers, HttpURLConnection conn)
             throws IOException {
         configureAdditionalHeaders(conn, headers);
         return getResponse(log, piiLog, headers, conn);
     }
 
     private static String executePostRequest(Logger log, Logger piiLog, String postData,
-            Map<String, String> headers, HttpsURLConnection conn)
+            Map<String, String> headers, HttpURLConnection conn)
             throws IOException {
         configureAdditionalHeaders(conn, headers);
         conn.setRequestMethod("POST");
@@ -179,7 +185,7 @@ class HttpHelper {
     }
 
     private static String getResponse(Logger log, Logger piiLog, Map<String, String> headers,
-            HttpsURLConnection conn) throws IOException {
+            HttpURLConnection conn) throws IOException {
         String response = readResponseFromConnection(conn);
         if (headers != null) {
             HttpHelper.verifyReturnedCorrelationId(log, piiLog, conn, headers
