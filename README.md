@@ -39,11 +39,8 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 
 The Library uses The Simple Logging Facade for Java (SLF4J) as a simple facade or abstraction for various logging frameworks.
 
-For regular logs we use class names as logger names.
-For log which might contains Pii(personally identifiable information) class names preceded by prefix "adal4jPii." are used.
-So, for the same class, for instance Foo, we define two loggers:
+By default Pii (personally identifiable information) is no logged.
+Instance of AuthenticationContext can be configured to log Pii by setting logPii property to true:
 
-com.microsoft.aad.adal4j.Foo - no Pii data
-
-adal4jPii.com.microsoft.aad.adal4j.Foo - might contain Pii data
-
+AuthenticationContext ctx = new AuthenticationContext(...);
+ctx.setLogPii(true);
