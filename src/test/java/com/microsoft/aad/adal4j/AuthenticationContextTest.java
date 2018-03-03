@@ -127,6 +127,7 @@ public class AuthenticationContextTest extends AbstractAdalTests {
 	public void testAcquireTokenAuthCode_RedirectUriNull() throws Exception {
 		ctx = new AuthenticationContext(TestConfiguration.AAD_TENANT_ENDPOINT,
 				true, service);
+		ctx.setLogPii(true);
 		ctx.acquireTokenByAuthorizationCode("auth_code", null,
 				new ClientCredential("clientId", "clientSecret"), null);
 	}

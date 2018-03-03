@@ -43,8 +43,6 @@ class WSTrustRequest {
 
     private final static Logger log = LoggerFactory
             .getLogger(WSTrustRequest.class);
-    private final static Logger piiLog = LoggerFactory
-            .getLogger(LogHelper.PII_LOGGER_PREFIX + WSTrustRequest.class);
 
     private final static int MAX_EXPECTED_MESSAGE_SIZE = 1024;
     final static String DEFAULT_APPLIES_TO = "urn:federation:MicrosoftOnline";
@@ -70,18 +68,18 @@ class WSTrustRequest {
         String body = buildMessage(policy.getUrl(), username, password,
                 policy.getVersion(), cloudAudienceUrn).toString();
       
-        String response = HttpHelper.executeHttpPost(log, piiLog, policy.getUrl(),
+        String response = HttpHelper.executeHttpPost(log, policy.getUrl(),
                 body, headers, proxy, sslSocketFactory);
 
         return WSTrustResponse.parse(response, policy.getVersion());
     }
 
     static WSTrustResponse execute(String url, String username, String password, String cloudAudienceUrn,
-                                   Proxy proxy, SSLSocketFactory sslSocketFactory) throws Exception {
+                                   Proxy proxy, SSLSocketFactory sslSocketFactory, boolean logPii) throws Exception {
 
-        String mexResponse = HttpHelper.executeHttpGet(log, piiLog, url, proxy, sslSocketFactory);
+        String mexResponse = HttpHelper.executeHttpGet(log, url, proxy, sslSocketFactory);
 
-        BindingPolicy policy = MexParser.getWsTrustEndpointFromMexResponse(mexResponse);
+        BindingPolicy policy = MexParser.getWsTrustEndpointFromMexResponse(mexResponse, logPii);
 
         if(policy == null){
             throw new AuthenticationException("WsTrust endpoint not found in metadata document");
@@ -91,11 +89,11 @@ class WSTrustRequest {
     }
 
     static WSTrustResponse execute(String mexURL, String cloudAudienceUrn, Proxy proxy,
-                                   SSLSocketFactory sslSocketFactory) throws Exception {
+                                   SSLSocketFactory sslSocketFactory, boolean logPii) throws Exception {
 
-        String mexResponse = HttpHelper.executeHttpGet(log, piiLog, mexURL, proxy, sslSocketFactory);
+        String mexResponse = HttpHelper.executeHttpGet(log, mexURL, proxy, sslSocketFactory);
 
-        BindingPolicy policy = MexParser.getPolicyFromMexResponseForIntegrated(mexResponse);
+        BindingPolicy policy = MexParser.getPolicyFromMexResponseForIntegrated(mexResponse, logPii);
 
         if(policy == null){
             throw new AuthenticationException("WsTrust endpoint not found in metadata document");
