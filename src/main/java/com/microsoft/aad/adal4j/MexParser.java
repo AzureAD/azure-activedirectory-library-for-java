@@ -48,7 +48,6 @@ import org.xml.sax.SAXException;
 class MexParser {
 
     private final static Logger log = LoggerFactory.getLogger(MexParser.class);
-    private final static Logger piiLog = LoggerFactory.getLogger(LogHelper.PII_LOGGER_PREFIX + MexParser.class);
 
     private final static String TRANSPORT_BINDING_XPATH = "wsp:ExactlyOne/wsp:All/sp:TransportBinding";
     private final static String TRANSPORT_BINDING_2005_XPATH = "wsp:ExactlyOne/wsp:All/sp2005:TransportBinding";
@@ -61,11 +60,11 @@ class MexParser {
     private final static String SOAP_HTTP_TRANSPORT_VALUE = "http://schemas.xmlsoap.org/soap/http";
 
     private interface PolicySelector {
-        Map<String, BindingPolicy> selectPolicies(Document document, XPath xPath) throws XPathExpressionException;
+        Map<String, BindingPolicy> selectPolicies(Document document, XPath xPath, boolean logPii) throws XPathExpressionException;
     }
 
     private static class NegotiateAuthenticationPolicySelector implements PolicySelector {
-        public Map<String, BindingPolicy> selectPolicies(Document xmlDocument, XPath xPath) throws XPathExpressionException {
+        public Map<String, BindingPolicy> selectPolicies(Document xmlDocument, XPath xPath, boolean logPii) throws XPathExpressionException {
             String xpathExpression = "//wsdl:definitions/wsp:Policy/wsp:ExactlyOne/wsp:All/http:NegotiateAuthentication";
 
             return selectIntegratedPoliciesWithExpression(xmlDocument, xPath, xpathExpression);
@@ -73,12 +72,13 @@ class MexParser {
     }
 
     private static class WsTrustEndpointPolicySelector implements PolicySelector {
-        public Map<String, BindingPolicy> selectPolicies(Document xmlDocument, XPath xPath) throws XPathExpressionException {
+        public Map<String, BindingPolicy> selectPolicies(Document xmlDocument, XPath xPath, boolean logPii)
+                throws XPathExpressionException {
             String xpathExpression = "//wsdl:definitions/wsp:Policy/wsp:ExactlyOne/wsp:All/"
                     + "sp:SignedEncryptedSupportingTokens/wsp:Policy/sp:UsernameToken/"
                     + "wsp:Policy/sp:WssUsernameToken10";
             Map<String, BindingPolicy> policies = selectUsernamePasswordPoliciesWithExpression(
-                    xmlDocument, xPath, xpathExpression);
+                    xmlDocument, xPath, xpathExpression, logPii);
 
             ((NamespaceContextImpl) xPath.getNamespaceContext()).modifyNameSpace("sp",
                     "http://schemas.xmlsoap.org/ws/2005/07/securitypolicy");
@@ -87,13 +87,13 @@ class MexParser {
                     + "sp:SignedSupportingTokens/wsp:Policy/sp:UsernameToken/"
                     + "wsp:Policy/sp:WssUsernameToken10";
             policies.putAll(selectUsernamePasswordPoliciesWithExpression(
-                    xmlDocument, xPath, xpathExpression));
+                    xmlDocument, xPath, xpathExpression, logPii));
 
             return policies;
         }
     }
 
-    static BindingPolicy getPolicy(String mexResponse, PolicySelector policySelector)
+    static BindingPolicy getPolicy(String mexResponse, PolicySelector policySelector, boolean logPii)
             throws Exception {
         DocumentBuilderFactory builderFactory = SafeDocumentBuilderFactory.createInstance();
         builderFactory.setNamespaceAware(true);
@@ -105,40 +105,36 @@ class MexParser {
         NamespaceContextImpl nameSpace = new NamespaceContextImpl();
         xPath.setNamespaceContext(nameSpace);
 
-        Map<String, BindingPolicy> policies = policySelector.selectPolicies(xmlDocument, xPath);
+        Map<String, BindingPolicy> policies = policySelector.selectPolicies(xmlDocument, xPath, logPii);
 
         if (policies.isEmpty()) {
-            String msg = "No matching policies";
-            log.debug(msg);
-            piiLog.debug(msg);
+            log.debug("No matching policies");
 
             return null;
         }
         else {
             Map<String, BindingPolicy> bindings = getMatchingBindings(
-                    xmlDocument, xPath, policies);
+                    xmlDocument, xPath, policies, logPii);
 
             if (bindings.isEmpty()) {
-                String msg = "No matching bindings";
-                log.debug(msg);
-                piiLog.debug(msg);
+                log.debug("No matching bindings");
 
                 return null;
             }
             else {
-                getPortsForPolicyBindings(xmlDocument, xPath, bindings, policies);
+                getPortsForPolicyBindings(xmlDocument, xPath, bindings, policies, logPii);
                 return selectSingleMatchingPolicy(policies);
             }
         }
     }
 
-    static BindingPolicy getPolicyFromMexResponseForIntegrated(String mexResponse) throws Exception {
-        return getPolicy(mexResponse, new NegotiateAuthenticationPolicySelector());
+    static BindingPolicy getPolicyFromMexResponseForIntegrated(String mexResponse, boolean logPii) throws Exception {
+        return getPolicy(mexResponse, new NegotiateAuthenticationPolicySelector(), logPii);
     }
 
-    static BindingPolicy getWsTrustEndpointFromMexResponse(String mexResponse)
+    static BindingPolicy getWsTrustEndpointFromMexResponse(String mexResponse, boolean logPii)
             throws Exception {
-        return getPolicy(mexResponse, new WsTrustEndpointPolicySelector());
+        return getPolicy(mexResponse, new WsTrustEndpointPolicySelector(), logPii);
     }
 
     private static BindingPolicy selectSingleMatchingPolicy(
@@ -162,9 +158,7 @@ class MexParser {
         }
 
         if (wstrust13 == null && wstrust2005 == null) {
-            String msg = "no policies found with the url";
-            log.warn(msg);
-            piiLog.warn(msg);
+            log.warn("No policies found with the url");
 
             return null;
         }
@@ -174,15 +168,13 @@ class MexParser {
 
     private static void getPortsForPolicyBindings(Document xmlDocument,
             XPath xPath, Map<String, BindingPolicy> bindings,
-            Map<String, BindingPolicy> policies) throws Exception {
+            Map<String, BindingPolicy> policies, boolean logPii) throws Exception {
 
         NodeList portNodes = (NodeList) xPath.compile(PORT_XPATH).evaluate(
                 xmlDocument, XPathConstants.NODESET);
 
         if (portNodes.getLength() == 0) {
-            String msg = "no ports found";
-            log.warn(msg);
-            piiLog.warn(msg);
+            log.warn("No ports found");
         }
         else {
             for (int i = 0; i < portNodes.getLength(); i++) {
@@ -210,9 +202,12 @@ class MexParser {
                                 bindingPolicy.setUrl(address.trim());
                             }
                             else {
-                                String msg = "skipping insecure endpoint";
-                                log.warn(msg);
-                                piiLog.warn(msg + ": " + address);
+                                if(logPii){
+                                    log.warn("Skipping insecure endpoint" + ": " + address);
+                                }
+                                else{
+                                    log.warn("Skipping insecure endpoint");
+                                }
                             }
                         }
                         else {
@@ -226,7 +221,7 @@ class MexParser {
 
     private static Map<String, BindingPolicy> getMatchingBindings(
             Document xmlDocument, XPath xPath,
-            Map<String, BindingPolicy> policies)
+            Map<String, BindingPolicy> policies, boolean logPii)
             throws XPathExpressionException {
         Map<String, BindingPolicy> bindings = new HashMap<String, BindingPolicy>();
         NodeList nodeList = (NodeList) xPath.compile(
@@ -242,7 +237,7 @@ class MexParser {
                         .getNamedItem("name").getNodeValue();
 
                 WSTrustVersion version = checkSoapActionAndTransport(xPath,
-                        bindingNode);
+                        bindingNode, logPii);
                 if (version != WSTrustVersion.UNDEFINED) {
                     BindingPolicy policy = new BindingPolicy("");
                     policy.setUrl(uri);
@@ -255,7 +250,7 @@ class MexParser {
     }
 
     private static WSTrustVersion checkSoapActionAndTransport(XPath xPath,
-            Node bindingNode) throws XPathExpressionException {
+            Node bindingNode, boolean logPii) throws XPathExpressionException {
         NodeList soapTransportAttributes = null;
         String soapAction = null;
         String bindingName = bindingNode.getAttributes().getNamedItem("name")
@@ -274,16 +269,22 @@ class MexParser {
                             .equalsIgnoreCase(SOAP_HTTP_TRANSPORT_VALUE)) {
 
                 if (soapAction.equalsIgnoreCase(RST_SOAP_ACTION)) {
-                    log.debug("Found binding matching Action and Transport");
-                    piiLog.debug("Found binding matching Action and Transport: "
-                            + bindingName);
+                    if(logPii){
+                        log.debug("Found binding matching Action and Transport: " + bindingName);
+                    }
+                    else{
+                        log.debug("Found binding matching Action and Transport");
+                    }
 
                     return WSTrustVersion.WSTRUST13;
                 }
                 else if (soapAction.equalsIgnoreCase(RST_SOAP_ACTION_2005)) {
-                    log.debug("Binding node did not match soap Action or Transport");
-                    piiLog.debug("Binding node did not match soap Action or Transport: "
-                            + bindingName);
+                    if(logPii){
+                        log.debug("Binding node did not match soap Action or Transport: " + bindingName);
+                    }
+                    else{
+                        log.debug("Binding node did not match soap Action or Transport");
+                    }
 
                     return WSTrustVersion.WSTRUST2005;
                 }
@@ -294,7 +295,7 @@ class MexParser {
     }
 
     private static Map<String, BindingPolicy> selectUsernamePasswordPoliciesWithExpression(
-            Document xmlDocument, XPath xPath, String xpathExpression)
+            Document xmlDocument, XPath xPath, String xpathExpression, boolean logPii)
             throws XPathExpressionException {
 
         Map<String, BindingPolicy> policies = new HashMap<String, BindingPolicy>();
@@ -314,7 +315,7 @@ class MexParser {
             // wsp:Policy
             String policy = checkPolicy(xPath, nodeList.item(i).getParentNode()
                     .getParentNode().getParentNode().getParentNode()
-                    .getParentNode().getParentNode().getParentNode());
+                    .getParentNode().getParentNode().getParentNode(), logPii);
             policies.put("#" + policy, new BindingPolicy("#" + policy));
         }
         return policies;
@@ -335,7 +336,7 @@ class MexParser {
         return policies;
     }
 
-    private static String checkPolicy(XPath xPath, Node node)
+    private static String checkPolicy(XPath xPath, Node node, boolean logPii)
             throws XPathExpressionException {
 
         String policyId = null;
@@ -351,17 +352,25 @@ class MexParser {
         if (transportBindingNodes.getLength() > 0 && id != null) {
             policyId = id.getNodeValue();
 
-            log.debug("found matching policy");
-            piiLog.debug("found matching policy id: " + policyId);
+            if(logPii){
+                log.debug("found matching policy id: " + policyId);
+            }
+            else{
+                log.debug("found matching policy");
+            }
         }
         else {
             String nodeValue = "none";
             if (id != null) {
                 nodeValue = id.getNodeValue();
             }
-            log.debug("potential policy did not match required transport binding");
-            piiLog.debug("potential policy did not match required transport binding: "
-                    + nodeValue);
+
+            if(logPii){
+                log.debug("potential policy did not match required transport binding: " + nodeValue);
+            }
+            else{
+                log.debug("potential policy did not match required transport binding");
+            }
         }
         return policyId;
     }

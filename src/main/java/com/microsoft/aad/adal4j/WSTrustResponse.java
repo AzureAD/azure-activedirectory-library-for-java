@@ -47,8 +47,6 @@ class WSTrustResponse {
 
     private final static Logger log = LoggerFactory
             .getLogger(WSTrustResponse.class);
-    private final static Logger piiLog = LoggerFactory
-            .getLogger(LogHelper.PII_LOGGER_PREFIX + WSTrustResponse.class);
 
     public final static String SAML1_ASSERTION = "urn:oasis:names:tc:SAML:1.0:assertion";
     private String faultMessage;
@@ -126,14 +124,12 @@ class WSTrustResponse {
         if (tokenTypeNodes.getLength() == 0) {
             String msg = "No TokenType elements found in RSTR";
             log.warn(msg);
-            piiLog.warn(msg);
         }
 
         for (int i = 0; i < tokenTypeNodes.getLength(); i++) {
             if (!StringHelper.isBlank(responseValue.token)) {
                 String msg = "Found more than one returned token.  Using the first.";
                 log.warn(msg);
-                piiLog.warn(msg);
 
                 break;
             }
@@ -143,7 +139,6 @@ class WSTrustResponse {
             if (StringHelper.isBlank(responseValue.tokenType)) {
                 String msg = "Could not find token type in RSTR token";
                 log.warn(msg);
-                piiLog.warn(msg);
             }
 
             NodeList requestedTokenNodes = (NodeList) xPath.compile(
@@ -158,7 +153,6 @@ class WSTrustResponse {
                 String msg = "Unable to find RequestsSecurityToken element associated with TokenType element: "
                         + responseValue.tokenType;
                 log.warn(msg);
-                piiLog.warn(msg);
                 continue;
             }
 
@@ -167,14 +161,12 @@ class WSTrustResponse {
                 String msg = "Unable to find token associated with TokenType element: "
                         + responseValue.tokenType;
                 log.warn(msg);
-                piiLog.warn(msg);
 
                 continue;
             }
 
             String msg = "Found token of type: " + responseValue.tokenType;
             log.info(msg);
-            piiLog.info(msg);
         }
 
         if (StringHelper.isBlank(responseValue.token)) {
