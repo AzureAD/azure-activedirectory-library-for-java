@@ -16,6 +16,21 @@ From version 1.3.0 support for handling Conditional Access claims challenge was 
 
 You can find the changes for each version in the [change log](https://github.com/AzureAD/azure-activedirectory-library-for-java/blob/master/changelog.txt).
 
+## Logging
+
+ADAL for Java uses the Simple Logging Facade for Java (SLF4J) as a simple facade or abstraction for various logging frameworks.
+
+#### Personal Identifiable Information (PII) & Organizational Identifiable Information (OII)
+
+By default, ADAL logging does not capture or log any PII or OII. The library allows app developers to turn this on by configuring the logPii property on the AuthenticationContext. By turning on PII or OII, the app takes responsibility for safely handling highly-sensitive data and complying with any regulatory requirements.
+
+```java
+//PII or OII logging disabled. Default Logger does not capture any PII or OII
+AuthenticationContext context = new AuthenticationContext(...);
+
+//PII or OII logging enabled
+context.setLogPii(true);
+```
 
 ## Community Help and Support
 
@@ -34,13 +49,3 @@ All code is licensed under the MIT License and we triage actively on GitHub. We 
 ## We Value and Adhere to the Microsoft Open Source Code of Conduct
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
-
-## Logging
-
-The Library uses The Simple Logging Facade for Java (SLF4J) as a simple facade or abstraction for various logging frameworks.
-
-By default Pii (personally identifiable information) is not logged.
-Instance of AuthenticationContext can be configured to log Pii by setting logPii property to true:
-
-AuthenticationContext ctx = new AuthenticationContext(...);
-ctx.setLogPii(true);
