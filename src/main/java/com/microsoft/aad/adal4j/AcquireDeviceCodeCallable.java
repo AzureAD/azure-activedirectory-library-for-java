@@ -23,30 +23,23 @@
 
 package com.microsoft.aad.adal4j;
 
-/**
- * The exception type thrown when a claims challenge error occurs during token acquisition.
- */
-public class AdalClaimsChallengeException extends AuthenticationException {
+class AcquireDeviceCodeCallable extends AdalCallable<DeviceCode> {
+    private String clientId;
+    private String resource;
 
-    /**
-     * Constructor
-     *
-     * @param message string error message
-     * @param claims claims challenge returned from the STS
-     */
-    public AdalClaimsChallengeException(String message, String claims) {
-        super(message);
-
-        this.claims = claims;
+    AcquireDeviceCodeCallable(AuthenticationContext context,
+                              String clientId, String resource,
+                              AuthenticationCallback<DeviceCode> callback) {
+        super(context, callback);
+        this.headers = new ClientDataHttpHeaders(context.correlationId);
+        this.clientId = clientId;
+        this.resource = resource;
     }
 
-    private final String claims;
-
-    /**
-     *
-     * @return claims challenge value
-     */
-    public String getClaims() {
-        return claims;
+    DeviceCode execute() throws Exception {
+        context.authenticationAuthority.doInstanceDiscovery(headers.getReadonlyHeaderMap(),
+                context.proxy, context.sslSocketFactory);
+        return DeviceCodeRequest.execute(context.authenticationAuthority.getDeviceCodeEndpoint(),
+                clientId, resource, headers.getReadonlyHeaderMap(), context.proxy, context.sslSocketFactory);
     }
 }

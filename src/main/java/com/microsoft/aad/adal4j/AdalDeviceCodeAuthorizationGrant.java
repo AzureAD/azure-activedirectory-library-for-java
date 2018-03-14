@@ -25,12 +25,17 @@ import java.util.Map;
 /**
  * Class for device code grant.
  */
-public class AdalDeviceCodeGrant implements AdalGrant {
-
+public class AdalDeviceCodeAuthorizationGrant implements AdalAuthorizationGrant {
     private final String GRANT_TYPE = "device_code";
 
     private final DeviceCode deviceCode;
-    private final Map<String, String> params;
+    private final String resource;
+
+    protected String correlationId;
+
+    public String getCorrelationId() {
+        return correlationId;
+    }
 
     /**
      *  Create a new device code grant object from a device code and a resource.
@@ -38,23 +43,10 @@ public class AdalDeviceCodeGrant implements AdalGrant {
      * @param deviceCode  The device code.
      * @param resource    The resource for which the device code was acquired.
      */
-    AdalDeviceCodeGrant(final DeviceCode deviceCode, final String resource) {
+    AdalDeviceCodeAuthorizationGrant(final DeviceCode deviceCode, final String resource) {
         this.deviceCode = deviceCode;
-        params = new LinkedHashMap<>();
-        if (!StringHelper.isBlank(resource)) {
-            params.put("resource", resource);
-        }
-    }
-
-    /**
-     * Creates a new device code grant object from a device code and some parameters.
-     *
-     * @param deviceCode The device code.
-     * @param params     The map with paramters.
-     */
-    AdalDeviceCodeGrant(final DeviceCode deviceCode, final Map<String, String> params) {
-        this.deviceCode = deviceCode;
-        this.params = params;
+        this.resource = resource;
+        this.correlationId = deviceCode.getCorrelationId();
     }
 
     /**
@@ -65,29 +57,10 @@ public class AdalDeviceCodeGrant implements AdalGrant {
     @Override
     public Map<String, String> toParameters() {
         final Map<String, String> outParams = new LinkedHashMap<>();
-        outParams.putAll(this.params);
-
+        outParams.put("resource", resource);
         outParams.put("grant_type", GRANT_TYPE);
         outParams.put("code", deviceCode.getDeviceCode());
 
         return outParams;
-    }
-
-    /**
-     * Returns the device code.
-     *
-     * @return The device code.
-     */
-    public DeviceCode getDeviceCode() {
-        return deviceCode;
-    }
-
-    /**
-     * Returns a map with HTTP parameters.
-     *
-     * @return The HTTP parameters.
-     */
-    public Map<String, String> getParams() {
-        return params;
     }
 }

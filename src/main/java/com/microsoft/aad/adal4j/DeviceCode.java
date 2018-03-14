@@ -19,110 +19,51 @@
  ******************************************************************************/
 package com.microsoft.aad.adal4j;
 
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
-import net.jcip.annotations.Immutable;
-import net.minidev.json.JSONAware;
-import net.minidev.json.JSONObject;
+import com.google.gson.annotations.SerializedName;
 
-/**
- *  Device code returned by Azure Active Directory
- *
- *  <p> Example device code serialized to JSON:
- *   <pre>
- *   {
- *      "user_code": "DW83JNP2P",
- *      "device_code": "DAQABAAEAAADRNYRQ3dhRSrm-4K-adpCJ0D4JzelxlksQioyRVsCC0nWL7wqK0KPxDaF-g9WmI5cAyjVGWF6kZMUyd6E0LZbo2zzJ02e6CyTS_jV5hBRlyqJtpQ-r562GCkEzal3PdYab9qFFEeqWvq-yipsIeD5lryOnxb1CKF2I6QodK2pb1iAA",
- *      "verification_url": "https://aka.ms/devicelogin",
- *      "expires_in": "900",
- *      "interval": "5",
- *      "message": "To sign in, use a web browser to open the page https://aka.ms/devicelogin and enter the code DW83JNP2P to authenticate."
- *   }
- *   </pre>
- */
-@Immutable
-public final class DeviceCode implements JSONAware {
+public final class DeviceCode {
 
     /**
      *  The user code.
      */
-    private final String userCode;
+    @SerializedName("user_code")
+    private String userCode;
 
     /**
      * The device code.
      */
-    private final String deviceCode;
+    @SerializedName("device_code")
+    private String deviceCode;
 
     /**
      * The verification url.
      */
-    private final String verificationUrl;
+    @SerializedName("verification_url")
+    private String verificationUrl;
 
     /**
      * The expiration time in seconds.
      */
-    private final long expiresIn;
+    @SerializedName("expires_in")
+    private long expiresIn;
 
     /**
      * The interval
      */
-    private final long interval;
+    @SerializedName("interval")
+    private long interval;
 
     /**
      * The message which should be displayed to the user.
      */
-    private final String message;
+    @SerializedName("message")
+    private String message;
 
-    /**
-     * Creates a new Device Code
-     *
-     * @param userCode         The user code.
-     * @param deviceCode       The device code.
-     * @param verificationUrl  The verification URL.
-     * @param expiresIn        The expiration time in seconds.
-     * @param interval         The interval.
-     * @param message          The message which should be displayed to the user.
-     */
-    public DeviceCode(final String userCode,
-                      final String deviceCode,
-                      final String verificationUrl,
-                      final long expiresIn,
-                      final long interval,
-                      final String message) {
-        if (userCode == null) {
-            throw new IllegalArgumentException("The use code must not be null");
-        }
-        if (deviceCode == null) {
-            throw new IllegalArgumentException("The device code must not be null");
-        }
-        if (verificationUrl == null) {
-            throw new IllegalArgumentException("The verification URL must not be null");
-        }
-        if (message == null) {
-            throw new IllegalArgumentException("The message must not be null");
-        }
+    private transient  String correlationId = null;
 
-        this.userCode = userCode;
-        this.deviceCode = deviceCode;
-        this.verificationUrl = verificationUrl;
-        this.expiresIn = expiresIn;
-        this.interval = interval;
-        this.message = message;
-    }
+    private transient  String clientId = null;
 
-    /**
-     * Creates a new Device Code.
-     *
-     * @param deviceCode The Device Code as string
-     */
-    public DeviceCode(final String deviceCode) {
-        this.deviceCode = deviceCode;
-        this.userCode = null;
-        this.verificationUrl = null;
-        this.expiresIn = 0;
-        this.interval = 0;
-        this.message = null;
-    }
+    private transient  String resource = null;
 
     /**
      * Returns the user code.
@@ -178,50 +119,27 @@ public final class DeviceCode implements JSONAware {
         return message;
     }
 
-    /**
-     * Returns the device code serialized as a JSON object.
-     *
-     * @return The device code as JSONObject.
-     */
-    public JSONObject toJSONObject() {
-        JSONObject o = new JSONObject();
-
-        o.put("user_code", userCode);
-        o.put("device_code", deviceCode);
-        o.put("verification_url", verificationUrl);
-        o.put("expires_in", expiresIn);
-        o.put("interval", interval);
-        o.put("message", message);
-
-        return o;
+    protected String getCorrelationId() {
+        return correlationId;
     }
 
-    /**
-     * Returns the device code serialized as JSON string.
-     *
-     * @return The device code as JSON string.
-     */
-    @Override
-    public String toJSONString() {
-        return toJSONObject().toString();
+    protected void setCorrelationId(String correlationId) {
+        this.correlationId = correlationId;
     }
 
-    /**
-     * Parses a device code from a JSON object.
-     *
-     * @param jsonObject The JSON object to parse.
-     *
-     * @return The device code.
-     *
-     * @throws ParseException If the JSON object couldn't be parsed to a device code.
-     */
-    public static DeviceCode parse(final JSONObject jsonObject) throws ParseException {
-        String userCode = JSONObjectUtils.getString(jsonObject, "user_code");
-        String deviceCode = JSONObjectUtils.getString(jsonObject, "device_code");
-        String verificationUrl = JSONObjectUtils.getString(jsonObject, "verification_url");
-        long expiresIn = Long.valueOf(JSONObjectUtils.getString(jsonObject, "expires_in"));
-        long interval = Long.valueOf(JSONObjectUtils.getString(jsonObject, "interval"));
-        String message = JSONObjectUtils.getString(jsonObject, "message");
-        return new DeviceCode(userCode, deviceCode, verificationUrl, expiresIn, interval, message);
+    protected String getClientId() {
+        return clientId;
+    }
+
+    protected void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
+    protected String getResource() {
+        return resource;
+    }
+
+    protected void setResource(String resource) {
+        this.resource = resource;
     }
 }

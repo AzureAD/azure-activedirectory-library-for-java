@@ -23,30 +23,42 @@
 
 package com.microsoft.aad.adal4j;
 
-/**
- * The exception type thrown when a claims challenge error occurs during token acquisition.
- */
-public class AdalClaimsChallengeException extends AuthenticationException {
+import java.util.concurrent.Callable;
 
-    /**
-     * Constructor
-     *
-     * @param message string error message
-     * @param claims claims challenge returned from the STS
-     */
-    public AdalClaimsChallengeException(String message, String claims) {
-        super(message);
+abstract class AdalCallable<T> implements Callable<T> {
+    AuthenticationContext context;
+    ClientDataHttpHeaders headers;
+    AuthenticationCallback<T> callback;
 
-        this.claims = claims;
+    AdalCallable(AuthenticationContext context, AuthenticationCallback<T> callback) {
+        this.context = context;
+        this.callback = callback;
     }
 
-    private final String claims;
+    abstract T execute() throws Exception;
 
-    /**
-     *
-     * @return claims challenge value
-     */
-    public String getClaims() {
-        return claims;
+    void logResult(T result, ClientDataHttpHeaders headers) throws Exception {
+    }
+
+    @Override
+    public T call() throws Exception {
+        T result = null;
+        try {
+            result = execute();
+
+            logResult(result, headers);
+            if (callback != null) {
+                callback.onSuccess(result);
+            }
+        } catch (final Exception ex) {
+            context.log.error(LogHelper.createMessage("Execution of " + this.getClass() + " failed.",
+                    this.headers.getHeaderCorrelationIdValue()), ex);
+            if (callback != null) {
+                callback.onFailure(ex);
+            } else {
+                throw ex;
+            }
+        }
+        return result;
     }
 }

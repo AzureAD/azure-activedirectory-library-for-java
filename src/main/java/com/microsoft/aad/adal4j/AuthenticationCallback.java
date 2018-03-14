@@ -26,7 +26,7 @@ package com.microsoft.aad.adal4j;
 /**
  * Authentication callback Interface that can be implemented by the developer.
  */
-public interface AuthenticationCallback {
+public interface AuthenticationCallback<T> {
 
     /**
      * Executed on success.
@@ -34,7 +34,7 @@ public interface AuthenticationCallback {
      * @param result
      *            authentication result for further processing
      */
-    void onSuccess(AuthenticationResult result);
+    void onSuccess(T result);
 
     /**
      * Executed on failure.

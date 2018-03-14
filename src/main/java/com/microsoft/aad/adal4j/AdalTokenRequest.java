@@ -50,13 +50,13 @@ class AdalTokenRequest {
 
     private final URL uri;
     private final ClientAuthentication clientAuth;
-    private final AdalGrant grant;
+    private final AdalAuthorizationGrant grant;
     private final Map<String, String> headerMap;
     private final Proxy proxy;
     private final SSLSocketFactory sslSocketFactory;
 
     AdalTokenRequest(final URL uri, final ClientAuthentication clientAuth,
-            final AdalGrant authzGrant,
+            final AdalAuthorizationGrant authzGrant,
             final Map<String, String> headerMap, final Proxy proxy,
             final SSLSocketFactory sslSocketFactory) {
         this.clientAuth = clientAuth;
@@ -86,15 +86,6 @@ class AdalTokenRequest {
         httpResponse = adalOAuthHttpRequest.send();
 
         if (httpResponse.getStatusCode() == HTTPResponse.SC_OK) {
-
-            DeviceCodeTokenErrorResponse errorResponse = DeviceCodeTokenErrorResponse.parse(httpResponse);
-            if (errorResponse != null && errorResponse.isDeviceCodeError()) {
-                ErrorObject errorObject = errorResponse.getErrorObject();
-                DeviceCodeException deviceCodeException =
-                        new DeviceCodeException(errorObject.getCode(), errorObject.getDescription());
-                throw new AuthenticationException("Device Code Error", deviceCodeException);
-            }
-
             final AdalAccessTokenResponse response = AdalAccessTokenResponse
                     .parseHttpResponse(httpResponse);
 
@@ -119,8 +110,16 @@ class AdalTokenRequest {
         } else {
             final TokenErrorResponse errorResponse = TokenErrorResponse
                     .parse(httpResponse);
-            if(HTTPResponse.SC_BAD_REQUEST == errorResponse.getErrorObject().getHTTPStatusCode() &&
-                    "interaction_required".equals(errorResponse.getErrorObject().getCode())){
+            ErrorObject errorObject = errorResponse.getErrorObject();
+            if(AdalErrorCode.AUTHORIZATION_PENDING.toString()
+                    .equals(errorObject.getCode())){
+                throw new AuthenticationException(AdalErrorCode.AUTHORIZATION_PENDING,
+                        errorObject.getDescription());
+            }
+
+            if(HTTPResponse.SC_BAD_REQUEST == errorObject.getHTTPStatusCode() &&
+                    AdalErrorCode.INTERACTION_REQUIRED.toString()
+                            .equals(errorObject.getCode())){
                 throw new AdalClaimsChallengeException(errorResponse.toJSONObject()
                         .toJSONString(), getClaims(httpResponse.getContent()));
             }

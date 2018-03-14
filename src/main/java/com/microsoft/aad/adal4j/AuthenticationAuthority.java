@@ -47,7 +47,7 @@ class AuthenticationAuthority {
     private final static String DISCOVERY_ENDPOINT = "common/discovery/instance";
     private final static String TOKEN_ENDPOINT = "/oauth2/token";
     private final static String USER_REALM_ENDPOINT = "common/userrealm";
-    private final static String DEVICE_CODE_ENDPOINT = "/oauth2/devicecode";
+    final static String DEVICE_CODE_ENDPOINT = "/oauth2/devicecode";
 
     private String host;
     private String issuer;

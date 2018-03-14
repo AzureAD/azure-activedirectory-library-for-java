@@ -24,7 +24,7 @@ import java.util.Map;
 /**
  * Interface for an ADAL grant.
  */
-public interface AdalGrant {
+public interface AdalAuthorizationGrant {
 
     /**
      *  Converts the grant into a HTTP parameters map.
