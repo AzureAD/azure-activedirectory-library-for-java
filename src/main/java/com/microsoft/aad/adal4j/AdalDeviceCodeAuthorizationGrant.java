@@ -26,7 +26,7 @@ import java.util.Map;
  * Class for device code grant.
  */
 public class AdalDeviceCodeAuthorizationGrant implements AdalAuthorizationGrant {
-    private final String GRANT_TYPE = "device_code";
+    private final static String GRANT_TYPE = "device_code";
 
     private final DeviceCode deviceCode;
     private final String resource;
