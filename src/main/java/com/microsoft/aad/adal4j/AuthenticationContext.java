@@ -59,6 +59,8 @@ public class AuthenticationContext {
 
     final Logger log = LoggerFactory
             .getLogger(AuthenticationContext.class);
+    private final Logger piiLog = LoggerFactory
+            .getLogger(LogHelper.PII_LOGGER_PREFIX + AuthenticationContext.class);
 
     final AuthenticationAuthority authenticationAuthority;
     String correlationId;
@@ -148,22 +150,18 @@ public class AuthenticationContext {
     }
 
     /**
-     * Acquires a security token from the authority using a Refresh Token
-     * previously received.
+     * Acquires a security token from the authority using a username/password flow.
      *
      * @param clientId
      *            Name or ID of the client requesting the token.
      * @param resource
      *            Identifier of the target resource that is the recipient of the
-     *            requested token. If null, token is requested for the same
-     *            resource refresh token was originally issued for. If passed,
-     *            resource should match the original resource used to acquire
-     *            refresh token unless token service supports refresh token for
-     *            multiple resources.
+     *            requested token.
      * @param username
      *            Username of the managed or federated user.
      * @param password
      *            Password of the managed or federated user.
+     *            If null, integrated authentication will be used.
      * @param callback
      *            optional callback object for non-blocking execution.
      * @return A {@link Future} object representing the
@@ -185,15 +183,15 @@ public class AuthenticationContext {
             throw new IllegalArgumentException("username is null or empty");
         }
 
-        if (StringHelper.isBlank(password)) {
-            throw new IllegalArgumentException("password is null or empty");
-        }
+        ClientAuthenticationPost clientAuth = new ClientAuthenticationPost(ClientAuthenticationMethod.NONE, new ClientID(clientId));
 
-        return this.acquireToken(new AdalOauthAuthorizationGrant(
-                new ResourceOwnerPasswordCredentialsGrant(username, new Secret(
-                        password)), resource), new ClientAuthenticationPost(
-                ClientAuthenticationMethod.NONE, new ClientID(clientId)),
-                callback);
+        if (password != null) {
+            return this.acquireToken(new AdalAuthorizatonGrant(
+                    new ResourceOwnerPasswordCredentialsGrant(username, new Secret(
+                            password)), resource), clientAuth, callback);
+        } else {
+            return this.acquireTokenIntegrated(username, resource, clientAuth, callback);
+        }
     }
 
     /**
@@ -220,6 +218,90 @@ public class AuthenticationContext {
         final AdalOauthAuthorizationGrant authGrant = new AdalOauthAuthorizationGrant(
                 new ClientCredentialsGrant(), resource);
         return this.acquireToken(authGrant, clientAuth, callback);
+    }
+
+    private Future<AuthenticationResult> acquireTokenIntegrated(String userName,
+            final String resource,
+            final ClientAuthentication clientAuth,
+            final AuthenticationCallback callback) {
+
+        return service.submit(new Callable<AuthenticationResult>() {
+
+            private String userName;
+            private String resource;
+            private ClientAuthentication clientAuth;
+            private ClientDataHttpHeaders headers;
+
+            @Override
+            public AuthenticationResult call() throws Exception {
+                AuthenticationResult result = null;
+                try {
+                    AdalAuthorizatonGrant authGrant = new AdalAuthorizatonGrant(getAuthorizationGrantIntegrated(this.userName), this.resource);
+
+                    // Make the OAuth2 call to get the access Token.
+                    result = acquireTokenCommon(authGrant, this.clientAuth, this.headers);
+                    logResult(result, headers);
+                    if (callback != null) {
+                        callback.onSuccess(result);
+                    }
+                }
+                catch (final Exception ex) {
+                    log.error(LogHelper.createMessage("Request to acquire token failed.", this.headers.getHeaderCorrelationIdValue()), ex);
+                    if (callback != null) {
+                        callback.onFailure(ex);
+                    }
+                    else {
+                        throw ex;
+                    }
+                }
+                return result;
+            }
+
+            private Callable<AuthenticationResult> init(String userName,
+                    final String resource,
+                    final ClientAuthentication clientAuth,
+                    final ClientDataHttpHeaders headers) {
+                this.userName = userName;
+                this.resource = resource;
+                this.clientAuth = clientAuth;
+                this.headers = headers;
+                return this;
+            }
+
+        }.init(userName, resource, clientAuth, new ClientDataHttpHeaders(this.getCorrelationId())));
+    }
+
+    AuthorizationGrant getAuthorizationGrantIntegrated(String userName) throws Exception {
+        AuthorizationGrant updatedGrant;
+
+        String userRealmEndpoint = authenticationAuthority.getUserRealmEndpoint(URLEncoder.encode(userName, "UTF-8"));
+
+        // Get the realm information
+        UserDiscoveryResponse userRealmResponse = UserDiscoveryRequest.execute(userRealmEndpoint, proxy, sslSocketFactory);
+
+        if (userRealmResponse.isAccountFederated() && "WSTrust".equalsIgnoreCase(userRealmResponse.getFederationProtocol())) {
+            String mexURL = userRealmResponse.getFederationMetadataUrl();
+            String cloudAudienceUrn = userRealmResponse.getCloudAudienceUrn();
+
+            // Discover the policy for authentication using the Metadata Exchange Url.
+            // Get the WSTrust Token (Web Service Trust Token)
+            WSTrustResponse wsTrustResponse = WSTrustRequest.execute(mexURL, cloudAudienceUrn, proxy, sslSocketFactory);
+
+            if (wsTrustResponse.isTokenSaml2()) {
+                updatedGrant = new SAML2BearerGrant(new Base64URL(Base64.encodeBase64String(wsTrustResponse.getToken().getBytes("UTF-8"))));
+            }
+            else {
+                updatedGrant = new SAML11BearerGrant(new Base64URL(Base64.encodeBase64String(wsTrustResponse.getToken().getBytes())));
+            }
+        }
+        else if (userRealmResponse.isAccountManaged()) {
+            throw new AuthenticationException("Password is required for managed user");
+        }
+        else{
+            throw new AuthenticationException("Unknown User Type");
+        }
+
+        return updatedGrant;
     }
 
     private void validateInput(final String resource, final Object credential,
@@ -773,7 +855,7 @@ public class AuthenticationContext {
                 credential.getClientId(),
                 JwtHelper.buildJwt(credential,
                         this.authenticationAuthority.getSelfSignedJwtAudience()),
-                (String) null, callback);
+                resource, callback);
     }
 
     /**
@@ -876,9 +958,11 @@ public class AuthenticationContext {
             final AdalAuthorizationGrant authGrant,
             final ClientAuthentication clientAuth,
             final ClientDataHttpHeaders headers) throws Exception {
-        log.debug(LogHelper.createMessage(
+        String msg = LogHelper.createMessage(
                 String.format("Using Client Http Headers: %s", headers),
-                headers.getHeaderCorrelationIdValue()));
+                headers.getHeaderCorrelationIdValue());
+        piiLog.debug(msg);
+
         this.authenticationAuthority.doInstanceDiscovery(
                 headers.getReadonlyHeaderMap(), this.proxy,
                 this.sslSocketFactory);
@@ -890,7 +974,7 @@ public class AuthenticationContext {
                 .executeOAuthRequestAndProcessResponse();
         return result;
     }
-
+  
     private ClientAuthentication createClientAuthFromClientAssertion(
             final ClientAssertion clientAssertion) {
 

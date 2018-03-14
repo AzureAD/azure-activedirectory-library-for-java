@@ -199,7 +199,7 @@ public class AadController {
                 ClientCredential oboCredential = new ClientCredential(oboClientId, oboClientSecret);
 
                 future = context.acquireToken(caProtectedApiIdUri,
-                        new ClientAssertion(result.getAccessToken()), oboCredential, null);
+                        new UserAssertion(result.getAccessToken()), oboCredential, null);
 
                 result = future.get();
 

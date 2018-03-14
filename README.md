@@ -1,4 +1,3 @@
-[![Stories in Ready](https://badge.waffle.io/AzureAD/azure-activedirectory-library-for-java.png?label=ready&title=Ready)](https://waffle.io/AzureAD/azure-activedirectory-library-for-java)
 [![Javadocs](http://javadoc.io/badge/com.microsoft.azure/adal4j.svg)](http://javadoc.io/doc/com.microsoft.azure/adal4j)
 </br>
 # Microsoft Azure Active Directory Authentication Library (ADAL) for Java
@@ -9,10 +8,11 @@
 [We provide a full suite of sample applications and documentation on GitHub](https://github.com/Azure-Samples) to help you get started with learning the Azure Identity system. This includes tutorials for native clients such as Windows, Windows Phone, iOS, macOS, Android, and Linux. We also provide full walkthroughs for authentication flows such as OAuth2, OpenID Connect, Graph API, and other awesome features.
 
 ## Versions
-Current version - 1.3.0
-Minimum recommended version - 1.3.0
+Current version - 1.4.0
 
-Version 1.3.0 has support for handling Conditional Access claims challenge. You can read about CA [here](https://go.microsoft.com/fwlink/?linkid=855860) and refer this [sample](https://github.com/AzureAD/azure-activedirectory-library-for-java/tree/dev/src/samples/web-app-samples-for-adal4j) to handle it. 
+Minimum recommended version - 1.4.0
+
+From version 1.3.0 support for handling Conditional Access claims challenge was added. You can read about CA [here](https://go.microsoft.com/fwlink/?linkid=855860) and refer this [sample](https://github.com/AzureAD/azure-activedirectory-library-for-java/tree/dev/src/samples/web-app-samples-for-adal4j) to handle it.
 
 You can find the changes for each version in the [change log](https://github.com/AzureAD/azure-activedirectory-library-for-java/blob/master/changelog.txt).
 
@@ -34,4 +34,16 @@ All code is licensed under the MIT License and we triage actively on GitHub. We 
 ## We Value and Adhere to the Microsoft Open Source Code of Conduct
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
+## Logging
+
+The Library uses The Simple Logging Facade for Java (SLF4J) as a simple facade or abstraction for various logging frameworks.
+
+For regular logs we use class names as logger names.
+For log which might contains Pii(personally identifiable information) class names preceded by prefix "adal4jPii." are used.
+So, for the same class, for instance Foo, we define two loggers:
+
+com.microsoft.aad.adal4j.Foo - no Pii data
+
+adal4jPii.com.microsoft.aad.adal4j.Foo - might contain Pii data
 
