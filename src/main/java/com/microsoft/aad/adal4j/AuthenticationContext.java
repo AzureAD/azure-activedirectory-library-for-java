@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
-import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
@@ -40,7 +39,6 @@ import com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
-import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,16 +51,37 @@ public class AuthenticationContext {
 
     final Logger log = LoggerFactory
             .getLogger(AuthenticationContext.class);
-    private final Logger piiLog = LoggerFactory
-            .getLogger(LogHelper.PII_LOGGER_PREFIX + AuthenticationContext.class);
 
     final AuthenticationAuthority authenticationAuthority;
     String correlationId;
     private String authority;
     private final ExecutorService service;
     private final boolean validateAuthority;
+
     Proxy proxy;
     SSLSocketFactory sslSocketFactory;
+
+    private boolean logPii = false;
+
+    /**
+     * Returns logPii - boolean value, which determines
+     * whether Pii (personally identifiable information) will be logged in
+     *
+     * @return boolean value of logPii
+     */
+    public boolean isLogPii() {
+        return logPii;
+    }
+
+    /**
+     * Set logPii - boolean value, which determines
+     * whether Pii (personally identifiable information) will be logged in
+     *
+     * @param logPii boolean value
+     */
+    public void setLogPii(boolean logPii) {
+        this.logPii = logPii;
+    }
 
     /**
      * Constructor to create the context with the address of the authority.
@@ -868,10 +887,11 @@ public class AuthenticationContext {
             final AdalAuthorizationGrant authGrant,
             final ClientAuthentication clientAuth,
             final ClientDataHttpHeaders headers) throws Exception {
-        String msg = LogHelper.createMessage(
-                String.format("Using Client Http Headers: %s", headers),
-                headers.getHeaderCorrelationIdValue());
-        piiLog.debug(msg);
+        if(logPii) {
+            log.debug(LogHelper.createMessage(
+                    String.format("Using Client Http Headers: %s", headers),
+                    headers.getHeaderCorrelationIdValue()));
+        }
 
         this.authenticationAuthority.doInstanceDiscovery(
                 headers.getReadonlyHeaderMap(), this.proxy,
@@ -884,7 +904,7 @@ public class AuthenticationContext {
                 .executeOAuthRequestAndProcessResponse();
         return result;
     }
-  
+
     private ClientAuthentication createClientAuthFromClientAssertion(
             final ClientAssertion clientAssertion) {
 

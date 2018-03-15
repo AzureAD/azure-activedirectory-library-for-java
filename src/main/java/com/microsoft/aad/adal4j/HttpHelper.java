@@ -35,34 +35,34 @@ import org.slf4j.Logger;
 
 class HttpHelper {
 
-    static String executeHttpGet(final Logger log,  final Logger piiLog, final String url,
+    static String executeHttpGet(final Logger log, final String url,
             final Proxy proxy, final SSLSocketFactory sslSocketFactory)
             throws Exception {
-        return executeHttpGet(log, piiLog, url, null, proxy, sslSocketFactory);
+        return executeHttpGet(log, url, null, proxy, sslSocketFactory);
     }
 
-    static String executeHttpGet(final Logger log, final Logger piiLog, final String url,
+    static String executeHttpGet(final Logger log, final String url,
             final Map<String, String> headers, final Proxy proxy,
             final SSLSocketFactory sslSocketFactory) throws Exception {
         final HttpsURLConnection conn = HttpHelper.openConnection(url, proxy,
                 sslSocketFactory);
-        return executeGetRequest(log, piiLog, headers, conn);
+        return executeGetRequest(log, headers, conn);
     }
 
-    static String executeHttpPost(final Logger log, final Logger piiLog, final String url,
+    static String executeHttpPost(final Logger log, final String url,
             String postData, final Proxy proxy,
             final SSLSocketFactory sslSocketFactory) throws Exception {
-        return executeHttpPost(log, piiLog, url, postData, null, proxy,
+        return executeHttpPost(log, url, postData, null, proxy,
                 sslSocketFactory);
     }
 
-    static String executeHttpPost(final Logger log, final Logger piiLog, final String url,
+    static String executeHttpPost(final Logger log, final String url,
             String postData, final Map<String, String> headers,
             final Proxy proxy, final SSLSocketFactory sslSocketFactory)
             throws Exception {
         final HttpsURLConnection conn = HttpHelper.openConnection(url, proxy,
                 sslSocketFactory);
-        return executePostRequest(log, piiLog, postData, headers, conn);
+        return executePostRequest(log, postData, headers, conn);
     }
 
     static String inputStreamToString(java.io.InputStream is) {
@@ -129,7 +129,7 @@ class HttpHelper {
         return conn;
     }
 
-    static void verifyReturnedCorrelationId(Logger log, Logger piilog,
+    static void verifyReturnedCorrelationId(Logger log,
             HttpsURLConnection conn, String sentCorrelationId) {
         if (StringHelper
                 .isBlank(conn
@@ -145,18 +145,17 @@ class HttpHelper {
                             conn.getHeaderField(ClientDataHttpHeaders.CORRELATION_ID_HEADER_NAME)),
                     sentCorrelationId);
             log.info(msg);
-            piilog.info(msg);
         }
     }
 
-    private static String executeGetRequest(Logger log, Logger piiLog,
+    private static String executeGetRequest(Logger log,
             Map<String, String> headers, HttpsURLConnection conn)
             throws IOException {
         configureAdditionalHeaders(conn, headers);
-        return getResponse(log, piiLog, headers, conn);
+        return getResponse(log, headers, conn);
     }
 
-    private static String executePostRequest(Logger log, Logger piiLog, String postData,
+    private static String executePostRequest(Logger log, String postData,
             Map<String, String> headers, HttpsURLConnection conn)
             throws IOException {
         configureAdditionalHeaders(conn, headers);
@@ -168,7 +167,7 @@ class HttpHelper {
             wr.writeBytes(postData);
             wr.flush();
 
-            return getResponse(log, piiLog, headers, conn);
+            return getResponse(log, headers, conn);
         }
         finally {
             if (wr != null) {
@@ -177,11 +176,11 @@ class HttpHelper {
         }
     }
 
-    private static String getResponse(Logger log, Logger piiLog, Map<String, String> headers,
+    private static String getResponse(Logger log, Map<String, String> headers,
             HttpsURLConnection conn) throws IOException {
         String response = readResponseFromConnection(conn);
         if (headers != null) {
-            HttpHelper.verifyReturnedCorrelationId(log, piiLog, conn, headers
+            HttpHelper.verifyReturnedCorrelationId(log, conn, headers
                     .get(ClientDataHttpHeaders.CORRELATION_ID_HEADER_NAME));
         }
         return response;

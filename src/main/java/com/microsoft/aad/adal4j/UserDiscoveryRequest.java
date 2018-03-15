@@ -35,8 +35,6 @@ class UserDiscoveryRequest {
 
     private final static Logger log = LoggerFactory
             .getLogger(UserDiscoveryRequest.class);
-    private final static Logger piiLog = LoggerFactory
-            .getLogger(LogHelper.PII_LOGGER_PREFIX + UserDiscoveryRequest.class);
 
     private final static Map<String, String> HEADERS;
     static {
@@ -48,7 +46,7 @@ class UserDiscoveryRequest {
     static UserDiscoveryResponse execute(final String uri, final Proxy proxy,
             final SSLSocketFactory sslSocketFactory) throws Exception {
 
-        String response = HttpHelper.executeHttpGet(log, piiLog, uri, HEADERS, proxy,
+        String response = HttpHelper.executeHttpGet(log, uri, HEADERS, proxy,
                 sslSocketFactory);
         return JsonHelper.convertJsonToObject(response,
                 UserDiscoveryResponse.class);

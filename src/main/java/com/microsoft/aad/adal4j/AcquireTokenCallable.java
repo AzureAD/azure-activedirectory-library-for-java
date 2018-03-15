@@ -63,7 +63,7 @@ class AcquireTokenCallable extends AdalCallable<AuthenticationResult> {
         if (this.authGrant instanceof AdalIntegratedAuthorizationGrant) {
             AdalIntegratedAuthorizationGrant integratedAuthGrant = (AdalIntegratedAuthorizationGrant) authGrant;
             authGrant = new AdalOAuthAuthorizationGrant(
-                    getAuthorizationGrantIntegrated(context, integratedAuthGrant.getUserName()),
+                    getAuthorizationGrantIntegrated(integratedAuthGrant.getUserName()),
                     integratedAuthGrant.getResource());
         }
 
@@ -72,24 +72,38 @@ class AcquireTokenCallable extends AdalCallable<AuthenticationResult> {
 
     @Override
     void logResult(AuthenticationResult result, ClientDataHttpHeaders headers)
-            throws UnsupportedEncodingException, NoSuchAlgorithmException {
+            throws NoSuchAlgorithmException, UnsupportedEncodingException {
+
         if (!StringHelper.isBlank(result.getAccessToken())) {
-            String logMessage = "";
+
             String accessTokenHash = this.computeSha256Hash(result
                     .getAccessToken());
             if (!StringHelper.isBlank(result.getRefreshToken())) {
                 String refreshTokenHash = this.computeSha256Hash(result
                         .getRefreshToken());
-                logMessage = String
-                        .format("Access Token with hash '%s' and Refresh Token with hash '%s' returned",
-                                accessTokenHash, refreshTokenHash);
-            } else {
-                logMessage = String
-                        .format("Access Token with hash '%s' returned",
-                                accessTokenHash);
+                if(context.isLogPii()){
+                    context.log.debug(LogHelper.createMessage(String
+                                    .format("Access Token with hash '%s' and Refresh Token with hash '%s' returned",
+                                            accessTokenHash, refreshTokenHash),
+                            headers.getHeaderCorrelationIdValue()));
+                }
+                else{
+                    context.log.debug(LogHelper.createMessage("Access Token and Refresh Token were returned",
+                            headers.getHeaderCorrelationIdValue()));
+                }
             }
-            context.log.debug(LogHelper.createMessage(logMessage,
-                    headers.getHeaderCorrelationIdValue()));
+            else {
+                if(context.isLogPii()){
+                    context.log.debug(LogHelper.createMessage(String
+                                    .format("Access Token with hash '%s' returned",
+                                            accessTokenHash),
+                            headers.getHeaderCorrelationIdValue()));
+                }
+                else{
+                    context.log.debug(LogHelper.createMessage("Access Token was returned",
+                            headers.getHeaderCorrelationIdValue()));
+                }
+            }
         }
     }
 
@@ -121,14 +135,15 @@ class AcquireTokenCallable extends AdalCallable<AuthenticationResult> {
             WSTrustResponse response = WSTrustRequest.execute(
                     userDiscoveryResponse.getFederationMetadataUrl(),
                     grant.getUsername(), grant.getPassword().getValue(), userDiscoveryResponse.getCloudAudienceUrn(),
-                    context.proxy, context.sslSocketFactory);
+                    context.proxy, context.sslSocketFactory, context.isLogPii());
 
             AuthorizationGrant updatedGrant = null;
             if (response.isTokenSaml2()) {
                 updatedGrant = new SAML2BearerGrant(new Base64URL(
                         Base64.encodeBase64String(response.getToken().getBytes(
                                 "UTF-8"))));
-            } else {
+            }
+            else {
                 updatedGrant = new SAML11BearerGrant(new Base64URL(
                         Base64.encodeBase64String(response.getToken()
                                 .getBytes())));
@@ -141,31 +156,39 @@ class AcquireTokenCallable extends AdalCallable<AuthenticationResult> {
         return authGrant;
     }
 
-    AuthorizationGrant getAuthorizationGrantIntegrated(AuthenticationContext ctx, String userName) throws Exception {
+    AuthorizationGrant getAuthorizationGrantIntegrated(String userName) throws Exception {
         AuthorizationGrant updatedGrant;
 
-        String userRealmEndpoint = ctx.authenticationAuthority.getUserRealmEndpoint(URLEncoder.encode(userName, "UTF-8"));
+        String userRealmEndpoint = context.authenticationAuthority.
+                getUserRealmEndpoint(URLEncoder.encode(userName, "UTF-8"));
 
         // Get the realm information
         UserDiscoveryResponse userRealmResponse =
-                UserDiscoveryRequest.execute(userRealmEndpoint, ctx.proxy, ctx.sslSocketFactory);
+                UserDiscoveryRequest.execute(userRealmEndpoint, context.proxy, context.sslSocketFactory);
 
-        if (userRealmResponse.isAccountFederated() && "WSTrust".equalsIgnoreCase(userRealmResponse.getFederationProtocol())) {
+        if (userRealmResponse.isAccountFederated() &&
+                "WSTrust".equalsIgnoreCase(userRealmResponse.getFederationProtocol())) {
             String mexURL = userRealmResponse.getFederationMetadataUrl();
             String cloudAudienceUrn = userRealmResponse.getCloudAudienceUrn();
 
             // Discover the policy for authentication using the Metadata Exchange Url.
             // Get the WSTrust Token (Web Service Trust Token)
-            WSTrustResponse wsTrustResponse = WSTrustRequest.execute(mexURL, cloudAudienceUrn, ctx.proxy, ctx.sslSocketFactory);
+            WSTrustResponse wsTrustResponse = WSTrustRequest.execute
+                    (mexURL, cloudAudienceUrn, context.proxy, context.sslSocketFactory, context.isLogPii());
 
             if (wsTrustResponse.isTokenSaml2()) {
-                updatedGrant = new SAML2BearerGrant(new Base64URL(Base64.encodeBase64String(wsTrustResponse.getToken().getBytes("UTF-8"))));
-            } else {
-                updatedGrant = new SAML11BearerGrant(new Base64URL(Base64.encodeBase64String(wsTrustResponse.getToken().getBytes())));
+                updatedGrant = new SAML2BearerGrant(
+                        new Base64URL(Base64.encodeBase64String(wsTrustResponse.getToken().getBytes("UTF-8"))));
             }
-        } else if (userRealmResponse.isAccountManaged()) {
+            else {
+                updatedGrant = new SAML11BearerGrant(
+                        new Base64URL(Base64.encodeBase64String(wsTrustResponse.getToken().getBytes())));
+            }
+        }
+        else if (userRealmResponse.isAccountManaged()) {
             throw new AuthenticationException("Password is required for managed user");
-        } else {
+        }
+        else{
             throw new AuthenticationException("Unknown User Type");
         }
 
