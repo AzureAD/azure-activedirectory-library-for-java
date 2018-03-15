@@ -31,6 +31,7 @@ import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import org.apache.commons.codec.binary.Base64;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -55,9 +56,17 @@ class AcquireTokenCallable extends AdalCallable<AuthenticationResult> {
     }
 
     AuthenticationResult execute() throws Exception {
-        if (this.authGrant instanceof AdalOauthAuthorizationGrant) {
-            this.authGrant = processPasswordGrant((AdalOauthAuthorizationGrant) this.authGrant);
+        if (authGrant instanceof AdalOAuthAuthorizationGrant) {
+            authGrant = processPasswordGrant((AdalOAuthAuthorizationGrant) authGrant);
         }
+
+        if (this.authGrant instanceof AdalIntegratedAuthorizationGrant) {
+            AdalIntegratedAuthorizationGrant integratedAuthGrant = (AdalIntegratedAuthorizationGrant) authGrant;
+            authGrant = new AdalOAuthAuthorizationGrant(
+                    getAuthorizationGrantIntegrated(context, integratedAuthGrant.getUserName()),
+                    integratedAuthGrant.getResource());
+        }
+
         return context.acquireTokenCommon(this.authGrant, this.clientAuth, this.headers);
     }
 
@@ -93,11 +102,10 @@ class AcquireTokenCallable extends AdalCallable<AuthenticationResult> {
     }
 
     /**
-     *
      * @param authGrant
      */
-    private AdalOauthAuthorizationGrant processPasswordGrant(
-            AdalOauthAuthorizationGrant authGrant) throws Exception {
+    private AdalOAuthAuthorizationGrant processPasswordGrant(
+            AdalOAuthAuthorizationGrant authGrant) throws Exception {
 
         if (!(authGrant.getAuthorizationGrant() instanceof ResourceOwnerPasswordCredentialsGrant)) {
             return authGrant;
@@ -120,17 +128,47 @@ class AcquireTokenCallable extends AdalCallable<AuthenticationResult> {
                 updatedGrant = new SAML2BearerGrant(new Base64URL(
                         Base64.encodeBase64String(response.getToken().getBytes(
                                 "UTF-8"))));
-            }
-            else {
+            } else {
                 updatedGrant = new SAML11BearerGrant(new Base64URL(
                         Base64.encodeBase64String(response.getToken()
                                 .getBytes())));
             }
 
-            authGrant = new AdalOauthAuthorizationGrant(updatedGrant,
+            authGrant = new AdalOAuthAuthorizationGrant(updatedGrant,
                     authGrant.getCustomParameters());
         }
 
         return authGrant;
+    }
+
+    AuthorizationGrant getAuthorizationGrantIntegrated(AuthenticationContext ctx, String userName) throws Exception {
+        AuthorizationGrant updatedGrant;
+
+        String userRealmEndpoint = ctx.authenticationAuthority.getUserRealmEndpoint(URLEncoder.encode(userName, "UTF-8"));
+
+        // Get the realm information
+        UserDiscoveryResponse userRealmResponse =
+                UserDiscoveryRequest.execute(userRealmEndpoint, ctx.proxy, ctx.sslSocketFactory);
+
+        if (userRealmResponse.isAccountFederated() && "WSTrust".equalsIgnoreCase(userRealmResponse.getFederationProtocol())) {
+            String mexURL = userRealmResponse.getFederationMetadataUrl();
+            String cloudAudienceUrn = userRealmResponse.getCloudAudienceUrn();
+
+            // Discover the policy for authentication using the Metadata Exchange Url.
+            // Get the WSTrust Token (Web Service Trust Token)
+            WSTrustResponse wsTrustResponse = WSTrustRequest.execute(mexURL, cloudAudienceUrn, ctx.proxy, ctx.sslSocketFactory);
+
+            if (wsTrustResponse.isTokenSaml2()) {
+                updatedGrant = new SAML2BearerGrant(new Base64URL(Base64.encodeBase64String(wsTrustResponse.getToken().getBytes("UTF-8"))));
+            } else {
+                updatedGrant = new SAML11BearerGrant(new Base64URL(Base64.encodeBase64String(wsTrustResponse.getToken().getBytes())));
+            }
+        } else if (userRealmResponse.isAccountManaged()) {
+            throw new AuthenticationException("Password is required for managed user");
+        } else {
+            throw new AuthenticationException("Unknown User Type");
+        }
+
+        return updatedGrant;
     }
 }

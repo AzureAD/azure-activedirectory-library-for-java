@@ -40,14 +40,14 @@ public class AdalOauthAuthorizatonGrantTest {
 
     @Test
     public void testConstructor() {
-        final AdalOauthAuthorizationGrant grant = new AdalOauthAuthorizationGrant(null,
+        final AdalOAuthAuthorizationGrant grant = new AdalOAuthAuthorizationGrant(null,
                 new HashMap<String, String>());
         Assert.assertNotNull(grant);
     }
 
     @Test
     public void testToParameters() throws URISyntaxException {
-        final AdalOauthAuthorizationGrant grant = new AdalOauthAuthorizationGrant(
+        final AdalOAuthAuthorizationGrant grant = new AdalOAuthAuthorizationGrant(
                 new AuthorizationCodeGrant(new AuthorizationCode("grant"),
                         new URI("http://microsoft.com")),
                 (Map<String, String>) null);
