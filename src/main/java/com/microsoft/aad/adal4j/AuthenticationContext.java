@@ -70,8 +70,6 @@ public class AuthenticationContext {
 
     private final Logger log = LoggerFactory
             .getLogger(AuthenticationContext.class);
-    private final Logger piiLog = LoggerFactory
-            .getLogger(LogHelper.PII_LOGGER_PREFIX + AuthenticationContext.class);
 
     private final AuthenticationAuthority authenticationAuthority;
     private String correlationId;
@@ -80,6 +78,27 @@ public class AuthenticationContext {
     private final boolean validateAuthority;
     private Proxy proxy;
     private SSLSocketFactory sslSocketFactory;
+    private boolean logPii = false;
+
+    /**
+     * Returns logPii - boolean value, which determines
+     * whether Pii (personally identifiable information) will be logged in
+     *
+     * @return boolean value of logPii
+     */
+    public boolean isLogPii() {
+        return logPii;
+    }
+
+    /**
+     * Set logPii - boolean value, which determines
+     * whether Pii (personally identifiable information) will be logged in
+     *
+     * @param logPii boolean value
+     */
+    public void setLogPii(boolean logPii) {
+        this.logPii = logPii;
+    }
 
     /**
      * Constructor to create the context with the address of the authority.
@@ -187,8 +206,12 @@ public class AuthenticationContext {
                     String msg = LogHelper.createMessage(
                             "Request to acquire token failed.",
                             this.headers.getHeaderCorrelationIdValue());
-                    log.error(msg + System.getProperty("line.separator") + LogHelper.getPiiScrubbedDetails(ex));
-                    piiLog.error(msg, ex);
+                    if(logPii){
+                        log.error(msg, ex);
+                    }
+                    else{
+                        log.error(msg + System.getProperty("line.separator") + LogHelper.getPiiScrubbedDetails(ex));
+                    }
 
                     if (callback != null) {
                         callback.onFailure(ex);
@@ -349,13 +372,15 @@ public class AuthenticationContext {
 
             // Discover the policy for authentication using the Metadata Exchange Url.
             // Get the WSTrust Token (Web Service Trust Token)
-            WSTrustResponse wsTrustResponse = WSTrustRequest.execute(mexURL, cloudAudienceUrn, proxy, sslSocketFactory);
+            WSTrustResponse wsTrustResponse = WSTrustRequest.execute(mexURL, cloudAudienceUrn, proxy, sslSocketFactory, logPii);
 
             if (wsTrustResponse.isTokenSaml2()) {
-                updatedGrant = new SAML2BearerGrant(new Base64URL(Base64.encodeBase64String(wsTrustResponse.getToken().getBytes("UTF-8"))));
+                updatedGrant = new SAML2BearerGrant(
+                        new Base64URL(Base64.encodeBase64String(wsTrustResponse.getToken().getBytes("UTF-8"))));
             }
             else {
-                updatedGrant = new SAML11BearerGrant(new Base64URL(Base64.encodeBase64String(wsTrustResponse.getToken().getBytes())));
+                updatedGrant = new SAML11BearerGrant(
+                        new Base64URL(Base64.encodeBase64String(wsTrustResponse.getToken().getBytes())));
             }
         }
         else if (userRealmResponse.isAccountManaged()) {
@@ -952,10 +977,11 @@ public class AuthenticationContext {
             final AdalAuthorizatonGrant authGrant,
             final ClientAuthentication clientAuth,
             final ClientDataHttpHeaders headers) throws Exception {
-        String msg = LogHelper.createMessage(
-                String.format("Using Client Http Headers: %s", headers),
-                headers.getHeaderCorrelationIdValue());
-        piiLog.debug(msg);
+        if(logPii) {
+            log.debug(LogHelper.createMessage(
+                    String.format("Using Client Http Headers: %s", headers),
+                    headers.getHeaderCorrelationIdValue()));
+        }
 
         this.authenticationAuthority.doInstanceDiscovery(
                 headers.getReadonlyHeaderMap(), this.proxy,
@@ -990,7 +1016,7 @@ public class AuthenticationContext {
             WSTrustResponse response = WSTrustRequest.execute(
                     userDiscoveryResponse.getFederationMetadataUrl(),
                     grant.getUsername(), grant.getPassword().getValue(), userDiscoveryResponse.getCloudAudienceUrn(),
-                    this.proxy, this.sslSocketFactory);
+                    this.proxy, this.sslSocketFactory, logPii);
 
             AuthorizationGrant updatedGrant = null;
             if (response.isTokenSaml2()) {
@@ -1015,29 +1041,36 @@ public class AuthenticationContext {
             ClientDataHttpHeaders headers) throws NoSuchAlgorithmException,
             UnsupportedEncodingException {
         if (!StringHelper.isBlank(result.getAccessToken())) {
-            String logMessage = "";
-            String piiLogMessage = "";
+
             String accessTokenHash = this.computeSha256Hash(result
                     .getAccessToken());
             if (!StringHelper.isBlank(result.getRefreshToken())) {
                 String refreshTokenHash = this.computeSha256Hash(result
                         .getRefreshToken());
-                logMessage = "Access Token and Refresh Token were returned";
-                piiLogMessage = String
-                        .format("Access Token with hash '%s' and Refresh Token with hash '%s' returned",
-                                accessTokenHash, refreshTokenHash);
+
+                if(logPii){
+                    log.debug(LogHelper.createMessage(String
+                                    .format("Access Token with hash '%s' and Refresh Token with hash '%s' returned",
+                                            accessTokenHash, refreshTokenHash),
+                            headers.getHeaderCorrelationIdValue()));
+                }
+                else{
+                    log.debug(LogHelper.createMessage("Access Token and Refresh Token were returned",
+                            headers.getHeaderCorrelationIdValue()));
+                }
             }
             else {
-                logMessage = "Access Token was returned";
-                piiLogMessage = String
-                        .format("Access Token with hash '%s' returned",
-                                accessTokenHash);
+                if(logPii){
+                    log.debug(LogHelper.createMessage(String
+                                    .format("Access Token with hash '%s' returned",
+                                            accessTokenHash),
+                            headers.getHeaderCorrelationIdValue()));
+                }
+                else{
+                    log.debug(LogHelper.createMessage("Access Token was returned",
+                            headers.getHeaderCorrelationIdValue()));
+                }
             }
-            log.debug(LogHelper.createMessage(logMessage,
-                    headers.getHeaderCorrelationIdValue()));
-
-            piiLog.debug(LogHelper.createMessage(piiLogMessage,
-                    headers.getHeaderCorrelationIdValue()));
         }
     }
 
