@@ -53,12 +53,15 @@ final class ClientDataHttpHeaders {
     private final String headerValues;
     private final Map<String, String> headerMap = new HashMap<String, String>();
 
+    public static String generateCorrelationId(){
+        return UUID.randomUUID().toString();
+    }
     ClientDataHttpHeaders(final String correlationId) {
         if (!StringHelper.isBlank(correlationId)) {
             this.correlationIdHeaderValue = correlationId;
         }
         else {
-            this.correlationIdHeaderValue = UUID.randomUUID().toString();
+            this.correlationIdHeaderValue = generateCorrelationId();
         }
         this.headerValues = initHeaderMap();
     }

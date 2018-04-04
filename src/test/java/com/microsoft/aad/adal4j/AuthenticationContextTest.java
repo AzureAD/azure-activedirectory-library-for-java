@@ -47,12 +47,14 @@ import java.util.concurrent.Future;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import org.easymock.EasyMock;
 import org.powermock.api.easymock.PowerMock;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+@PowerMockIgnore({"javax.net.ssl.*"})
 @Test(groups = { "checkin" })
 @PrepareForTest({ AuthenticationContext.class, AuthenticationCallback.class,
 		AsymmetricKeyCredential.class, UserDiscoveryRequest.class })
@@ -98,7 +100,7 @@ public class AuthenticationContextTest extends AbstractAdalTests {
 				new String[] { "acquireTokenCommon" },
 				TestConfiguration.AAD_TENANT_ENDPOINT, true, service);
 		PowerMock.expectPrivate(ctx, "acquireTokenCommon",
-				EasyMock.isA(AdalAuthorizatonGrant.class),
+				EasyMock.isA(AdalOAuthAuthorizationGrant.class),
 				EasyMock.isA(ClientAuthentication.class),
 				EasyMock.isA(ClientDataHttpHeaders.class)).andReturn(
 				new AuthenticationResult("bearer", "accessToken",
@@ -115,7 +117,7 @@ public class AuthenticationContextTest extends AbstractAdalTests {
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "authorization code is null or empty")
-	public void testcAquireTokenAuthCode_AuthCodeNull() throws Exception {
+	public void testAcquireTokenAuthCode_AuthCodeNull() throws Exception {
 		ctx = new AuthenticationContext(TestConfiguration.AAD_TENANT_ENDPOINT,
 				true, service);
 		ctx.acquireTokenByAuthorizationCode(null, new URI(
@@ -137,7 +139,7 @@ public class AuthenticationContextTest extends AbstractAdalTests {
 				new String[] { "acquireTokenCommon" },
 				TestConfiguration.AAD_TENANT_ENDPOINT, true, service);
 		PowerMock.expectPrivate(ctx, "acquireTokenCommon",
-				EasyMock.isA(AdalAuthorizatonGrant.class),
+				EasyMock.isA(AdalAuthorizationGrant.class),
 				EasyMock.isA(ClientAuthentication.class),
 				EasyMock.isA(ClientDataHttpHeaders.class))
 				.andReturn(
@@ -170,7 +172,7 @@ public class AuthenticationContextTest extends AbstractAdalTests {
 				new String[] { "acquireTokenCommon" },
 				TestConfiguration.AAD_TENANT_ENDPOINT, true, service);
 		PowerMock.expectPrivate(ctx, "acquireTokenCommon",
-				EasyMock.isA(AdalAuthorizatonGrant.class),
+				EasyMock.isA(AdalOAuthAuthorizationGrant.class),
 				EasyMock.isA(ClientAuthentication.class),
 				EasyMock.isA(ClientDataHttpHeaders.class)).andReturn(
 				new AuthenticationResult("bearer", "accessToken",
@@ -207,7 +209,7 @@ public class AuthenticationContextTest extends AbstractAdalTests {
 				new String[] { "acquireTokenCommon" },
 				TestConfiguration.AAD_TENANT_ENDPOINT, true, service);
 		PowerMock.expectPrivate(ctx, "acquireTokenCommon",
-				EasyMock.isA(AdalAuthorizatonGrant.class),
+				EasyMock.isA(AdalOAuthAuthorizationGrant.class),
 				EasyMock.isA(ClientAuthentication.class),
 				EasyMock.isA(ClientDataHttpHeaders.class)).andReturn(
 				new AuthenticationResult("bearer", "accessToken", null,

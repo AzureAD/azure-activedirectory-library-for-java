@@ -104,6 +104,8 @@ public class AuthenticationAuthorityTest extends AbstractAdalTests{
         Assert.assertEquals(aa.getTokenUri(),
                 TestConfiguration.AAD_TENANT_ENDPOINT + "oauth2/token");
         Assert.assertEquals(aa.isTenantless(), false);
+        Assert.assertEquals(aa.getDeviceCodeEndpoint(),
+                TestConfiguration.AAD_TENANT_ENDPOINT + "oauth2/devicecode");
     }
 
     @Test
@@ -124,6 +126,8 @@ public class AuthenticationAuthorityTest extends AbstractAdalTests{
         Assert.assertEquals(aa.getTokenUri(),
                 TestConfiguration.ADFS_TENANT_ENDPOINT + "oauth2/token");
         Assert.assertEquals(aa.isTenantless(), false);
+        Assert.assertEquals(aa.getDeviceCodeEndpoint(),
+                TestConfiguration.ADFS_TENANT_ENDPOINT + "oauth2/devicecode");
     }
 
     @Test
