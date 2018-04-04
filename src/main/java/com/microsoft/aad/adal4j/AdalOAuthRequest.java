@@ -46,10 +46,6 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * 
- * 
- */
 class AdalOAuthRequest extends HTTPRequest {
 
     private final Map<String, String> extraHeaderParams;
