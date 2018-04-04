@@ -17,7 +17,7 @@ your copy.
 Example for ADAL Java:
 
 ```
-$ git clone git@github.com:AzureAD/azure-activedirectory-library-for-java.git
+$ git clone git@github.com:username/azure-activedirectory-library-for-java.git
 $ cd azure-activedirectory-library-for-java
 $ git remote add upstream git@github.com:AzureAD/azure-activedirectory-library-for-java.git
 ```
