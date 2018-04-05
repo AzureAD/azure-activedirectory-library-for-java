@@ -21,8 +21,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -31,6 +29,7 @@ import javax.naming.ServiceUnavailableException;
 
 import com.microsoft.aad.adal4j.AuthenticationContext;
 import com.microsoft.aad.adal4j.AuthenticationResult;
+import com.microsoft.aad.adal4j.DeviceCode;
 
 public class PublicClient {
 
@@ -39,40 +38,32 @@ public class PublicClient {
     private final static String RESOURCE = "https://graph.windows.net";
 
     public static void main(String args[]) throws Exception {
-
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(
-                System.in))) {
-            System.out.print("Enter username: ");
-            String username = br.readLine();
-            System.out.print("Enter password: ");
-            String password = br.readLine();
-
-            AuthenticationResult result = getAccessTokenFromUserCredentials(
-                    username, password);
+            AuthenticationResult result = getAccessTokenUsingDeviceCodeFlow();
             System.out.println("Access Token - " + result.getAccessToken());
             System.out.println("Refresh Token - " + result.getRefreshToken());
             System.out.println("ID Token - " + result.getIdToken());
         }
-    }
 
-    private static AuthenticationResult getAccessTokenFromUserCredentials(
-            String username, String password) throws Exception {
+    private static AuthenticationResult getAccessTokenUsingDeviceCodeFlow() throws Exception {
         AuthenticationContext context = null;
         AuthenticationResult result = null;
         ExecutorService service = null;
         try {
             service = Executors.newFixedThreadPool(1);
-            context = new AuthenticationContext(AUTHORITY, false, service);
-            Future<AuthenticationResult> future = context.acquireToken(
-                    RESOURCE, CLIENT_ID, username, password, null);
-            result = future.get();
+            context = new AuthenticationContext(AUTHORITY, true, service);
+
+            Future<DeviceCode> future = context.acquireDeviceCode(CLIENT_ID, RESOURCE, null);
+            DeviceCode deviceCode = future.get();
+            System.out.println(deviceCode.getMessage());
+            System.out.println("Press Enter after authenticating");
+            System.in.read();
+            Future<AuthenticationResult> futureResult = context.acquireTokenByDeviceCode(deviceCode, null);
+            result = futureResult.get();
         } finally {
             service.shutdown();
         }
-
         if (result == null) {
-            throw new ServiceUnavailableException(
-                    "authentication result was null");
+            throw new ServiceUnavailableException("authentication result was null");
         }
         return result;
     }
