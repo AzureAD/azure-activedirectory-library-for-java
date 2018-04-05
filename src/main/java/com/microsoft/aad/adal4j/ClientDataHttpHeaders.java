@@ -28,9 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- *
- */
 final class ClientDataHttpHeaders {
 
     public final static String PRODUCT_HEADER_NAME = "x-client-SKU";

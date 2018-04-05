@@ -49,7 +49,13 @@ import org.testng.annotations.Test;
 
 import javax.net.ssl.SSLSocketFactory;
 
-import static com.microsoft.aad.adal4j.TestConfiguration.*;
+import static com.microsoft.aad.adal4j.TestConfiguration.AAD_CLIENT_ID;
+import static com.microsoft.aad.adal4j.TestConfiguration.AAD_HOST_NAME;
+import static com.microsoft.aad.adal4j.TestConfiguration.AAD_RESOURCE_ID;
+import static com.microsoft.aad.adal4j.TestConfiguration.AAD_TENANT_ENDPOINT;
+import static com.microsoft.aad.adal4j.TestConfiguration.AAD_TENANT_NAME;
+import static com.microsoft.aad.adal4j.TestConfiguration.ADFS_TENANT_ENDPOINT;
+
 
 @Test(groups = { "checkin" })
 @PrepareForTest({HttpHelper.class, AuthenticationContext.class })
