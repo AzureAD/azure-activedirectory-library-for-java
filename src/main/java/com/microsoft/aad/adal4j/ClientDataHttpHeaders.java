@@ -56,6 +56,7 @@ final class ClientDataHttpHeaders {
     public static String generateCorrelationId(){
         return UUID.randomUUID().toString();
     }
+
     ClientDataHttpHeaders(final String correlationId) {
         if (!StringHelper.isBlank(correlationId)) {
             this.correlationIdHeaderValue = correlationId;

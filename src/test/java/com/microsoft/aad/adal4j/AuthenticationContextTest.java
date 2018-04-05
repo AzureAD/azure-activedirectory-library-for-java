@@ -139,7 +139,7 @@ public class AuthenticationContextTest extends AbstractAdalTests {
 				new String[] { "acquireTokenCommon" },
 				TestConfiguration.AAD_TENANT_ENDPOINT, true, service);
 		PowerMock.expectPrivate(ctx, "acquireTokenCommon",
-				EasyMock.isA(AdalAuthorizationGrant.class),
+				EasyMock.isA(AdalOAuthAuthorizationGrant.class),
 				EasyMock.isA(ClientAuthentication.class),
 				EasyMock.isA(ClientDataHttpHeaders.class))
 				.andReturn(
