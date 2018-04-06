@@ -31,7 +31,7 @@ import com.nimbusds.oauth2.sdk.AuthorizationGrant;
 /**
  * 
  */
-class AdalAuthorizatonGrant {
+class AdalAuthorizatonGrant implements AdalGrant {
 
     private final AuthorizationGrant grant;
     private final Map<String, String> params;
@@ -60,7 +60,8 @@ class AdalAuthorizatonGrant {
         this.params = params;
     }
 
-    Map<String, String> toParameters() {
+    @Override
+    public Map<String, String> toParameters() {
 
         final Map<String, String> outParams = new LinkedHashMap<String, String>();
         if (this.params != null) {
