@@ -60,7 +60,7 @@ public class AuthenticationException extends RuntimeException {
      * Constructor
      *
      * @param message string error message
-     * @param t       Throwable object
+     * @param t Throwable object
      */
     public AuthenticationException(final String message, final Throwable t) {
         super(message, t);

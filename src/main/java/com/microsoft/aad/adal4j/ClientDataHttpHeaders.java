@@ -50,9 +50,9 @@ final class ClientDataHttpHeaders {
     private final String headerValues;
     private final Map<String, String> headerMap = new HashMap<String, String>();
 
-    public static String generateCorrelationId(){
-        return UUID.randomUUID().toString();
-    }
+    private static String generateCorrelationId(){
+    return UUID.randomUUID().toString();
+}
 
     ClientDataHttpHeaders(final String correlationId) {
         if (!StringHelper.isBlank(correlationId)) {
