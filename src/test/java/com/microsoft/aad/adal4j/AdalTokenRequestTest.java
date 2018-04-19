@@ -57,7 +57,7 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
         AuthorizationGrant ag = new AuthorizationCodeGrant(
                 new AuthorizationCode("code"),
                 new URI("http://my.redirect.com"));
-        AdalAuthorizatonGrant grant = new AdalAuthorizatonGrant(ag, (String) null);
+        AdalOAuthAuthorizationGrant grant = new AdalOAuthAuthorizationGrant(ag, (String) null);
 
         AdalTokenRequest request = PowerMock.createPartialMock(
                 AdalTokenRequest.class, new String[]{"toOAuthRequest"},
@@ -102,7 +102,7 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
         final AuthorizationGrant ag = new AuthorizationCodeGrant(
                 new AuthorizationCode("code"),
                 new URI("http://my.redirect.com"));
-        final AdalAuthorizatonGrant grant = new AdalAuthorizatonGrant(ag,
+        final AdalOAuthAuthorizationGrant grant = new AdalOAuthAuthorizationGrant(ag,
                 (String) null);
         final ClientDataHttpHeaders cdhh = new ClientDataHttpHeaders("corr-id");
         final AdalTokenRequest request = new AdalTokenRequest(null, ca, grant,
@@ -119,7 +119,7 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
         final AuthorizationGrant ag = new AuthorizationCodeGrant(
                 new AuthorizationCode("code"),
                 new URI("http://my.redirect.com"));
-        final AdalAuthorizatonGrant grant = new AdalAuthorizatonGrant(ag,
+        final AdalOAuthAuthorizationGrant grant = new AdalOAuthAuthorizationGrant(ag,
                 (String) null);
         final ClientDataHttpHeaders cdhh = new ClientDataHttpHeaders("corr-id");
         final AdalTokenRequest request = new AdalTokenRequest(new URL(
@@ -137,7 +137,7 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
         final AuthorizationGrant ag = new AuthorizationCodeGrant(
                 new AuthorizationCode("code"),
                 new URI("http://my.redirect.com"));
-        final AdalAuthorizatonGrant grant = new AdalAuthorizatonGrant(ag,
+        final AdalOAuthAuthorizationGrant grant = new AdalOAuthAuthorizationGrant(ag,
                 (String) null);
         final ClientDataHttpHeaders cdhh = new ClientDataHttpHeaders("corr-id");
         final AdalTokenRequest request = new AdalTokenRequest(new URL(
@@ -159,7 +159,7 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
         final AuthorizationGrant ag = new AuthorizationCodeGrant(
                 new AuthorizationCode("code"),
                 new URI("http://my.redirect.com"));
-        final AdalAuthorizatonGrant grant = new AdalAuthorizatonGrant(ag,
+        final AdalOAuthAuthorizationGrant grant = new AdalOAuthAuthorizationGrant(ag,
                 (String) null);
         final AdalTokenRequest request = new AdalTokenRequest(new URL(
                 "http://login.windows.net"), null, grant, null, null, null);
@@ -175,7 +175,7 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
         final AuthorizationGrant ag = new AuthorizationCodeGrant(
                 new AuthorizationCode("code"),
                 new URI("http://my.redirect.com"));
-        final AdalAuthorizatonGrant grant = new AdalAuthorizatonGrant(ag,
+        final AdalOAuthAuthorizationGrant grant = new AdalOAuthAuthorizationGrant(ag,
                 (String) null);
 
         final AdalTokenRequest request = PowerMock.createPartialMock(
@@ -224,7 +224,7 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
         final AuthorizationGrant ag = new AuthorizationCodeGrant(
                 new AuthorizationCode("code"),
                 new URI("http://my.redirect.com"));
-        final AdalAuthorizatonGrant grant = new AdalAuthorizatonGrant(ag,
+        final AdalOAuthAuthorizationGrant grant = new AdalOAuthAuthorizationGrant(ag,
                 (String) null);
 
         final AdalTokenRequest request = PowerMock.createPartialMock(
@@ -243,8 +243,13 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
         final TokenErrorResponse errorResponse = PowerMock
                 .createMock(TokenErrorResponse.class);
 
-        final ErrorObject errorObject = PowerMock
-                .createMock(ErrorObject.class);
+        final ErrorObject errorObject = PowerMock.createMock(ErrorObject.class);
+
+        EasyMock.expect(errorObject.getCode())
+                .andReturn("unknown").times(1);
+        EasyMock.expect(errorObject.getHTTPStatusCode())
+                .andReturn(402).times(1);
+
         EasyMock.expect(errorResponse.getErrorObject())
                 .andReturn(errorObject).times(1);
 
@@ -260,7 +265,7 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
                 .times(1);
 
         PowerMock.replay(request, adalOAuthHttpRequest, httpResponse,
-                TokenErrorResponse.class, jsonObj, errorResponse);
+                TokenErrorResponse.class, errorObject, jsonObj, errorResponse);
         try {
             request.executeOAuthRequestAndProcessResponse();
             PowerMock.verifyAll();

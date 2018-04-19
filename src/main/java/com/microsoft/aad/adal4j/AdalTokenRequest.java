@@ -29,6 +29,7 @@ import java.net.Proxy;
 import java.net.URL;
 import java.util.Map;
 
+import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -49,17 +50,17 @@ class AdalTokenRequest {
 
     private final URL uri;
     private final ClientAuthentication clientAuth;
-    private final AdalAuthorizatonGrant authzGrant;
+    private final AdalAuthorizationGrant grant;
     private final Map<String, String> headerMap;
     private final Proxy proxy;
     private final SSLSocketFactory sslSocketFactory;
 
     AdalTokenRequest(final URL uri, final ClientAuthentication clientAuth,
-            final AdalAuthorizatonGrant authzGrant,
+            final AdalAuthorizationGrant authzGrant,
             final Map<String, String> headerMap, final Proxy proxy,
             final SSLSocketFactory sslSocketFactory) {
         this.clientAuth = clientAuth;
-        this.authzGrant = authzGrant;
+        this.grant = authzGrant;
         this.uri = uri;
         this.headerMap = headerMap;
         this.proxy = proxy;
@@ -106,12 +107,19 @@ class AdalTokenRequest {
                     tokens.getAccessToken().getLifetime(),
                     tokens.getIDTokenString(), info,
                     !StringHelper.isBlank(response.getResource()));
-        }
-        else {
+        } else {
             final TokenErrorResponse errorResponse = TokenErrorResponse
                     .parse(httpResponse);
-            if(HTTPResponse.SC_BAD_REQUEST == errorResponse.getErrorObject().getHTTPStatusCode() &&
-                    "interaction_required".equals(errorResponse.getErrorObject().getCode())){
+            ErrorObject errorObject = errorResponse.getErrorObject();
+            if(AdalErrorCode.AUTHORIZATION_PENDING.toString()
+                    .equals(errorObject.getCode())){
+                throw new AuthenticationException(AdalErrorCode.AUTHORIZATION_PENDING,
+                        errorObject.getDescription());
+            }
+
+            if(HTTPResponse.SC_BAD_REQUEST == errorObject.getHTTPStatusCode() &&
+                    AdalErrorCode.INTERACTION_REQUIRED.toString()
+                            .equals(errorObject.getCode())){
                 throw new AdalClaimsChallengeException(errorResponse.toJSONObject()
                         .toJSONString(), getClaims(httpResponse.getContent()));
             }
@@ -147,7 +155,7 @@ class AdalTokenRequest {
                 HTTPRequest.Method.POST, this.uri, headerMap, this.proxy,
                 this.sslSocketFactory);
         httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
-        final Map<String, String> params = this.authzGrant.toParameters();
+        final Map<String, String> params = this.grant.toParameters();
         httpRequest.setQuery(URLUtils.serializeParameters(params));
         if (this.clientAuth != null) {
             this.clientAuth.applyTo(httpRequest);

@@ -23,30 +23,17 @@
 
 package com.microsoft.aad.adal4j;
 
+import java.util.Map;
+
 /**
- * The exception type thrown when a claims challenge error occurs during token acquisition.
+ * Interface for an ADAL grant.
  */
-public class AdalClaimsChallengeException extends AuthenticationException {
+public interface AdalAuthorizationGrant {
 
     /**
-     * Constructor
+     *  Converts the grant into a HTTP parameters map.
      *
-     * @param message string error message
-     * @param claims claims challenge returned from the STS
+     * @return A map contains the HTTP parameters
      */
-    public AdalClaimsChallengeException(String message, String claims) {
-        super(message);
-
-        this.claims = claims;
-    }
-
-    private final String claims;
-
-    /**
-     *
-     * @return claims challenge value
-     */
-    public String getClaims() {
-        return claims;
-    }
+    Map<String, String> toParameters();
 }

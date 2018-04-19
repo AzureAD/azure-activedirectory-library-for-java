@@ -30,35 +30,44 @@ public class AuthenticationException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
+    private AdalErrorCode errorCode;
+
     /**
      * Constructor
-     * 
-     * @param t
-     *            Throwable object
+     *
+     * @param t Throwable object
      */
     public AuthenticationException(final Throwable t) {
         super(t);
+        this.errorCode = AdalErrorCode.UNKNOWN;
     }
 
     /**
      * Constructor
-     * 
-     * @param message
-     *            string error message
+     *
+     * @param message string error message
      */
     public AuthenticationException(final String message) {
+        this(AdalErrorCode.UNKNOWN, message);
+    }
+
+    public AuthenticationException(AdalErrorCode errorCode, final String message) {
         super(message);
+        this.errorCode = errorCode;
     }
 
     /**
      * Constructor
-     * 
-     * @param message
-     *            string error message
-     * @param t
-     *            Throwable object
+     *
+     * @param message string error message
+     * @param t Throwable object
      */
     public AuthenticationException(final String message, final Throwable t) {
         super(message, t);
+        this.errorCode = AdalErrorCode.UNKNOWN;
+    }
+
+    public AdalErrorCode getErrorCode() {
+        return errorCode;
     }
 }

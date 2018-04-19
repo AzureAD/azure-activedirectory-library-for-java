@@ -23,30 +23,29 @@
 
 package com.microsoft.aad.adal4j;
 
-/**
- * The exception type thrown when a claims challenge error occurs during token acquisition.
- */
-public class AdalClaimsChallengeException extends AuthenticationException {
+import java.util.Map;
 
-    /**
-     * Constructor
-     *
-     * @param message string error message
-     * @param claims claims challenge returned from the STS
-     */
-    public AdalClaimsChallengeException(String message, String claims) {
-        super(message);
+public class AdalIntegratedAuthorizationGrant implements AdalAuthorizationGrant {
 
-        this.claims = claims;
+    private final String resource;
+
+    private final String userName;
+
+    AdalIntegratedAuthorizationGrant(String userName, String resource){
+        this.userName = userName;
+        this.resource = resource;
     }
 
-    private final String claims;
+    @Override
+    public Map<String, String> toParameters() {
+        return null;
+    }
 
-    /**
-     *
-     * @return claims challenge value
-     */
-    public String getClaims() {
-        return claims;
+    public String getResource() {
+        return resource;
+    }
+
+    public String getUserName() {
+        return userName;
     }
 }

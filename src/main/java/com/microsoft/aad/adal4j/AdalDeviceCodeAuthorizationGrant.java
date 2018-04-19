@@ -23,30 +23,48 @@
 
 package com.microsoft.aad.adal4j;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
- * The exception type thrown when a claims challenge error occurs during token acquisition.
+ * Class for device code grant.
  */
-public class AdalClaimsChallengeException extends AuthenticationException {
+public class AdalDeviceCodeAuthorizationGrant implements AdalAuthorizationGrant {
+    private final static String GRANT_TYPE = "device_code";
 
-    /**
-     * Constructor
-     *
-     * @param message string error message
-     * @param claims claims challenge returned from the STS
-     */
-    public AdalClaimsChallengeException(String message, String claims) {
-        super(message);
+    private final DeviceCode deviceCode;
+    private final String resource;
 
-        this.claims = claims;
+    protected String correlationId;
+
+    public String getCorrelationId() {
+        return correlationId;
     }
 
-    private final String claims;
+    /**
+     *  Create a new device code grant object from a device code and a resource.
+     *
+     * @param deviceCode  The device code.
+     * @param resource    The resource for which the device code was acquired.
+     */
+    AdalDeviceCodeAuthorizationGrant(final DeviceCode deviceCode, final String resource) {
+        this.deviceCode = deviceCode;
+        this.resource = resource;
+        this.correlationId = deviceCode.getCorrelationId();
+    }
 
     /**
+     * Converts the device code grant to a map of HTTP paramters.
      *
-     * @return claims challenge value
+     * @return The map with HTTP parameters.
      */
-    public String getClaims() {
-        return claims;
+    @Override
+    public Map<String, String> toParameters() {
+        final Map<String, String> outParams = new LinkedHashMap<>();
+        outParams.put("resource", resource);
+        outParams.put("grant_type", GRANT_TYPE);
+        outParams.put("code", deviceCode.getDeviceCode());
+
+        return outParams;
     }
 }
