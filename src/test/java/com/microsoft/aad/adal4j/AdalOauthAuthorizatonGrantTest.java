@@ -23,32 +23,35 @@
 
 package com.microsoft.aad.adal4j;
 
-import javax.net.ssl.SSLSocketFactory;
-import java.net.Proxy;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.nimbusds.oauth2.sdk.AuthorizationCode;
+import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
-class UserDiscoveryRequest {
+/**
+ *
+ */
+public class AdalOauthAuthorizatonGrantTest {
 
-    private final static Logger log = LoggerFactory
-            .getLogger(UserDiscoveryRequest.class);
-
-    private final static Map<String, String> HEADERS;
-    static {
-        HEADERS = new HashMap<>();
-        HEADERS.put("Accept", "application/json, text/javascript, */*");
-
+    @Test
+    public void testConstructor() {
+        final AdalOAuthAuthorizationGrant grant = new AdalOAuthAuthorizationGrant(null,
+                new HashMap<String, String>());
+        Assert.assertNotNull(grant);
     }
 
-    static UserDiscoveryResponse execute(final String uri, final Proxy proxy,
-            final SSLSocketFactory sslSocketFactory) throws Exception {
-
-        String response = HttpHelper.executeHttpGet(log, uri, HEADERS, proxy,
-                sslSocketFactory);
-        return JsonHelper.convertJsonToObject(response,
-                UserDiscoveryResponse.class);
+    @Test
+    public void testToParameters() throws URISyntaxException {
+        final AdalOAuthAuthorizationGrant grant = new AdalOAuthAuthorizationGrant(
+                new AuthorizationCodeGrant(new AuthorizationCode("grant"),
+                        new URI("http://microsoft.com")),
+                (Map<String, String>) null);
+        Assert.assertNotNull(grant);
+        Assert.assertNotNull(grant.toParameters());
     }
 }

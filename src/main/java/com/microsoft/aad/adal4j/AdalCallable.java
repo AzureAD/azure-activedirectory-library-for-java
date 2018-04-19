@@ -23,32 +23,42 @@
 
 package com.microsoft.aad.adal4j;
 
-import javax.net.ssl.SSLSocketFactory;
-import java.net.Proxy;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.Callable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+abstract class AdalCallable<T> implements Callable<T> {
+    AuthenticationContext context;
+    ClientDataHttpHeaders headers;
+    AuthenticationCallback<T> callback;
 
-class UserDiscoveryRequest {
-
-    private final static Logger log = LoggerFactory
-            .getLogger(UserDiscoveryRequest.class);
-
-    private final static Map<String, String> HEADERS;
-    static {
-        HEADERS = new HashMap<>();
-        HEADERS.put("Accept", "application/json, text/javascript, */*");
-
+    AdalCallable(AuthenticationContext context, AuthenticationCallback<T> callback) {
+        this.context = context;
+        this.callback = callback;
     }
 
-    static UserDiscoveryResponse execute(final String uri, final Proxy proxy,
-            final SSLSocketFactory sslSocketFactory) throws Exception {
+    abstract T execute() throws Exception;
 
-        String response = HttpHelper.executeHttpGet(log, uri, HEADERS, proxy,
-                sslSocketFactory);
-        return JsonHelper.convertJsonToObject(response,
-                UserDiscoveryResponse.class);
+    void logResult(T result, ClientDataHttpHeaders headers) throws Exception {
+    }
+
+    @Override
+    public T call() throws Exception {
+        T result = null;
+        try {
+            result = execute();
+
+            logResult(result, headers);
+            if (callback != null) {
+                callback.onSuccess(result);
+            }
+        } catch (final Exception ex) {
+            context.log.error(LogHelper.createMessage("Execution of " + this.getClass() + " failed.",
+                    this.headers.getHeaderCorrelationIdValue()), ex);
+            if (callback != null) {
+                callback.onFailure(ex);
+            } else {
+                throw ex;
+            }
+        }
+        return result;
     }
 }

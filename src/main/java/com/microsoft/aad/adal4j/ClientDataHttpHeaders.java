@@ -28,9 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- *
- */
 final class ClientDataHttpHeaders {
 
     public final static String PRODUCT_HEADER_NAME = "x-client-SKU";
@@ -53,12 +50,16 @@ final class ClientDataHttpHeaders {
     private final String headerValues;
     private final Map<String, String> headerMap = new HashMap<String, String>();
 
+    private static String generateCorrelationId(){
+    return UUID.randomUUID().toString();
+}
+
     ClientDataHttpHeaders(final String correlationId) {
         if (!StringHelper.isBlank(correlationId)) {
             this.correlationIdHeaderValue = correlationId;
         }
         else {
-            this.correlationIdHeaderValue = UUID.randomUUID().toString();
+            this.correlationIdHeaderValue = generateCorrelationId();
         }
         this.headerValues = initHeaderMap();
     }

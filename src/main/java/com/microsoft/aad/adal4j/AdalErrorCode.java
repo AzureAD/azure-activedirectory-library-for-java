@@ -23,32 +23,20 @@
 
 package com.microsoft.aad.adal4j;
 
-import javax.net.ssl.SSLSocketFactory;
-import java.net.Proxy;
-import java.util.HashMap;
-import java.util.Map;
+public enum AdalErrorCode {
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+    UNKNOWN ("unknown"),
+    AUTHORIZATION_PENDING ("authorization_pending"),
+    INTERACTION_REQUIRED ("interaction_required");
 
-class UserDiscoveryRequest {
+    private String errorCode;
 
-    private final static Logger log = LoggerFactory
-            .getLogger(UserDiscoveryRequest.class);
-
-    private final static Map<String, String> HEADERS;
-    static {
-        HEADERS = new HashMap<>();
-        HEADERS.put("Accept", "application/json, text/javascript, */*");
-
+    AdalErrorCode(String errorCode){
+        this.errorCode = errorCode;
     }
 
-    static UserDiscoveryResponse execute(final String uri, final Proxy proxy,
-            final SSLSocketFactory sslSocketFactory) throws Exception {
-
-        String response = HttpHelper.executeHttpGet(log, uri, HEADERS, proxy,
-                sslSocketFactory);
-        return JsonHelper.convertJsonToObject(response,
-                UserDiscoveryResponse.class);
+    @Override
+    public String toString(){
+        return errorCode;
     }
 }

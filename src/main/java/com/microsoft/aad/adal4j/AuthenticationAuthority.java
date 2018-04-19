@@ -39,9 +39,6 @@ class AuthenticationAuthority {
     private final Logger log = LoggerFactory
             .getLogger(AuthenticationAuthority.class);
 
-    private final Logger piiLog = LoggerFactory
-            .getLogger(LogHelper.PII_LOGGER_PREFIX + this.getClass());
-
     private final static String[] TRUSTED_HOST_LIST = { "login.windows.net",
             "login.chinacloudapi.cn", "login-us.microsoftonline.com", "login.microsoftonline.de",
             "login.microsoftonline.com", "login.microsoftonline.us" };
@@ -50,6 +47,7 @@ class AuthenticationAuthority {
     private final static String DISCOVERY_ENDPOINT = "common/discovery/instance";
     private final static String TOKEN_ENDPOINT = "/oauth2/token";
     private final static String USER_REALM_ENDPOINT = "common/userrealm";
+    final static String DEVICE_CODE_ENDPOINT = "/oauth2/devicecode";
 
     private String host;
     private String issuer;
@@ -59,9 +57,13 @@ class AuthenticationAuthority {
             + USER_REALM_ENDPOINT + "/%s?api-version=1.0";
     private final String tokenEndpointFormat = "https://%s/{tenant}"
             + TOKEN_ENDPOINT;
+    private final String devicecodeEndpointFormat = "https://%s/{tenant}"
+            + DEVICE_CODE_ENDPOINT;
+
     private String authority = "https://%s/%s/";
     private String instanceDiscoveryEndpoint;
     private String tokenEndpoint;
+    private String deviceCodeEndpoint;
 
     private final AuthorityType authorityType;
     private boolean isTenantless;
@@ -97,6 +99,8 @@ class AuthenticationAuthority {
     String getTokenEndpoint() {
         return tokenEndpoint;
     }
+
+    String getDeviceCodeEndpoint() { return deviceCodeEndpoint; }
 
     String getUserRealmEndpoint(String username) {
         return String.format(userRealmEndpointFormat, host, username);
@@ -143,7 +147,6 @@ class AuthenticationAuthority {
                     "Instance discovery was successful",
                     headers.get(ClientDataHttpHeaders.CORRELATION_ID_HEADER_NAME));
             log.info(msg);
-            piiLog.info(msg);
 
             instanceDiscoveryCompleted = true;
         }
@@ -152,7 +155,7 @@ class AuthenticationAuthority {
     boolean doDynamicInstanceDiscovery(final Map<String, String> headers,
             final Proxy proxy, final SSLSocketFactory sslSocketFactory)
             throws Exception {
-        final String json = HttpHelper.executeHttpGet(log, piiLog,
+        final String json = HttpHelper.executeHttpGet(log,
                 instanceDiscoveryEndpoint, headers, proxy, sslSocketFactory);
         final InstanceDiscoveryResponse discoveryResponse = JsonHelper
                 .convertJsonToObject(json, InstanceDiscoveryResponse.class);
@@ -183,6 +186,8 @@ class AuthenticationAuthority {
         this.tokenEndpoint = this.tokenEndpoint.replace("{tenant}", tenant);
         this.tokenUri = this.tokenEndpoint;
         this.issuer = this.tokenUri;
+        this.deviceCodeEndpoint = String.format(this.devicecodeEndpointFormat, host);
+        this.deviceCodeEndpoint = this.deviceCodeEndpoint.replace("{tenant}", tenant);
 
         this.isTenantless = TENANTLESS_TENANT_NAME.equalsIgnoreCase(tenant);
         this.setSelfSignedJwtAudience(this.getIssuer());

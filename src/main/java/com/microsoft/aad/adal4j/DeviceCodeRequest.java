@@ -23,32 +23,41 @@
 
 package com.microsoft.aad.adal4j;
 
+import com.nimbusds.oauth2.sdk.util.URLUtils;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.net.ssl.SSLSocketFactory;
 import java.net.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+public class DeviceCodeRequest {
 
-class UserDiscoveryRequest {
+    private final static Logger log = LoggerFactory.getLogger(DeviceCodeRequest.class);
 
-    private final static Logger log = LoggerFactory
-            .getLogger(UserDiscoveryRequest.class);
+    static DeviceCode execute(String url, String clientId, String resource, Map<String, String> clientDataHeaders,
+                              final Proxy proxy, final SSLSocketFactory sslSocketFactory) throws Exception {
+        Map<String, String> headers = new HashMap<>(clientDataHeaders);
+        headers.put("Accept", "application/json");
 
-    private final static Map<String, String> HEADERS;
-    static {
-        HEADERS = new HashMap<>();
-        HEADERS.put("Accept", "application/json, text/javascript, */*");
+        Map<String, String> queryParameters = new HashMap<>();
+        queryParameters.put("client_id", clientId);
+        queryParameters.put("resource", resource);
 
-    }
+        url = url + "?" + URLUtils.serializeParameters(queryParameters);
 
-    static UserDiscoveryResponse execute(final String uri, final Proxy proxy,
-            final SSLSocketFactory sslSocketFactory) throws Exception {
+        final String json = HttpHelper.executeHttpGet(log, url, headers, proxy, sslSocketFactory);
 
-        String response = HttpHelper.executeHttpGet(log, uri, HEADERS, proxy,
-                sslSocketFactory);
-        return JsonHelper.convertJsonToObject(response,
-                UserDiscoveryResponse.class);
+        DeviceCode result;
+        result = JsonHelper.convertJsonToObject(json, DeviceCode.class);
+
+        result.setCorrelationId(headers.get(ClientDataHttpHeaders.CORRELATION_ID_HEADER_NAME));
+
+        result.setClientId(clientId);
+        result.setResource(resource);
+
+        return result;
     }
 }

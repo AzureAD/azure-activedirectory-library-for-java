@@ -23,32 +23,29 @@
 
 package com.microsoft.aad.adal4j;
 
-import javax.net.ssl.SSLSocketFactory;
-import java.net.Proxy;
-import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+public class AdalIntegratedAuthorizationGrant implements AdalAuthorizationGrant {
 
-class UserDiscoveryRequest {
+    private final String resource;
 
-    private final static Logger log = LoggerFactory
-            .getLogger(UserDiscoveryRequest.class);
+    private final String userName;
 
-    private final static Map<String, String> HEADERS;
-    static {
-        HEADERS = new HashMap<>();
-        HEADERS.put("Accept", "application/json, text/javascript, */*");
-
+    AdalIntegratedAuthorizationGrant(String userName, String resource){
+        this.userName = userName;
+        this.resource = resource;
     }
 
-    static UserDiscoveryResponse execute(final String uri, final Proxy proxy,
-            final SSLSocketFactory sslSocketFactory) throws Exception {
+    @Override
+    public Map<String, String> toParameters() {
+        return null;
+    }
 
-        String response = HttpHelper.executeHttpGet(log, uri, HEADERS, proxy,
-                sslSocketFactory);
-        return JsonHelper.convertJsonToObject(response,
-                UserDiscoveryResponse.class);
+    public String getResource() {
+        return resource;
+    }
+
+    public String getUserName() {
+        return userName;
     }
 }
