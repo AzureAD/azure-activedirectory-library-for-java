@@ -1,3 +1,9 @@
+Version 1.5.0
+=============
+- added device code flow api
+- added pii logging flag
+- updated gson to version 2.8.0 and slf4j to version 1.7.21
+
 Version 1.4.0
 =============
 - pii (personal identifiable information) Logger added
@@ -41,5 +47,5 @@ Version 1.1.0
 Version 1.0.1
 =============
 GA release of the API to support
--  server-2-server flows
+- server-2-server flows
 - resource owner grant flow for command line apps
