@@ -295,6 +295,52 @@ public class AuthenticationContext {
     }
 
     /**
+     * Acquires an access token from the authority on behalf of a user. It
+     * requires using a user token previously received. Uses certificate to
+     * authenticate client.
+     *
+     * @param resource
+     *            Identifier of the target resource that is the recipient of the
+     *            requested token.
+     * @param userAssertion
+     *            userAssertion to use as Authorization grant
+     * @param credential
+     *            The certificate based client credential to use for token acquisition.
+     * @param callback
+     *            optional callback object for non-blocking execution.
+     * @return A {@link Future} object representing the
+     *         {@link AuthenticationResult} of the call. It contains Access
+     *         Token and the Access Token's expiration time. Refresh Token
+     *         property will be null for this overload.
+     * @throws AuthenticationException {@link AuthenticationException}
+     */
+    public Future<AuthenticationResult> acquireToken(final String resource,
+                                                     final UserAssertion userAssertion,
+                                                     final AsymmetricKeyCredential credential,
+                                                     final AuthenticationCallback callback) {
+
+        this.validateInput(resource, credential, true);
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("resource", resource);
+        params.put("requested_token_use", "on_behalf_of");
+        try {
+            AdalOAuthAuthorizationGrant grant = new AdalOAuthAuthorizationGrant(
+                    new JWTBearerGrant(
+                            SignedJWT.parse(userAssertion.getAssertion())), params);
+
+            ClientAssertion clientAssertion = JwtHelper
+                    .buildJwt(credential, this.authenticationAuthority
+                            .getSelfSignedJwtAudience());
+
+            final ClientAuthentication clientAuth = createClientAuthFromClientAssertion(clientAssertion);
+            return this.acquireToken(grant, clientAuth, callback);
+        }
+        catch (final Exception e) {
+            throw new AuthenticationException(e);
+        }
+    }
+
+    /**
      * Acquires security token from the authority.
      *
      * @param resource
