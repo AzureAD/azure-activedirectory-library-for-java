@@ -191,7 +191,7 @@ public class OAuthRequestValidationTest extends PowerMockTestCase {
     }
 
     @Test
-    public void oAuthRequest_for_acquireTokenByUserAssertionClientCertificate() throws Exception {
+    public void oAuthRequest_for_acquireTokenByAsymmetricKeyCredential() throws Exception {
         try {
             final KeyStore keystore = KeyStore.getInstance("PKCS12", "SunJSSE");
             keystore.load(
