@@ -252,6 +252,18 @@ public class AuthenticationContext {
         }
     }
 
+    private void validateInput(final String resource, final UserAssertion userAssertion, Object clientCredential) {
+        if (StringHelper.isBlank(resource)) {
+            throw new IllegalArgumentException("resource is null or empty");
+        }
+        if (userAssertion == null) {
+            throw new IllegalArgumentException("userAssertion is null");
+        }
+        if (clientCredential == null) {
+            throw new IllegalArgumentException("credential is null");
+        }
+    }
+
     /**
      * Acquires an access token from the authority on behalf of a user. It
      * requires using a user token previously received.
@@ -275,23 +287,11 @@ public class AuthenticationContext {
             final UserAssertion userAssertion, final ClientCredential credential,
             final AuthenticationCallback callback) {
 
-        this.validateInput(resource, credential, true);
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("resource", resource);
-        params.put("requested_token_use", "on_behalf_of");
-        try {
-            AdalOAuthAuthorizationGrant grant = new AdalOAuthAuthorizationGrant(
-                    new JWTBearerGrant(
-                            SignedJWT.parse(userAssertion.getAssertion())), params);
-
-            final ClientAuthentication clientAuth = new ClientSecretPost(
-                    new ClientID(credential.getClientId()), new Secret(
-                            credential.getClientSecret()));
-            return this.acquireToken(grant, clientAuth, callback);
-        }
-        catch (final Exception e) {
-            throw new AuthenticationException(e);
-        }
+        this.validateInput(resource, userAssertion, credential);
+        final ClientAuthentication clientAuth = new ClientSecretPost(
+                new ClientID(credential.getClientId()), new Secret(
+                credential.getClientSecret()));
+        return acquireTokenOnBehalfOf(resource, userAssertion, clientAuth, callback);
     }
 
     /**
@@ -319,26 +319,32 @@ public class AuthenticationContext {
                                                      final AsymmetricKeyCredential credential,
                                                      final AuthenticationCallback callback) {
 
-        this.validateInput(resource, credential, true);
+        this.validateInput(resource, userAssertion, credential);
+        ClientAssertion clientAssertion = JwtHelper
+                .buildJwt(credential, this.authenticationAuthority.getSelfSignedJwtAudience());
+        final ClientAuthentication clientAuth = createClientAuthFromClientAssertion(clientAssertion);
+        return acquireTokenOnBehalfOf(resource, userAssertion, clientAuth, callback);
+    }
+
+    private Future<AuthenticationResult> acquireTokenOnBehalfOf(final String resource,
+                                                     final UserAssertion userAssertion,
+                                                     final ClientAuthentication clientAuthentication,
+                                                     final AuthenticationCallback callback) {
+
         Map<String, String> params = new HashMap<String, String>();
         params.put("resource", resource);
         params.put("requested_token_use", "on_behalf_of");
         try {
             AdalOAuthAuthorizationGrant grant = new AdalOAuthAuthorizationGrant(
-                    new JWTBearerGrant(
-                            SignedJWT.parse(userAssertion.getAssertion())), params);
+                    new JWTBearerGrant(SignedJWT.parse(userAssertion.getAssertion())), params);
 
-            ClientAssertion clientAssertion = JwtHelper
-                    .buildJwt(credential, this.authenticationAuthority
-                            .getSelfSignedJwtAudience());
-
-            final ClientAuthentication clientAuth = createClientAuthFromClientAssertion(clientAssertion);
-            return this.acquireToken(grant, clientAuth, callback);
+            return this.acquireToken(grant, clientAuthentication, callback);
         }
         catch (final Exception e) {
             throw new AuthenticationException(e);
         }
     }
+
 
     /**
      * Acquires security token from the authority.
