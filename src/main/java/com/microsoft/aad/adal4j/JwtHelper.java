@@ -59,6 +59,7 @@ final class JwtHelper {
         final JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .audience(Collections.singletonList(jwtAudience))
                 .issuer(credential.getClientId())
+                .jwtID(UUID.randomUUID().toString())
                 .notBeforeTime(new Date(time))
                 .expirationTime(new Date(time
                                 + AuthenticationConstants.AAD_JWT_TOKEN_LIFETIME_SECONDS
