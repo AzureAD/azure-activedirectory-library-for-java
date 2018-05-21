@@ -23,32 +23,43 @@
 
 package com.microsoft.aad.adal4j;
 
+import static org.powermock.api.support.membermodification.MemberMatcher.method;
+import static org.powermock.api.support.membermodification.MemberModifier.replace;
+
+import java.io.FileInputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import com.nimbusds.jose.*;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import static org.powermock.api.support.membermodification.MemberMatcher.method;
-import static org.powermock.api.support.membermodification.MemberModifier.replace;
-
+import org.apache.commons.lang3.StringUtils;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-
-import java.lang.reflect.InvocationHandler;
-
 import org.powermock.modules.testng.PowerMockTestCase;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -67,6 +78,7 @@ public class OAuthRequestValidationTest extends PowerMockTestCase {
 
     private final static String GRANT_TYPE_JWT = "urn:ietf:params:oauth:grant-type:jwt-bearer";
     private final static String CLIENT_ASSERTION_TYPE_JWT = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
+    private final static String ON_BEHALF_OF_USE_JWT = "on_behalf_of";
 
     private final static String CLIENT_CREDENTIALS_GRANT_TYPE = "client_credentials";
 
@@ -174,6 +186,50 @@ public class OAuthRequestValidationTest extends PowerMockTestCase {
         Assert.assertEquals(OPEN_ID_SCOPE, queryParams.get("scope"));
 
         Assert.assertEquals("on_behalf_of", queryParams.get("requested_token_use"));
+
+        Assert.assertEquals(RESOURCE, queryParams.get("resource"));
+    }
+
+    @Test
+    public void oAuthRequest_for_acquireTokenByAsymmetricKeyCredential() throws Exception {
+        try {
+            final KeyStore keystore = KeyStore.getInstance("PKCS12", "SunJSSE");
+            keystore.load(
+                    new FileInputStream(this.getClass()
+                            .getResource(TestConfiguration.AAD_CERTIFICATE_PATH)
+                            .getFile()),
+                    TestConfiguration.AAD_CERTIFICATE_PASSWORD.toCharArray());
+            final String alias = keystore.aliases().nextElement();
+            final PrivateKey key = (PrivateKey) keystore.getKey(alias,
+                    TestConfiguration.AAD_CERTIFICATE_PASSWORD.toCharArray());
+            final X509Certificate cert = (X509Certificate) keystore
+                    .getCertificate(alias);
+
+            AsymmetricKeyCredential certCredential = AsymmetricKeyCredential.create(CLIENT_ID, key, cert);
+
+            // Using UserAssertion as Authorization Grants
+            Future<AuthenticationResult> future = context.acquireToken(RESOURCE, new UserAssertion(jwt),
+                    certCredential, null);
+            future.get();
+        }
+        catch (ExecutionException ex){
+            Assert.assertTrue(ex.getCause() instanceof AuthenticationException);
+        }
+
+        Map<String, String> queryParams = splitQuery(query);
+        Assert.assertEquals(7, queryParams.size());
+
+        // validate Authorization Grants query params
+        Assert.assertEquals(GRANT_TYPE_JWT, queryParams.get("grant_type"));
+        Assert.assertEquals(jwt, queryParams.get("assertion"));
+
+        // validate Client Authentication query params
+        Assert.assertFalse(StringUtils.isEmpty(queryParams.get("client_assertion")));
+
+        Assert.assertEquals(OPEN_ID_SCOPE, queryParams.get("scope"));
+
+        Assert.assertEquals(CLIENT_ASSERTION_TYPE_JWT, queryParams.get("client_assertion_type"));
+        Assert.assertEquals(ON_BEHALF_OF_USE_JWT, queryParams.get("requested_token_use"));
 
         Assert.assertEquals(RESOURCE, queryParams.get("resource"));
     }
