@@ -3,9 +3,12 @@
 # Microsoft Azure Active Directory Authentication Library (ADAL) for Java
 =====================================
 
-## Samples and Documentation
+|[Getting Started](https://github.com/AzureAD/azure-activedirectory-library-for-java/wiki)| [Docs](https://aka.ms/aaddev)| [Samples](https://github.com/azure-samples?query=active-directory)| [Support](README.md#community-help-and-support)
+| --- | --- | --- | --- |
 
-[We provide a full suite of sample applications and documentation on GitHub](https://github.com/Azure-Samples) to help you get started with learning the Azure Identity system. This includes tutorials for native clients such as Windows, Windows Phone, iOS, macOS, Android, and Linux. We also provide full walkthroughs for authentication flows such as OAuth2, OpenID Connect, Graph API, and other awesome features.
+The ADAL for Java library enables Java applications to authenticate with Azure AD and get tokens to access Azure AD protected web resources.
+
+You can learn in detail about ADAL4J functionality and usage documented in the [Wiki](https://github.com/AzureAD/azure-activedirectory-library-for-java/wiki).
 
 ## Versions
 Current version - 1.5.0
@@ -16,21 +19,12 @@ From version 1.3.0 support for handling Conditional Access claims challenge was 
 
 You can find the changes for each version in the [change log](https://github.com/AzureAD/azure-activedirectory-library-for-java/blob/master/changelog.txt).
 
-## Logging
+## Contribution
+All code is licensed under the MIT License and we triage actively on GitHub. We encourage and welcome contributions to the library. Please read the [contributing guide](./contributing.md) before starting.
 
-ADAL for Java uses the Simple Logging Facade for Java (SLF4J) as a simple facade or abstraction for various logging frameworks.
+## Samples and Documentation
 
-#### Personal Identifiable Information (PII) & Organizational Identifiable Information (OII)
-
-By default, ADAL logging does not capture or log any PII or OII. The library allows app developers to turn this on by configuring the logPii property on the AuthenticationContext. By turning on PII or OII, the app takes responsibility for safely handling highly-sensitive data and complying with any regulatory requirements.
-
-```java
-//PII or OII logging disabled. Default Logger does not capture any PII or OII
-AuthenticationContext context = new AuthenticationContext(...);
-
-//PII or OII logging enabled
-context.setLogPii(true);
-```
+[We provide a full suite of sample applications and documentation on GitHub](https://github.com/Azure-Samples) to help you get started with learning the Azure Identity system. This includes tutorials for native clients such as Windows, Windows Phone, iOS, macOS, Android, and Linux. We also provide full walkthroughs for authentication flows such as OAuth2, OpenID Connect, Graph API, and other awesome features.
 
 ## Community Help and Support
 
@@ -41,10 +35,6 @@ We recommend you use the "adal" tag so we can see it! Here is the latest Q&A on 
 ## Security Reporting
 
 If you find a security issue with our libraries or services please report it to [secure@microsoft.com](mailto:secure@microsoft.com) with as much detail as possible. Your submission may be eligible for a bounty through the [Microsoft Bounty](http://aka.ms/bugbounty) program. Please do not post security issues to GitHub Issues or any other public site. We will contact you shortly upon receiving the information. We encourage you to get notifications of when security incidents occur by visiting [this page](https://technet.microsoft.com/en-us/security/dd252948) and subscribing to Security Advisory Alerts.
-
-## Contributing
-
-All code is licensed under the MIT License and we triage actively on GitHub. We enthusiastically welcome contributions and feedback. You can clone the repo and start contributing now.
 
 ## We Value and Adhere to the Microsoft Open Source Code of Conduct
 
