@@ -242,16 +242,6 @@ public class AuthenticationContext {
         return this.acquireToken(authGrant, clientAuth, callback);
     }
 
-    private void validateInput(final String resource, final Object credential,
-            final boolean validateResource) {
-        if (validateResource && StringHelper.isBlank(resource)) {
-            throw new IllegalArgumentException("resource is null or empty");
-        }
-        if (credential == null) {
-            throw new IllegalArgumentException("credential is null");
-        }
-    }
-
     /**
      * Acquires an access token from the authority on behalf of a user. It
      * requires using a user token previously received.
@@ -275,24 +265,64 @@ public class AuthenticationContext {
             final UserAssertion userAssertion, final ClientCredential credential,
             final AuthenticationCallback callback) {
 
-        this.validateInput(resource, credential, true);
+        this.validateOnBehalfOfRequestInput(resource, userAssertion, credential, true);
+        final ClientAuthentication clientAuth = new ClientSecretPost(
+                new ClientID(credential.getClientId()), new Secret(
+                credential.getClientSecret()));
+        return acquireTokenOnBehalfOf(resource, userAssertion, clientAuth, callback);
+    }
+
+    /**
+     * Acquires an access token from the authority on behalf of a user. It
+     * requires using a user token previously received. Uses certificate to
+     * authenticate client.
+     *
+     * @param resource
+     *            Identifier of the target resource that is the recipient of the
+     *            requested token.
+     * @param userAssertion
+     *            userAssertion to use as Authorization grant
+     * @param credential
+     *            The certificate based client credential to use for token acquisition.
+     * @param callback
+     *            optional callback object for non-blocking execution.
+     * @return A {@link Future} object representing the
+     *         {@link AuthenticationResult} of the call. It contains Access
+     *         Token and the Access Token's expiration time. Refresh Token
+     *         property will be null for this overload.
+     * @throws AuthenticationException {@link AuthenticationException}
+     */
+    public Future<AuthenticationResult> acquireToken(final String resource,
+                                                     final UserAssertion userAssertion,
+                                                     final AsymmetricKeyCredential credential,
+                                                     final AuthenticationCallback callback) {
+
+        this.validateOnBehalfOfRequestInput(resource, userAssertion, credential, true);
+        ClientAssertion clientAssertion = JwtHelper
+                .buildJwt(credential, this.authenticationAuthority.getSelfSignedJwtAudience());
+        final ClientAuthentication clientAuth = createClientAuthFromClientAssertion(clientAssertion);
+        return acquireTokenOnBehalfOf(resource, userAssertion, clientAuth, callback);
+    }
+
+    private Future<AuthenticationResult> acquireTokenOnBehalfOf(final String resource,
+                                                     final UserAssertion userAssertion,
+                                                     final ClientAuthentication clientAuthentication,
+                                                     final AuthenticationCallback callback) {
+
         Map<String, String> params = new HashMap<String, String>();
         params.put("resource", resource);
         params.put("requested_token_use", "on_behalf_of");
         try {
             AdalOAuthAuthorizationGrant grant = new AdalOAuthAuthorizationGrant(
-                    new JWTBearerGrant(
-                            SignedJWT.parse(userAssertion.getAssertion())), params);
+            new JWTBearerGrant(SignedJWT.parse(userAssertion.getAssertion())), params);
 
-            final ClientAuthentication clientAuth = new ClientSecretPost(
-                    new ClientID(credential.getClientId()), new Secret(
-                            credential.getClientSecret()));
-            return this.acquireToken(grant, clientAuth, callback);
+            return this.acquireToken(grant, clientAuthentication, callback);
         }
         catch (final Exception e) {
             throw new AuthenticationException(e);
         }
     }
+
 
     /**
      * Acquires security token from the authority.
@@ -829,21 +859,6 @@ public class AuthenticationContext {
                 new AcquireTokenCallable(this, authGrant, clientAuth, callback));
     }
 
-    private void validateDeviceCodeRequestInput(String clientId, String resource) {
-        if (StringHelper.isBlank(clientId)) {
-            throw new IllegalArgumentException("clientId is null or empty");
-        }
-
-        if (StringHelper.isBlank(resource)) {
-            throw new IllegalArgumentException("resource is null or empty");
-        }
-
-        if (AuthorityType.ADFS.equals(authenticationAuthority.getAuthorityType())){
-            throw new IllegalArgumentException(
-                    "Invalid authority type. Device Flow is not supported by ADFS authority");
-        }
-    }
-
     /**
      * Acquires a security token from the authority using a Refresh Token
      * previously received. This method is suitable for the daemon OAuth2
@@ -969,6 +984,16 @@ public class AuthenticationContext {
         return this.authority;
     }
 
+    private void validateInput(final String resource, final Object credential,
+                               final boolean validateResource) {
+        if (validateResource && StringHelper.isBlank(resource)) {
+            throw new IllegalArgumentException("resource is null or empty");
+        }
+        if (credential == null) {
+            throw new IllegalArgumentException("credential is null");
+        }
+    }
+
     private void validateAuthCodeRequestInput(final String authorizationCode,
             final URI redirectUri, final Object clientCredential,
             final String resource) {
@@ -976,12 +1001,25 @@ public class AuthenticationContext {
             throw new IllegalArgumentException(
                     "authorization code is null or empty");
         }
-
         if (redirectUri == null) {
             throw new IllegalArgumentException("redirect uri is null");
         }
-
         this.validateInput(resource, clientCredential, false);
+    }
+
+  private void validateDeviceCodeRequestInput(String clientId, String resource) {
+        if (StringHelper.isBlank(clientId)) {
+            throw new IllegalArgumentException("clientId is null or empty");
+        }
+
+        if (StringHelper.isBlank(resource)) {
+            throw new IllegalArgumentException("resource is null or empty");
+        }
+
+        if (AuthorityType.ADFS.equals(authenticationAuthority.getAuthorityType())){
+            throw new IllegalArgumentException(
+                    "Invalid authority type. Device Flow is not supported by ADFS authority");
+        }
     }
 
     private void validateDeviceCodeRequestInput(final DeviceCode deviceCode,
@@ -994,5 +1032,13 @@ public class AuthenticationContext {
             throw new IllegalArgumentException("correlation id in device code is null or empty");
         }
         this.validateInput(resource, credential, true);
+    }
+
+    private void validateOnBehalfOfRequestInput(final String resource, final UserAssertion userAssertion,
+                                                final Object clientCredential, final boolean validateResource) {
+        if (userAssertion == null) {
+            throw new IllegalArgumentException("userAssertion is null");
+        }
+        this.validateInput(resource, clientCredential, validateResource);
     }
 }
