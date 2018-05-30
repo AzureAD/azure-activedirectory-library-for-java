@@ -314,7 +314,7 @@ public class AuthenticationContext {
         params.put("requested_token_use", "on_behalf_of");
         try {
             AdalOAuthAuthorizationGrant grant = new AdalOAuthAuthorizationGrant(
-                    new JWTBearerGrant(SignedJWT.parse(userAssertion.getAssertion())), params);
+            new JWTBearerGrant(SignedJWT.parse(userAssertion.getAssertion())), params);
 
             return this.acquireToken(grant, clientAuthentication, callback);
         }
@@ -1007,7 +1007,7 @@ public class AuthenticationContext {
         this.validateInput(resource, clientCredential, false);
     }
 
-    private void validateDeviceCodeRequestInput(String clientId, String resource) {
+  private void validateDeviceCodeRequestInput(String clientId, String resource) {
         if (StringHelper.isBlank(clientId)) {
             throw new IllegalArgumentException("clientId is null or empty");
         }
