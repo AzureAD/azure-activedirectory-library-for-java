@@ -11,9 +11,9 @@ The ADAL for Java library enables Java applications to authenticate with Azure A
 You can learn in detail about ADAL4J functionality and usage documented in the [Wiki](https://github.com/AzureAD/azure-activedirectory-library-for-java/wiki).
 
 ## Versions
-Current version - 1.5.0
+Current version - 1.5.1
 
-Minimum recommended version - 1.5.0
+Minimum recommended version - 1.5.1
 
 From version 1.3.0 support for handling Conditional Access claims challenge was added. You can read about CA [here](https://go.microsoft.com/fwlink/?linkid=855860) and refer this [sample](https://github.com/AzureAD/azure-activedirectory-library-for-java/tree/dev/src/samples/web-app-samples-for-adal4j) to handle it.
 
