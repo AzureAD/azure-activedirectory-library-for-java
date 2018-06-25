@@ -1,0 +1,10 @@
+sudo: false
+language: java
+
+jdk:
+  - oraclejdk8
+  - openjdk7
+
+script:
+  - mvn clean test
+  - mvn findbugs:check
