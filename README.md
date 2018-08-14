@@ -2,7 +2,7 @@
 
 `master` branch    | `dev` branch    | Reference Docs
 --------------------|-----------------|---------------
-[![Build Status](https://travis-ci.org/AzureAD/azure-activedirectory-library-for-java.svg?branch=master)](https://travis-ci.org/AzureAD/azure-activedirectory-library-for-java) | [![Build Status](https://travis-ci.org/AzureAD/azure-activedirectory-library-for-java.svg?branch=dev)](https://travis-ci.org/AzureAD/azure-activedirectory-library-for-java) | [![Javadocs](http://javadoc.io/badge/com.microsoft.azure/adal4j.svg)](http://javadoc.io/doc/com.microsoft.azure/adal4j)
+[![Build Status](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/591/badge?branchName=master)](https://identitydivision.visualstudio.com/IDDP/IDDP%20Team/_build/index?definitionId=591) | [![Build Status](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/591/badge?branchName=dev)](https://identitydivision.visualstudio.com/IDDP/IDDP%20Team/_build/index?definitionId=591) | [![Javadocs](http://javadoc.io/badge/com.microsoft.azure/adal4j.svg)](http://javadoc.io/doc/com.microsoft.azure/adal4j)
 
 |[Getting Started](https://github.com/AzureAD/azure-activedirectory-library-for-java/wiki)| [Docs](https://aka.ms/aaddev)| [Samples](https://github.com/AzureAD/azure-activedirectory-library-for-java/wiki/Code-samples)| [Support](README.md#community-help-and-support)
 | --- | --- | --- | --- |
