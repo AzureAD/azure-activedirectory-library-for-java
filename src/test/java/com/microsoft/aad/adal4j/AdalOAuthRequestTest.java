@@ -53,7 +53,7 @@ public class AdalOAuthRequestTest extends AbstractAdalTests {
     }
 
 
-    @Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = "Couldn't parse Content-Type header: Invalid Content-Type value: Expected '/', got null")
+    @Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = "Couldn't parse Content-Type header: Invalid Content-Type value: In Content-Type string <invalid-content>, expected '/', got null")
     public void testCreateResponseContentTypeParsingFailure()
             throws Exception {
 
@@ -68,7 +68,6 @@ public class AdalOAuthRequestTest extends AbstractAdalTests {
                 .times(1);
         PowerMock.replay(conn);
         Whitebox.invokeMethod(request, "createResponse", conn, null);
-
     }
 
     @Test
