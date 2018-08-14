@@ -1,3 +1,8 @@
+Version 1.6.1
+=============
+- updated javax.servlet-api to 4.0.1, oauth2-oidc-sdk to 5.63.3, commons-code to 1.11
+- switch from Travis CI to VSTS
+
 Version 1.6.0
 =============
 - added support for certificates in on-behalf-of api
