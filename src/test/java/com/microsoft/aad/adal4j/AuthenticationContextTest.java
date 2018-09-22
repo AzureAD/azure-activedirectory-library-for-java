@@ -39,6 +39,7 @@ import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -153,7 +154,10 @@ public class AuthenticationContextTest extends AbstractAdalTests {
 		
 		PowerMock.mockStatic(UserDiscoveryRequest.class);
 		EasyMock.expect(
-				UserDiscoveryRequest.execute(EasyMock.isA(String.class), EasyMock.isNull(Proxy.class),
+				UserDiscoveryRequest.execute(
+						EasyMock.isA(String.class), 
+						EasyMock.isA(Map.class),
+						EasyMock.isNull(Proxy.class),
 						EasyMock.isNull(SSLSocketFactory.class))).andReturn(response);
 
 		PowerMock.replay(ctx, response, UserDiscoveryRequest.class);

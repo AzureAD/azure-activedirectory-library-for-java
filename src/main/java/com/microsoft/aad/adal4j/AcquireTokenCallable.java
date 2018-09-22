@@ -129,8 +129,10 @@ class AcquireTokenCallable extends AdalCallable<AuthenticationResult> {
                 .getAuthorizationGrant();
 
         UserDiscoveryResponse userDiscoveryResponse = UserDiscoveryRequest.execute(
-                context.authenticationAuthority.getUserRealmEndpoint(grant
-                        .getUsername()), context.proxy, context.sslSocketFactory);
+                context.authenticationAuthority.getUserRealmEndpoint(grant.getUsername()),
+                this.headers.getReadonlyHeaderMap(),
+                context.proxy, 
+                context.sslSocketFactory);
         if (userDiscoveryResponse.isAccountFederated()) {
             WSTrustResponse response = WSTrustRequest.execute(
                     userDiscoveryResponse.getFederationMetadataUrl(),
@@ -163,8 +165,11 @@ class AcquireTokenCallable extends AdalCallable<AuthenticationResult> {
                 getUserRealmEndpoint(URLEncoder.encode(userName, "UTF-8"));
 
         // Get the realm information
-        UserDiscoveryResponse userRealmResponse =
-                UserDiscoveryRequest.execute(userRealmEndpoint, context.proxy, context.sslSocketFactory);
+        UserDiscoveryResponse userRealmResponse = UserDiscoveryRequest.execute(
+                userRealmEndpoint, 
+                this.headers.getReadonlyHeaderMap(), 
+                context.proxy, 
+                context.sslSocketFactory);
 
         if (userRealmResponse.isAccountFederated() &&
                 "WSTrust".equalsIgnoreCase(userRealmResponse.getFederationProtocol())) {

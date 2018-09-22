@@ -43,10 +43,12 @@ class UserDiscoveryRequest {
 
     }
 
-    static UserDiscoveryResponse execute(final String uri, final Proxy proxy,
-            final SSLSocketFactory sslSocketFactory) throws Exception {
-
-        String response = HttpHelper.executeHttpGet(log, uri, HEADERS, proxy,
+    static UserDiscoveryResponse execute(final String uri, final Map<String, String> clientDataHeaders,
+            final Proxy proxy, final SSLSocketFactory sslSocketFactory) throws Exception {
+            
+        HashMap<String, String> headers = new HashMap<>(HEADERS);
+        headers.putAll(clientDataHeaders);
+        String response = HttpHelper.executeHttpGet(log, uri, headers, proxy,
                 sslSocketFactory);
         return JsonHelper.convertJsonToObject(response,
                 UserDiscoveryResponse.class);
