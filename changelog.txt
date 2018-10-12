@@ -1,3 +1,7 @@
+Version 1.6.3
+=============
+- added client headers to user realm request
+
 Version 1.6.2
 =============
 - updated oauth2-oidc-sdk to 5.63.4

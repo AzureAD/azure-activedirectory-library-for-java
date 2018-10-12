@@ -125,7 +125,7 @@ public class OAuthRequestValidationTest extends PowerMockTestCase {
         // RSA signatures require a public and private RSA key pair, the public key
         // must be made known to the JWS recipient in order to verify the signatures
         KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance("RSA");
-        keyGenerator.initialize(1024);
+        keyGenerator.initialize(2048);
 
         KeyPair kp = keyGenerator.genKeyPair();
         RSAPublicKey publicKey = (RSAPublicKey)kp.getPublic();
