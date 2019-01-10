@@ -147,6 +147,24 @@ public class AuthenticationContext {
     }
 
     /**
+     * Sets a Proxy configuration with username/password authentication to be
+     * used by the context for all network communication. The Proxy is set as
+     * a tunneled socket through which direct SSL sockets are open.
+     *
+     * @param host
+     *            the host name of the proxy server
+     * @param port
+     *            the port of the proxy server
+     * @param proxyUsername
+     *            the username to authenticate to the proxy server
+     * @param proxyPassword
+     *            the password to authenticate to the proxy server
+     */
+    public void setProxy(String host, int port, String proxyUsername, String proxyPassword) {
+        setSslSocketFactory(new SSLProxyTunnelSocketFactory(host, port, proxyUsername, proxyPassword));
+    }
+
+    /**
      * Returns SSLSocketFactory configuration object.
      * 
      * @return SSLSocketFactory object
