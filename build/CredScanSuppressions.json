@@ -8,6 +8,10 @@
     {
       "placeholder": "client_secret",
       "_justification" : "credential used for testing. not associated with any tenant"
+    },
+    {
+      "placeholder": "ClientPassword",
+      "_justification" : "credential used for testing. not associated with any tenant"
     }
   ]
 }
