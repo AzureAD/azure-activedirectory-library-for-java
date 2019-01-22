@@ -10,16 +10,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.microsoft.windowsazure.activedirectory.sdk.graph</groupId>
-			<artifactId>WindowsAzure-ActiveDirectory-SDK-Graph</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>15.0</version>
-		</dependency>
-		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>3.0.1</version>
@@ -33,7 +23,7 @@
 		<dependency>
 			<groupId>com.nimbusds</groupId>
 			<artifactId>nimbus-jose-jwt</artifactId>
-			<version>2.20</version>
+			<version>6.5.1</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-configuration</groupId>
@@ -45,7 +35,6 @@
 			<artifactId>httpclient</artifactId>
 			<version>4.3.6</version>
 		</dependency>
-
 	</dependencies>
 
 	<build>
