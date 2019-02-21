@@ -65,8 +65,6 @@
 
 package com.microsoft.aad.adal4j;
 
-import org.apache.commons.codec.binary.Base64;
-
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
@@ -74,8 +72,13 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Supports proxy tunneling with authentication.
+ */
 public class SSLProxyTunnelSocketFactory extends SSLSocketFactory {
     private SSLSocketFactory defaultFactory;
 
@@ -83,18 +86,21 @@ public class SSLProxyTunnelSocketFactory extends SSLSocketFactory {
 
     private int tunnelPort;
 
-    private String proxyUserName;
+    private ChallengeHandler challengeHandler;
 
-    private String proxyPassword;
-
-    public SSLProxyTunnelSocketFactory(String proxyHost, int proxyPort,
-                                       String proxyUserName, String proxyPassword) {
+    /**
+     * Creates an SSLProxyTunnelSocketFactory for proxy tunneling.
+     *
+     * @param proxyHost the host of the proxy
+     * @param proxyPort the port of the proxy
+     * @param challengeHandler the handler to handle authentication challenges
+     */
+    public SSLProxyTunnelSocketFactory(String proxyHost, int proxyPort, ChallengeHandler challengeHandler) {
         tunnelHost = proxyHost;
         tunnelPort = proxyPort;
         defaultFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
 
-        this.proxyUserName = proxyUserName;
-        this.proxyPassword = proxyPassword;
+        this.challengeHandler = challengeHandler;
     }
 
     public Socket createSocket(String host, int port) throws IOException {
@@ -117,28 +123,36 @@ public class SSLProxyTunnelSocketFactory extends SSLSocketFactory {
 
     public Socket createSocket(Socket s, String host, int port,
                                boolean autoClose) throws IOException {
-
         Socket tunnel = new Socket(tunnelHost, tunnelPort);
 
         PrintStream out = new PrintStream(tunnel.getOutputStream());
 
-        String token = proxyUserName + ":" + proxyPassword;
-        String authString = "Basic " + Base64.encodeBase64String(token.getBytes());
-
         out.println("CONNECT " + host + ":" + port + " HTTP/1.1");
-        out.println("User-Agent: Azure-Sdk-For-Java");
-        out.println("Proxy-Authorization: " + authString);
-        out.print("\r\n\r\n");
+        out.println("User-Agent: Adal4j");
+        out.print("\r\n");
 
         out.flush();
+        String response = getResponse(tunnel);
 
+        if (response.toLowerCase().contains("http/1.1 407")) {
+            out.println("CONNECT " + host + ":" + port + " HTTP/1.1");
+            out.println("User-Agent: Adal4j");
+            List<String> headers = new ArrayList<>();
 
-        InputStream in = tunnel.getInputStream();
+            for (String header : response.split("\\n")) {
+                if (header.toLowerCase().startsWith("proxy-authenticate")) {
+                    headers.add(header.replaceFirst("[pP]roxy-[aA]uthenticate:", "").trim());
+                }
+            }
+            out.println("Proxy-Authorization: " + challengeHandler.handle("CONNECT", host + ":" + port, headers));
+            out.print("\r\n");
 
-        Scanner scanner = new Scanner(in).useDelimiter("\\A");
-        String response = scanner.hasNext() ? scanner.next() : "";
+            out.flush();
 
-        if (!response.toLowerCase().contains("200 connection established")) {
+            response = getResponse(tunnel);
+        }
+
+        if (!response.toLowerCase().contains("http/1.1 200")) {
             throw new IOException(String.format("Failed to establish tunnel %s:%d. Message: %s",
                     tunnelHost, tunnelPort, response));
         }
@@ -155,5 +169,24 @@ public class SSLProxyTunnelSocketFactory extends SSLSocketFactory {
 
     public String[] getSupportedCipherSuites() {
         return defaultFactory.getSupportedCipherSuites();
+    }
+
+    private String getResponse(Socket tunnel) throws IOException {
+        StringBuilder replyStr = new StringBuilder();
+
+        InputStream in = tunnel.getInputStream();
+
+        Scanner scan = new Scanner(in);
+
+        while(scan.hasNextLine()){
+            String line = scan.nextLine();
+            if (line.isEmpty()) {
+                break;
+            } else {
+                replyStr.append(line).append("\n");
+            }
+        }
+
+        return replyStr.toString();
     }
 }

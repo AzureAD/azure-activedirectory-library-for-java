@@ -24,6 +24,7 @@
 package com.microsoft.aad.adal4j;
 
 import javax.net.ssl.SSLSocketFactory;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URI;
@@ -151,17 +152,46 @@ public class AuthenticationContext {
      * used by the context for all network communication. The Proxy is set as
      * a tunneled socket through which direct SSL sockets are open.
      *
-     * @param host
-     *            the host name of the proxy server
-     * @param port
-     *            the port of the proxy server
+     * @param proxy
+     *            Proxy configuration object
+     * @param authenticationType
+     *            The type of authentication of the proxy server.
      * @param proxyUsername
-     *            the username to authenticate to the proxy server
+     *            The username to authenticate to the proxy server.
      * @param proxyPassword
-     *            the password to authenticate to the proxy server
+     *            The password to authenticate to the proxy server.
      */
-    public void setProxy(String host, int port, String proxyUsername, String proxyPassword) {
-        setSslSocketFactory(new SSLProxyTunnelSocketFactory(host, port, proxyUsername, proxyPassword));
+    public void setProxy(Proxy proxy, ProxyAuthenticationType authenticationType, String proxyUsername, String proxyPassword) {
+        InetSocketAddress address = (InetSocketAddress) proxy.address();
+        if (authenticationType == ProxyAuthenticationType.BASIC) {
+            setSslSocketFactory(new SSLProxyTunnelSocketFactory(
+                    address.getHostName(),
+                    address.getPort(),
+                    new BasicChallengeHandler(proxyUsername, proxyPassword)));
+        } else if (authenticationType == ProxyAuthenticationType.DIGEST) {
+            setSslSocketFactory(new SSLProxyTunnelSocketFactory(
+                    address.getHostName(),
+                    address.getPort(),
+                    new DigestChallengeHandler(proxyUsername, proxyPassword)));
+        }
+    }
+
+    /**
+     * Sets a Proxy configuration with username/password authentication to be
+     * used by the context for all network communication. The Proxy is set as
+     * a tunneled socket through which direct SSL sockets are open.
+     *
+     * @param proxy
+     *            Proxy configuration object
+     * @param challengeHandler
+     *            Handles the authentication challenge from the server
+     */
+    public void setProxy(Proxy proxy, ChallengeHandler challengeHandler) {
+        InetSocketAddress address = (InetSocketAddress) proxy.address();
+        setSslSocketFactory(new SSLProxyTunnelSocketFactory(
+                address.getHostName(),
+                address.getPort(),
+                challengeHandler));
     }
 
     /**
