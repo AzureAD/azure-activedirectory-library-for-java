@@ -23,6 +23,7 @@
 
 package com.microsoft.aad.adal4j;
 
+import java.util.List;
 import java.util.Map;
 
 public class AdalIntegratedAuthorizationGrant implements AdalAuthorizationGrant {
@@ -37,7 +38,7 @@ public class AdalIntegratedAuthorizationGrant implements AdalAuthorizationGrant 
     }
 
     @Override
-    public Map<String, String> toParameters() {
+    public Map<String, List<String>> toParameters() {
         return null;
     }
 

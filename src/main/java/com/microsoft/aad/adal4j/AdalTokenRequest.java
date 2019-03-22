@@ -27,6 +27,7 @@ import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.net.Proxy;
 import java.net.URL;
+import java.util.List;
 import java.util.Map;
 
 import com.nimbusds.oauth2.sdk.ErrorObject;
@@ -155,7 +156,7 @@ class AdalTokenRequest {
                 HTTPRequest.Method.POST, this.uri, headerMap, this.proxy,
                 this.sslSocketFactory);
         httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
-        final Map<String, String> params = this.grant.toParameters();
+        final Map<String, List<String>> params = this.grant.toParameters();
         httpRequest.setQuery(URLUtils.serializeParameters(params));
         if (this.clientAuth != null) {
             this.clientAuth.applyTo(httpRequest);

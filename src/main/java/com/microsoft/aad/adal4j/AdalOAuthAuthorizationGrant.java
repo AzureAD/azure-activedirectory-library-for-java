@@ -23,7 +23,9 @@
 
 package com.microsoft.aad.adal4j;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.nimbusds.oauth2.sdk.AuthorizationGrant;
@@ -34,7 +36,7 @@ import com.nimbusds.oauth2.sdk.AuthorizationGrant;
 class AdalOAuthAuthorizationGrant implements AdalAuthorizationGrant {
 
     private final AuthorizationGrant grant;
-    private final Map<String, String> params;
+    private final Map<String, List<String>> params;
 
     /**
      * 
@@ -45,7 +47,7 @@ class AdalOAuthAuthorizationGrant implements AdalAuthorizationGrant {
         this.grant = grant;
         params = new LinkedHashMap<>();
         if (!StringHelper.isBlank(resource)) {
-            params.put("resource", resource);
+            params.put("resource", Collections.singletonList(resource));
         }
     }
 
@@ -55,20 +57,20 @@ class AdalOAuthAuthorizationGrant implements AdalAuthorizationGrant {
      * @param params
      */
     AdalOAuthAuthorizationGrant(final AuthorizationGrant grant,
-                                final Map<String, String> params) {
+                                final Map<String, List<String>> params) {
         this.grant = grant;
         this.params = params;
     }
 
     @Override
-    public Map<String, String> toParameters() {
+    public Map<String, List<String>> toParameters() {
 
-        final Map<String, String> outParams = new LinkedHashMap<String, String>();
+        final Map<String, List<String>> outParams = new LinkedHashMap<>();
         if (this.params != null) {
             outParams.putAll(this.params);
         }
 
-        outParams.put("scope", "openid");
+        outParams.put("scope", Collections.singletonList("openid"));
         outParams.putAll(grant.toParameters());
         return outParams;
     }
@@ -77,7 +79,7 @@ class AdalOAuthAuthorizationGrant implements AdalAuthorizationGrant {
         return this.grant;
     }
 
-    Map<String, String> getCustomParameters() {
+    Map<String, List<String>> getCustomParameters() {
         return params;
     }
 }
