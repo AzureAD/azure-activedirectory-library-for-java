@@ -1,3 +1,8 @@
+Version 1.6.4
+=============
+- updated oauth2-oidc-sdk to 6.5
+- removed use sun.security.util.Length API
+
 Version 1.6.3
 =============
 - added client headers to user realm request
