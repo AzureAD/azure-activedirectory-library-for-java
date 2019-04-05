@@ -118,12 +118,12 @@ public class BasicFilter implements Filter {
 
     private void processAuthenticationData(HttpServletRequest httpRequest, String currentUri, String fullUrl)
             throws Throwable {
-        Map<String, String> params = new HashMap();
+        Map<String, List<String>> params = new HashMap<>();
         for (String key : httpRequest.getParameterMap().keySet()) {
-            params.put(key, httpRequest.getParameterMap().get(key)[0]);
+            params.put(key, Collections.singletonList(httpRequest.getParameterMap().get(key)[0]));
         }
         // validate that state in response equals to state in request
-        StateData stateData = validateState(httpRequest.getSession(), params.get(STATE));
+        StateData stateData = validateState(httpRequest.getSession(), params.get(STATE).get(0));
 
         AuthenticationResponse authResponse = AuthenticationResponseParser.parse(new URI(fullUrl), params);
         if (AuthHelper.isAuthenticationSuccessful(authResponse)) {

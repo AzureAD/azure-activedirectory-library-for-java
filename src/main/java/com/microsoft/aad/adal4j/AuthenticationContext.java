@@ -28,7 +28,9 @@ import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URI;
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -309,9 +311,9 @@ public class AuthenticationContext {
                                                      final ClientAuthentication clientAuthentication,
                                                      final AuthenticationCallback callback) {
 
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("resource", resource);
-        params.put("requested_token_use", "on_behalf_of");
+        Map<String, List<String>> params = new HashMap<>();
+        params.put("resource", Collections.singletonList(resource));
+        params.put("requested_token_use", Collections.singletonList("on_behalf_of"));
         try {
             AdalOAuthAuthorizationGrant grant = new AdalOAuthAuthorizationGrant(
             new JWTBearerGrant(SignedJWT.parse(userAssertion.getAssertion())), params);
@@ -933,9 +935,9 @@ public class AuthenticationContext {
             final ClientAssertion clientAssertion) {
 
         try {
-            final Map<String, String> map = new HashMap<String, String>();
-            map.put("client_assertion_type", clientAssertion.getAssertionType());
-            map.put("client_assertion", clientAssertion.getAssertion());
+            final Map<String, List<String>> map = new HashMap<>();
+            map.put("client_assertion_type", Collections.singletonList(clientAssertion.getAssertionType()) );
+            map.put("client_assertion", Collections.singletonList(clientAssertion.getAssertion()));
             return PrivateKeyJWT.parse(map);
         }
         catch (final ParseException e) {

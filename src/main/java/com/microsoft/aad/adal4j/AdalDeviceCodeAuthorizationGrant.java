@@ -23,7 +23,9 @@
 
 package com.microsoft.aad.adal4j;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -59,11 +61,11 @@ public class AdalDeviceCodeAuthorizationGrant implements AdalAuthorizationGrant 
      * @return The map with HTTP parameters.
      */
     @Override
-    public Map<String, String> toParameters() {
-        final Map<String, String> outParams = new LinkedHashMap<>();
-        outParams.put("resource", resource);
-        outParams.put("grant_type", GRANT_TYPE);
-        outParams.put("code", deviceCode.getDeviceCode());
+    public Map<String, List<String>> toParameters() {
+        final Map<String, List<String>> outParams = new LinkedHashMap<>();
+        outParams.put("resource", Collections.singletonList(resource));
+        outParams.put("grant_type", Collections.singletonList(GRANT_TYPE) );
+        outParams.put("code", Collections.singletonList(deviceCode.getDeviceCode()));
 
         return outParams;
     }

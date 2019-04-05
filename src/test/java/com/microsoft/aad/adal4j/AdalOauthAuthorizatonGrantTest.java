@@ -26,6 +26,7 @@ package com.microsoft.aad.adal4j;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
@@ -41,7 +42,7 @@ public class AdalOauthAuthorizatonGrantTest {
     @Test
     public void testConstructor() {
         final AdalOAuthAuthorizationGrant grant = new AdalOAuthAuthorizationGrant(null,
-                new HashMap<String, String>());
+                new HashMap<String, List<String>>());
         Assert.assertNotNull(grant);
     }
 
@@ -50,7 +51,7 @@ public class AdalOauthAuthorizatonGrantTest {
         final AdalOAuthAuthorizationGrant grant = new AdalOAuthAuthorizationGrant(
                 new AuthorizationCodeGrant(new AuthorizationCode("grant"),
                         new URI("http://microsoft.com")),
-                (Map<String, String>) null);
+                (Map<String, List<String>>) null);
         Assert.assertNotNull(grant);
         Assert.assertNotNull(grant.toParameters());
     }

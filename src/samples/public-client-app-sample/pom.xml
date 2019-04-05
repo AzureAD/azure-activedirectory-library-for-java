@@ -17,22 +17,8 @@
 			<artifactId>adal4j</artifactId>
 			<version>1.6.3</version>
 		</dependency>
-		<dependency>
-			<groupId>com.nimbusds</groupId>
-			<artifactId>oauth2-oidc-sdk</artifactId>
-			<version>5.64.4</version>
-		</dependency>
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-			<version>20090211</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.7.21</version>
-		</dependency>
-</dependencies>
+	</dependencies>
+
 	<build>
 		<finalName>public-client-username-password-sample</finalName>
 		<plugins>
