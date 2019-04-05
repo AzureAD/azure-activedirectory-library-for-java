@@ -25,6 +25,8 @@ package com.microsoft.aad.adal4j;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
@@ -39,7 +41,6 @@ import java.security.interfaces.RSAPrivateKey;
 import java.util.Enumeration;
 
 import org.apache.commons.codec.binary.Base64;
-import sun.security.util.Length;
 
 /**
  * Credential type containing X509 public certificate and RSA private key.
@@ -81,9 +82,16 @@ public final class AsymmetricKeyCredential {
             }
         }
         else if("sun.security.mscapi.RSAPrivateKey".equals(key.getClass().getName())){
-            if(((Length)key).length() < MIN_KEYSIZE_IN_BITS ){
-                throw new IllegalArgumentException(
-                        "certificate key size must be at least " + MIN_KEYSIZE_IN_BITS);
+            try {
+                Method method = key.getClass().getMethod("length");
+                method.setAccessible(true);
+                if ((int)method.invoke(key)< MIN_KEYSIZE_IN_BITS) {
+                    throw new IllegalArgumentException(
+                            "certificate key size must be at least " + MIN_KEYSIZE_IN_BITS);
+                }
+            } catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
+                throw new RuntimeException("error accessing sun.security.mscapi.RSAPrivateKey length: "
+                        + ex.getMessage());
             }
         }
         else{
@@ -122,10 +130,8 @@ public final class AsymmetricKeyCredential {
      * 
      * @return base64 encoded string
      * @throws CertificateEncodingException if an encoding error occurs
-     * @throws NoSuchAlgorithmException if requested algorithm is not available in the environment
      */
-    public String getPublicCertificate() throws CertificateEncodingException,
-            NoSuchAlgorithmException {
+    public String getPublicCertificate() throws CertificateEncodingException {
         return Base64.encodeBase64String(this.publicCertificate.getEncoded());
     }
 
@@ -187,12 +193,9 @@ public final class AsymmetricKeyCredential {
         return new AsymmetricKeyCredential(clientId, key, publicCertificate);
     }
 
-    private static byte[] getHash(final byte[] inputBytes)
-            throws NoSuchAlgorithmException, CertificateEncodingException {
+    private static byte[] getHash(final byte[] inputBytes) throws NoSuchAlgorithmException {
         final MessageDigest md = MessageDigest.getInstance("SHA-1");
         md.update(inputBytes);
         return md.digest();
-
     }
-
 }
