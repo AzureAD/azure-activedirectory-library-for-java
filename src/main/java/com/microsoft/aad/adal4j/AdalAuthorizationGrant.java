@@ -23,6 +23,7 @@
 
 package com.microsoft.aad.adal4j;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,5 +36,5 @@ public interface AdalAuthorizationGrant {
      *
      * @return A map contains the HTTP parameters
      */
-    Map<String, String> toParameters();
+    Map<String, List<String>> toParameters();
 }

@@ -30,7 +30,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLSocketFactory;
 import java.net.Proxy;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class DeviceCodeRequest {
@@ -42,9 +45,9 @@ public class DeviceCodeRequest {
         Map<String, String> headers = new HashMap<>(clientDataHeaders);
         headers.put("Accept", "application/json");
 
-        Map<String, String> queryParameters = new HashMap<>();
-        queryParameters.put("client_id", clientId);
-        queryParameters.put("resource", resource);
+        Map<String, List<String>> queryParameters = new HashMap<>();
+        queryParameters.put("client_id", Collections.singletonList(clientId));
+        queryParameters.put("resource", Collections.singletonList(resource));
 
         url = url + "?" + URLUtils.serializeParameters(queryParameters);
 

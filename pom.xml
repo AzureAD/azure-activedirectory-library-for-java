@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.microsoft.azure</groupId>
 	<artifactId>adal4j</artifactId>
-	<version>1.6.3</version>
+	<version>1.6.4</version>
 	<packaging>jar</packaging>
 	<name>adal4j</name>
 	<description>
@@ -70,7 +70,7 @@
 		<dependency>
 			<groupId>com.nimbusds</groupId>
 			<artifactId>oauth2-oidc-sdk</artifactId>
-			<version>5.64.4</version>
+			<version>6.5</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
