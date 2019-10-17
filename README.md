@@ -11,7 +11,7 @@ The ADAL for Java library enables Java applications to authenticate with Azure A
 
 ## Update to MSAL4J now!
 
-[MSAL4J](https://github.com/AzureAD/microsoft-authentication-library-for-java) is the new authentication library to be used with the Microsoft identity platform
+[MSAL4J](https://github.com/AzureAD/microsoft-authentication-library-for-java) is the new authentication library to be used with the Microsoft identity platform.
 
 Building on top of ADAL, MSAL works with both the Open ID Connect certified Azure AD V2 endpoint and the new social identity solution from Microsoft, Azure AD B2C.
 
