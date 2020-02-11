@@ -7,7 +7,7 @@ This library, ADAL for Java, will no longer receive new feature improvements. In
   [MSAL4J docs](https://github.com/AzureAD/microsoft-authentication-library-for-java/wiki)
   for details about the scenarios, usage, and relevant concepts.
 * If your application is using the previous ADAL JavaScript library, you can follow this
-  [migration guide](https://docs.microsoft.com/en-us/azure/active-directory/develop/migrate-adal-msal-java)
+  [migration guide](https://docs.microsoft.com/azure/active-directory/develop/migrate-adal-msal-java)
   to update to MSAL4J.
 * Existing applications relying on ADAL Java will continue to work.
 
