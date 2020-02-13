@@ -1,3 +1,18 @@
+---
+
+This library, ADAL for Java, will no longer receive new feature improvements. Instead, use the new
+[MSAL4J](https://github.com/AzureAD/microsoft-authentication-library-for-java).
+
+* If you are starting a new project, you can get started with the
+  [MSAL4J docs](https://github.com/AzureAD/microsoft-authentication-library-for-java/wiki)
+  for details about the scenarios, usage, and relevant concepts.
+* If your application is using the previous ADAL for Java library, you can follow this
+  [migration guide](https://docs.microsoft.com/azure/active-directory/develop/migrate-adal-msal-java)
+  to update to MSAL4J.
+* Existing applications relying on ADAL for Java will continue to work.
+
+---
+
 # Microsoft Azure Active Directory Authentication Library (ADAL) for Java
 
 `master` branch    | `dev` branch    | Reference Docs
