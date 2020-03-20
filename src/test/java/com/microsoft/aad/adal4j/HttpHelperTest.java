@@ -24,12 +24,11 @@
 package com.microsoft.aad.adal4j;
 
 import javax.net.ssl.HttpsURLConnection;
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URL;
 
-import org.apache.tools.ant.util.ReaderInputStream;
 import org.easymock.EasyMock;
 import org.powermock.api.easymock.PowerMock;
 import org.testng.annotations.Test;
@@ -50,9 +49,7 @@ public class HttpHelperTest extends AbstractAdalTests {
         EasyMock.expect(connection.getResponseCode()).andReturn(403).times(2);
         EasyMock.expect(connection.getURL()).andReturn(new URL("https://some.url"));
 
-        String testInput = "error info";
-        StringReader reader = new StringReader(testInput);
-        InputStream is = new ReaderInputStream(reader);
+        InputStream is =  new ByteArrayInputStream( "error info".getBytes() );
 
         EasyMock.expect(connection.getErrorStream()).andReturn(is).times(1);
 
