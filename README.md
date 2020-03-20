@@ -1,3 +1,18 @@
+---
+
+This library, ADAL for Java, will no longer receive new feature improvements. Instead, use the new
+[MSAL4J](https://github.com/AzureAD/microsoft-authentication-library-for-java).
+
+* If you are starting a new project, you can get started with the
+  [MSAL4J docs](https://github.com/AzureAD/microsoft-authentication-library-for-java/wiki)
+  for details about the scenarios, usage, and relevant concepts.
+* If your application is using the previous ADAL for Java library, you can follow this
+  [migration guide](https://docs.microsoft.com/azure/active-directory/develop/migrate-adal-msal-java)
+  to update to MSAL4J.
+* Existing applications relying on ADAL for Java will continue to work.
+
+---
+
 # Microsoft Azure Active Directory Authentication Library (ADAL) for Java
 
 `master` branch    | `dev` branch    | Reference Docs
@@ -9,15 +24,22 @@
 
 The ADAL for Java library enables Java applications to authenticate with Azure AD and get tokens to access Azure AD protected web resources.
 
+## Update to MSAL4J now!
+
+[MSAL4J](https://github.com/AzureAD/microsoft-authentication-library-for-java) is the new authentication library to be used with the Microsoft identity platform.
+
+Building on top of ADAL, MSAL works with both the [Open ID Connect certified Azure AD V2 endpoint](https://docs.microsoft.com/en-us/azure/active-directory/develop/about-microsoft-identity-platform) and the new social identity solution from Microsoft, Azure AD B2C.
+
+ADAL4J is in maintenance mode and no new features will be added going forward except for security fixes. All our ongoing efforts will be focused on improving [MSAL4J](https://github.com/AzureAD/microsoft-authentication-library-for-java). 
 
 ## Installation and usage
 
 You can find the steps for installation and basic usage documented in the [ADAL4J Basics Wiki](https://github.com/AzureAD/azure-activedirectory-library-for-java/wiki/ADAL4J-Basics).
 
 ## Versions
-Current version - 1.6.4
+Current version - 1.6.5
 
-Minimum recommended version - 1.6.4
+Minimum recommended version - 1.6.5
 
 From version 1.3.0 support for handling Conditional Access claims challenge was added. You can read about CA [here](https://go.microsoft.com/fwlink/?linkid=855860) and refer this [sample](https://github.com/AzureAD/azure-activedirectory-library-for-java/tree/dev/src/samples/web-app-samples-for-adal4j) to handle it.
 
