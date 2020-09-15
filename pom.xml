@@ -7,10 +7,10 @@
 	<packaging>jar</packaging>
 	<name>adal4j</name>
 	<description>
-    Azure active directory library for Java gives you the ability to add Windows Azure Active Directory 
-    authentication to your web application with just a few lines of additional code. Using our ADAL SDKs you 
-    can quickly and easily extend your existing application to all the employees that use Windows Azure 
-    AD and Active Directory on-premises using Active Directory Federation Services, including Office365 
+    Azure active directory library for Java gives you the ability to add Windows Azure Active Directory
+    authentication to your web application with just a few lines of additional code. Using our ADAL SDKs you
+    can quickly and easily extend your existing application to all the employees that use Windows Azure
+    AD and Active Directory on-premises using Active Directory Federation Services, including Office365
     customers.
   </description>
 	<url>https://github.com/AzureAD/azure-activedirectory-library-for-java</url>
@@ -70,7 +70,7 @@
 		<dependency>
 			<groupId>com.nimbusds</groupId>
 			<artifactId>oauth2-oidc-sdk</artifactId>
-			<version>6.5</version>
+			<version>8.9</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
@@ -119,7 +119,7 @@
             		<scope>test</scope>
         	</dependency>
 	</dependencies>
-	
+
 	<!-- force https -->
     	<repositories>
         	<repository>

@@ -32,9 +32,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.util.ContentTypeUtils;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.powermock.api.easymock.PowerMock;
@@ -196,7 +197,7 @@ public class DeviceCodeFlowTest {
                 "\"correlation_id\":\"ff60101b-cb23-4a52-82cb-9966f466327a\"}";
 
         httpResponse.setContent(content);
-        httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
+        httpResponse.setContentType(ContentType.APPLICATION_JSON.toString());
 
         EasyMock.expect(request.toOAuthRequest()).andReturn(adalOAuthHttpRequest).times(1);
         EasyMock.expect(adalOAuthHttpRequest.send()).andReturn(httpResponse).times(1);

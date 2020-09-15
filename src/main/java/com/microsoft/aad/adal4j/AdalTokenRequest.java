@@ -30,6 +30,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -37,7 +38,6 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.SerializeException;
 import com.nimbusds.oauth2.sdk.TokenErrorResponse;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
@@ -155,7 +155,11 @@ class AdalTokenRequest {
         final AdalOAuthRequest httpRequest = new AdalOAuthRequest(
                 HTTPRequest.Method.POST, this.uri, headerMap, this.proxy,
                 this.sslSocketFactory);
-        httpRequest.setContentType(CommonContentTypes.APPLICATION_URLENCODED);
+        try {
+            httpRequest.setContentType(ContentType.APPLICATION_URLENCODED.toString());
+        } catch (ParseException e) {
+            throw new IllegalArgumentException("ContentType toString and parse do not match up", e);
+        }
         final Map<String, List<String>> params = this.grant.toParameters();
         httpRequest.setQuery(URLUtils.serializeParameters(params));
         if (this.clientAuth != null) {

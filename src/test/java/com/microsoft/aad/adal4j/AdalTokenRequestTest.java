@@ -23,17 +23,11 @@
 
 package com.microsoft.aad.adal4j;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretPost;
 import com.nimbusds.oauth2.sdk.auth.Secret;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
@@ -43,6 +37,12 @@ import org.powermock.api.easymock.PowerMock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 @Test(groups = { "checkin" })
 @PrepareForTest(TokenErrorResponse.class)
@@ -77,7 +77,7 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
                 "\"correlation_id\":\"3a...95a\"," +
                 "\"claims\":\"" + claims + "\"}";
         httpResponse.setContent(content);
-        httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
+        httpResponse.setContentType(ContentType.APPLICATION_JSON.toString());
 
         EasyMock.expect(request.toOAuthRequest()).andReturn(adalOAuthHttpRequest).times(1);
         EasyMock.expect(adalOAuthHttpRequest.send()).andReturn(httpResponse).times(1);

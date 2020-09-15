@@ -39,8 +39,8 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
 
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import org.slf4j.Logger;
@@ -138,7 +138,7 @@ class AdalOAuthRequest extends HTTPRequest {
         HttpHelper.configureAdditionalHeaders(conn, params);
         conn.setDoOutput(true);
         conn.setRequestProperty("Content-Type",
-                CommonContentTypes.APPLICATION_URLENCODED.toString());
+            ContentType.APPLICATION_URLENCODED.toString());
 
         if (this.getQuery() != null) {
             try(final OutputStreamWriter writer = new OutputStreamWriter(

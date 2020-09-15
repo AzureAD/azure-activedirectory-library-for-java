@@ -53,7 +53,7 @@ public class AdalOAuthRequestTest extends AbstractAdalTests {
     }
 
 
-    @Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = "Couldn't parse Content-Type header: Invalid Content-Type value: In Content-Type string <invalid-content>, expected '/', got null")
+    @Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = "Couldn't parse Content-Type header: Invalid Content-Type value: .*")
     public void testCreateResponseContentTypeParsingFailure()
             throws Exception {
 
@@ -130,7 +130,7 @@ public class AdalOAuthRequestTest extends AbstractAdalTests {
         Assert.assertEquals(response.getLocation().getScheme(), "https");
         Assert.assertNull(response.getContent());
     }
-    
+
     @Test
     public void testCreateResponseFor404() throws Exception {
         final AdalOAuthRequest request = new AdalOAuthRequest(Method.GET,
