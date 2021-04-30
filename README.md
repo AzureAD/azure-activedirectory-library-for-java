@@ -19,8 +19,8 @@ This library, ADAL for Java, will no longer receive new feature improvements. In
 --------------------|-----------------|---------------
 [![Build Status](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/591/badge?branchName=master)](https://identitydivision.visualstudio.com/IDDP/IDDP%20Team/_build/index?definitionId=591) | [![Build Status](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/591/badge?branchName=dev)](https://identitydivision.visualstudio.com/IDDP/IDDP%20Team/_build/index?definitionId=591) | [![Javadocs](http://javadoc.io/badge/com.microsoft.azure/adal4j.svg)](http://javadoc.io/doc/com.microsoft.azure/adal4j)
 
-|[Getting Started](https://github.com/AzureAD/azure-activedirectory-library-for-java/wiki)| [Docs](https://aka.ms/aaddev)| [Samples](https://github.com/AzureAD/azure-activedirectory-library-for-java/wiki/Code-samples)| [Support](README.md#community-help-and-support)
-| --- | --- | --- | --- |
+|[Getting Started](https://github.com/AzureAD/azure-activedirectory-library-for-java/wiki)| [Docs](https://aka.ms/aaddev)| [Samples](https://github.com/AzureAD/azure-activedirectory-library-for-java/wiki/Code-samples)| [Support](README.md#community-help-and-support) | [Feedback](https://forms.office.com/r/MwHcRFtgtq) |
+| --- | --- | --- | --- | --- |
 
 The ADAL for Java library enables Java applications to authenticate with Azure AD and get tokens to access Azure AD protected web resources.
 
@@ -37,9 +37,10 @@ ADAL4J is in maintenance mode and no new features will be added going forward ex
 You can find the steps for installation and basic usage documented in the [ADAL4J Basics Wiki](https://github.com/AzureAD/azure-activedirectory-library-for-java/wiki/ADAL4J-Basics).
 
 ## Versions
-Current version - 1.6.6
 
-Minimum recommended version - 1.6.6
+Current version - 1.6.7
+
+Minimum recommended version - 1.6.7
 
 From version 1.3.0 support for handling Conditional Access claims challenge was added. You can read about CA [here](https://go.microsoft.com/fwlink/?linkid=855860) and refer this [sample](https://github.com/AzureAD/azure-activedirectory-library-for-java/tree/dev/src/samples/web-app-samples-for-adal4j) to handle it.
 
@@ -63,6 +64,9 @@ We also provide a [full suite of sample applications](https://github.com/Azure-S
 We leverage [Stack Overflow](http://stackoverflow.com/) to work with the community on supporting Azure Active Directory and its SDKs, including this one! We highly recommend you ask your questions on Stack Overflow (we're all on there!) Also browser existing issues to see if someone has had your question before.
 
 We recommend you use the "adal" tag so we can see it! Here is the latest Q&A on Stack Overflow for ADAL: [http://stackoverflow.com/questions/tagged/adal](http://stackoverflow.com/questions/tagged/adal)
+
+## Submit Feedback
+We'd like your thoughts on this library. Please complete [this short survey.](https://forms.office.com/r/MwHcRFtgtq)
 
 ## Security Reporting
 

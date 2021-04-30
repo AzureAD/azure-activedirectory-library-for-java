@@ -33,7 +33,6 @@ import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretPost;
 import com.nimbusds.oauth2.sdk.auth.Secret;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
@@ -77,7 +76,7 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
                 "\"correlation_id\":\"3a...95a\"," +
                 "\"claims\":\"" + claims + "\"}";
         httpResponse.setContent(content);
-        httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
+        httpResponse.setContentType(HTTPContentType.ApplicationJSON.contentType);
 
         EasyMock.expect(request.toOAuthRequest()).andReturn(adalOAuthHttpRequest).times(1);
         EasyMock.expect(adalOAuthHttpRequest.send()).andReturn(httpResponse).times(1);
@@ -131,7 +130,7 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
     @Test
     public void testToOAuthRequestNonEmptyCorrelationId()
             throws MalformedURLException, SerializeException,
-            URISyntaxException {
+            URISyntaxException, ParseException {
         final ClientAuthentication ca = new ClientSecretPost(
                 new ClientID("id"), new Secret("secret"));
         final AuthorizationGrant ag = new AuthorizationCodeGrant(
@@ -155,7 +154,7 @@ public class AdalTokenRequestTest extends AbstractAdalTests {
     @Test
     public void testToOAuthRequestNullCorrelationId_NullClientAuth()
             throws MalformedURLException, SerializeException,
-            URISyntaxException {
+            URISyntaxException, ParseException {
         final AuthorizationGrant ag = new AuthorizationCodeGrant(
                 new AuthorizationCode("code"),
                 new URI("http://my.redirect.com"));
