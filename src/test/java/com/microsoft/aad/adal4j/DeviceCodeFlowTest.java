@@ -33,7 +33,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
-import com.nimbusds.oauth2.sdk.http.CommonContentTypes;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
@@ -196,7 +195,7 @@ public class DeviceCodeFlowTest {
                 "\"correlation_id\":\"ff60101b-cb23-4a52-82cb-9966f466327a\"}";
 
         httpResponse.setContent(content);
-        httpResponse.setContentType(CommonContentTypes.APPLICATION_JSON);
+        httpResponse.setContentType(HTTPContentType.ApplicationJSON.contentType);
 
         EasyMock.expect(request.toOAuthRequest()).andReturn(adalOAuthHttpRequest).times(1);
         EasyMock.expect(adalOAuthHttpRequest.send()).andReturn(httpResponse).times(1);
