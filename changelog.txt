@@ -1,3 +1,7 @@
+Version 1.6.7
+=============
+- updated oauth2-oidc-sdk to 9.4
+
 Version 1.6.6
 =============
 - updated oauth2-oidc-sdk to 7.4
