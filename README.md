@@ -37,6 +37,7 @@ ADAL4J is in maintenance mode and no new features will be added going forward ex
 You can find the steps for installation and basic usage documented in the [ADAL4J Basics Wiki](https://github.com/AzureAD/azure-activedirectory-library-for-java/wiki/ADAL4J-Basics).
 
 ## Versions
+
 Current version - 1.6.7
 
 Minimum recommended version - 1.6.7
