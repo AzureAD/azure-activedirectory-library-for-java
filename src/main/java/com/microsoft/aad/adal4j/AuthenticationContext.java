@@ -54,10 +54,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ *
+ *  @deprecated ADAL is deprecated. Please use MSAL instead. To migrate, follow the instructions here
+ *       https://aka.ms/migrate-adal-to-msal-java
+ *
  * The main class representing the authority issuing tokens for resources. It
  * provides several ways to request access token, namely via Authorization Code,
  * Confidential Client and Client Certificate.
  */
+@Deprecated
 public class AuthenticationContext {
 
     final Logger log = LoggerFactory
